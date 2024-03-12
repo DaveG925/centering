@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta viewport="width=device-width, initial-scale=1.0">
+    <title>Card Centering Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        canvas {
+            border: 1px solid #ccc;
+        }
+        .button-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        button {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="button-container">
+    <button id="addOuterPoint">Add Outer Border Point</button>
+    <button id="addInnerPoint">Add Inner Border Point</button>
+    <button id="calculateCentering">Calculate Centering Ratios</button>
+</div>
+
+<canvas id="canvas" width="800" height="600"></canvas>
+
+<script>
+    const canvas = new fabric.Canvas('canvas');
+    const points = { outer: [], inner: [] };
+    let activeBorder = 'outer';
+    let lines = { outer: [], inner: [] };
+
+    document.getElementById('addOuterPoint').onclick = () => setActiveBorder('outer');
+    document.getElementById('addInnerPoint').onclick = () => setActiveBorder('inner');
+
+    function setActiveBorder(borderType) {
+        activeBorder = borderType;
+    }
+
+    function loadImage() {
+        fabric.Image.fromURL('https://m.media-amazon.com/images/I/71MWz5besdL._AC_SY679_.jpg', function(oImg) {
+            const scale = Math.min(canvas.width / oImg.width, canvas.height / oImg.height);
+            oImg.scale(scale).set({
+                left: canvas.width / 2,
+                top: canvas.height / 2,
+                originX: 'center',
+                originY: 'center'
+            });
+            canvas.setBackgroundImage(oImg, canvas.renderAll.bind(canvas));
+        });
+    }
+
+    canvas.on('mouse:down', function(options) {
+        if (points[activeBorder].length < 4) {
+            const pointer = canvas.getPointer(options.e);
+            let circle = new fabric.Circle({
+                radius: 4,
+                fill: activeBorder === 'outer' ? 'red' : 'blue',
+                left: pointer.x,
+                top: pointer.y,
+                originX: 'center',
+                originY: 'center',
+                hasBorders: false,
+                hasControls: false,
+                selectable: true,
+            });
+
+            circle.on('moving', function() {
+                drawLines(activeBorder);
+            });
+
+            canvas.add(circle);
+            points[activeBorder].push(circle);
+            drawLines(activeBorder);
+        }
+    });
+
+    function drawLines(borderType) {
+        lines[borderType].forEach(line => canvas.remove(line));
+        lines[borderType] = [];
+        
+        if (points[borderType].length > 1) {
+            for (let i = 0; i < points[borderType].length; i++) {
+                let startPoint = points[borderType][i].getCenterPoint();
+                let endPoint = points[borderType][(i + 1) % points[borderType].length].getCenterPoint();
+                let line = new fabric.Line([startPoint.x, startPoint.y, endPoint.x, endPoint.y], {
+                    stroke: borderType === 'outer' ? 'red' : 'blue',
+                    strokeWidth: 2,
+                    selectable: false,
+                });
+                canvas.add(line);
+                lines[borderType].push(line);
+            }
+        }
+        canvas.renderAll();
+    }
+
+    document.getElementById('calculateCentering').addEventListener('click', function() {
+        if (points.outer.length < 4 || points.inner.length < 4) {
+            alert('Please add all points for both the outer and inner borders.');
+            return;
+        }
+
+        const outerCorners = points.outer.map(p => p.getCenterPoint());
+        const innerCorners = points.inner.map(p => p.getCenterPoint());
+        const ratios = calculateCenteringRatios(outerCorners, innerCorners);
+        alert(`Centering Ratios - Horizontal: ${ratios.horizontal}% / Vertical: ${ratios.vertical}%`);
+    });
+
+    function calculateCenteringRatios(outerCorners, innerCorners) {
+    // Assuming corners are top-left, top-right, bottom-right, bottom-left in order
+    const outerWidth = Math.abs(outerCorners[1].x - outerCorners[0].x);
+    const innerWidth = Math.abs(innerCorners[1].x - innerCorners[0].x);
+    const outerHeight = Math.abs(outerCorners[2].y - outerCorners[1].y);
+    const innerHeight = Math.abs(innerCorners[2].y - innerCorners[1].y);
+
+    // Calculate spaces between inner and outer rectangles
+    const leftSpace = innerCorners[0].x - outerCorners[0].x;
+    const rightSpace = outerCorners[1].x - innerCorners[1].x;
+    const topSpace = innerCorners[0].y - outerCorners[0].y;
+    const bottomSpace = outerCorners[2].y - innerCorners[2].y;
+
+    // Calculate ratios
+    const horizontalRatio = (leftSpace / (outerWidth - innerWidth)) * 100;
+    const verticalRatio = (topSpace / (outerHeight - innerHeight)) * 100;
+
+    // Format ratios to "larger/smaller"
+    const horizontalFormatted = formatRatio(horizontalRatio);
+    const verticalFormatted = formatRatio(verticalRatio);
+
+    return { horizontal: horizontalFormatted, vertical: verticalFormatted };
+}
+
+function formatRatio(ratio) {
+    const remainder = 100 - ratio;
+    if (ratio > remainder) {
+        return `${ratio.toFixed(1)}/${remainder.toFixed(1)}`;
+    } else {
+        return `${remainder.toFixed(1)}/${ratio.toFixed(1)}`;
+    }
+}
+
+
+    loadImage();
+</script>
+
+</body>
+</html>
