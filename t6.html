@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Centering Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            max-width: 100%;
+            max-height: 80vh; /* Limit canvas height for smaller screens */
+            width: auto; /* Make canvas width responsive */
+            height: auto; /* Make canvas height responsive */
+        }
+        .button-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        button {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* Media query for smaller screens */
+        @media screen and (max-width: 600px) {
+            .button-container {
+                top: 10px;
+                left: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="button-container">
+    <button id="calculateCentering">Calculate Centering Ratios</button>
+</div>
+
+<canvas id="canvas" width="800" height="600"></canvas>
+
+<script>
+    const canvas = new fabric.Canvas('canvas');
+    const points = { outer: [], inner: [] };
+    const lines = { outer: [], inner: [] };
+
+    function initQuadrilaterals() {
+        const defaultOuterCorners = [
+            { x: 150, y: 100 }, { x: 650, y: 100 },
+            { x: 650, y: 500 }, { x: 150, y: 500 }
+        ];
+        const defaultInnerCorners = [
+            { x: 250, y: 200 }, { x: 550, y: 200 },
+            { x: 550, y: 400 }, { x: 250, y: 400 }
+        ];
+
+        defaultOuterCorners.forEach((point, index) => {
+            points.outer[index] = createCorner(point, 'outer');
+        });
+
+        defaultInnerCorners.forEach((point, index) => {
+            points.inner[index] = createCorner(point, 'inner');
+        });
+
+        drawLines('outer');
+        drawLines('inner');
+    }
+
+    function createCorner(point, borderType) {
+        let circle = new fabric.Circle({
+            radius: 5,
+            fill: borderType === 'outer' ? 'red' : 'blue',
+            left: point.x,
+            top: point.y,
+            originX: 'center',
+            originY: 'center',
+            hasBorders: false,
+            hasControls: false,
+            selectable: true,
+        });
+
+        circle.on('moving', () => drawLines(borderType));
+        canvas.add(circle);
+        return circle;
+    }
+
+    function drawLines(borderType) {
+        lines[borderType].forEach(line => canvas.remove(line));
+        lines[borderType] = [];
+        let corners = points[borderType];
+        
+        for (let i = 0; i < corners.length; i++) {
+            let startPoint = corners[i];
+            let endPoint = corners[(i + 1) % corners.length];
+            let line = new fabric.Line([startPoint.left, startPoint.top, endPoint.left, endPoint.top], {
+                stroke: borderType === 'outer' ? 'red' : 'blue',
+                strokeWidth: 2,
+                selectable: false,
+            });
+            canvas.add(line);
+            lines[borderType].push(line);
+        }
+        canvas.renderAll();
+    }
+
+    document.getElementById('calculateCentering').addEventListener('click', () => {
+        const outerCorners = points.outer.map(p => p.getCenterPoint());
+        const innerCorners = points.inner.map(p => p.getCenterPoint());
+        const ratios = calculateCenteringRatios(outerCorners, innerCorners);
+        alert(`Centering Ratios - Horizontal: ${ratios.horizontal} / Vertical: ${ratios.vertical}`);
+    });
+
+</script>
+<script>
+    // Remaining JavaScript code
+
+    function calculateCenteringRatios(outerCorners, innerCorners) {
+        // Calculating total width and height of the outer and inner rectangles
+        const totalOuterWidth = Math.abs(outerCorners[1].x - outerCorners[0].x);
+        const totalOuterHeight = Math.abs(outerCorners[3].y - outerCorners[0].y);
+        
+        // Calculating space on each side of the inner rectangle within the outer rectangle
+        const leftSpace = Math.abs(innerCorners[0].x - outerCorners[0].x);
+        const rightSpace = Math.abs(outerCorners[1].x - innerCorners[1].x);
+        const topSpace = Math.abs(innerCorners[0].y - outerCorners[0].y);
+        const bottomSpace = Math.abs(outerCorners[3].y - innerCorners[3].y);
+        
+        // Calculating horizontal and vertical ratios based on the spaces
+        const horizontalRatioLeft = (leftSpace / totalOuterWidth) * 100;
+        const horizontalRatioRight = (rightSpace / totalOuterWidth) * 100;
+        const verticalRatioTop = (topSpace / totalOuterHeight) * 100;
+        const verticalRatioBottom = (bottomSpace / totalOuterHeight) * 100;
+
+        // Ensuring the sum of ratios for each direction equals 100%
+        const horizontalTotal = horizontalRatioLeft + horizontalRatioRight;
+        const verticalTotal = verticalRatioTop + verticalRatioBottom;
+
+        // Adjusting ratios to ensure they sum up to 100% accurately
+        const adjustedHorizontalLeft = (horizontalRatioLeft / horizontalTotal) * 100;
+        const adjustedHorizontalRight = 100 - adjustedHorizontalLeft; // ensures the sum is 100%
+        const adjustedVerticalTop = (verticalRatioTop / verticalTotal) * 100;
+        const adjustedVerticalBottom = 100 - adjustedVerticalTop; // ensures the sum is 100%
+
+        return {
+            horizontal: `${adjustedHorizontalLeft.toFixed(1)}/${adjustedHorizontalRight.toFixed(1)}`,
+            vertical: `${adjustedVerticalTop.toFixed(1)}/${adjustedVerticalBottom.toFixed(1)}`
+        };
+    }
+
+    function loadImage() {
+        fabric.Image.fromURL('https://m.media-amazon.com/images/I/71MWz5besdL._AC_SY679_.jpg', function(oImg) {
+            // Maintain aspect ratio of the image
+            const aspectRatio = oImg.width / oImg.height;
+            const maxWidth = canvas.width * 0.8; // Set maximum width for the image
+            const maxHeight = canvas.height * 0.8; // Set maximum height for the image
+
+            let scale = 1;
+            if (oImg.width > maxWidth || oImg.height > maxHeight) {
+                scale = Math.min(maxWidth / oImg.width, maxHeight / oImg.height);
+            }
+
+            oImg.scale(scale).set({
+                left: canvas.width / 2,
+                top: canvas.height / 2,
+                originX: 'center',
+                originY: 'center'
+            });
+            canvas.setBackgroundImage(oImg, canvas.renderAll.bind(canvas));
+        });
+    }
+
+    loadImage();
+    initQuadrilaterals();
+</script>
+
+</body>
+</html>
