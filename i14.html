@@ -130,15 +130,6 @@
     const left1 = handles['left1'];
     const left2 = handles['left2'];
 
-    console.log('Top1:', top1.left, top1.top);
-    console.log('Top2:', top2.left, top2.top);
-    console.log('Right1:', right1.left, right1.top);
-    console.log('Right2:', right2.left, right2.top);
-    console.log('Bottom1:', bottom1.left, bottom1.top);
-    console.log('Bottom2:', bottom2.left, bottom2.top);
-    console.log('Left1:', left1.left, left1.top);
-    console.log('Left2:', left2.left, left2.top);
-
     const points = [
         fabric.Intersection.intersectLineLine(left1.left, left1.top, right1.left, right1.top, top1.left, top1.top, bottom1.left, bottom1.top),
         fabric.Intersection.intersectLineLine(left2.left, left2.top, right2.left, right2.top, top2.left, top2.top, bottom2.left, bottom2.top),
@@ -146,11 +137,21 @@
         fabric.Intersection.intersectLineLine(left2.left, left2.top, right2.left, right2.top, top1.left, top1.top, bottom1.left, bottom1.top)
     ];
 
-    console.log("Intersection Points:", points);
-
     const filteredPoints = points.filter(point => point);
 
-    console.log("Filtered Intersection Points:", filteredPoints);
+    const intersectionCircles = filteredPoints.map(point => {
+        return new fabric.Circle({
+            left: point.x,
+            top: point.y,
+            radius: 5,
+            fill: 'red',
+            selectable: false
+        });
+    });
+
+    intersectionCircles.forEach(circle => {
+        canvas.add(circle);
+    });
 
     const quadrilateral = new fabric.Polygon(filteredPoints, {
         fill: '',
