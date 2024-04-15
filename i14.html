@@ -24,13 +24,13 @@
             font-size: 16px;
         }
     </style>
-    <title>Canvas with Padding Around Image</title>
+    <title>Canvas with Quadrilateral</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
 </head>
 <body>
 
 <canvas id="canvas"></canvas>
-<button onclick="drawQuadrilateral()">Draw Quadrilateral</button>
+<button onclick="createQuadrilateral()">Create Quadrilateral</button>
 
 <script>
     const canvas = new fabric.Canvas('canvas', {
@@ -121,8 +121,7 @@
         canvas.renderAll();
     }
 
-    function drawQuadrilateral() {
-        // Get handle positions
+    function createQuadrilateral() {
         const top1 = handles['top1'];
         const top2 = handles['top2'];
         const right1 = handles['right1'];
@@ -132,50 +131,23 @@
         const left1 = handles['left1'];
         const left2 = handles['left2'];
 
-        // Calculate intersection points of the lines represented by handles
-        const intersection1 = intersection(top1, left1, right1, bottom1);
-        const intersection2 = intersection(top2, left2, right2, bottom2);
-        const intersection3 = intersection(top1, right1, left2, bottom2);
-        const intersection4 = intersection(top2, right2, left1, bottom1);
+        const points = [
+            { x: (top1.left + top2.left) / 2, y: (top1.top + top2.top) / 2 },
+            { x: (right1.left + right2.left) / 2, y: (right1.top + right2.top) / 2 },
+            { x: (bottom1.left + bottom2.left) / 2, y: (bottom1.top + bottom2.top) / 2 },
+            { x: (left1.left + left2.left) / 2, y: (left1.top + left2.top) / 2 }
+        ];
 
-        // Draw quadrilateral using intersection points
-        const quadrilateral = new fabric.Polygon([
-            intersection1, intersection2, intersection3, intersection4
-        ], {
-            fill: 'green',
+        const quadrilateral = new fabric.Polygon(points, {
+            fill: '',
+            stroke: 'green',
+            strokeWidth: 2,
             selectable: false
         });
         canvas.add(quadrilateral);
-
-        // Remove handles from the canvas
-        removeHandles();
-    }
-
-    function intersection(p1, p2, p3, p4) {
-        const x1 = p1.left, y1 = p1.top;
-        const x2 = p2.left, y2 = p2.top;
-        const x3 = p3.left, y3 = p3.top;
-        const x4 = p4.left, y4 = p4.top;
-
-        const numeratorX = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4));
-        const numeratorY = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4));
-        const denominator = ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
-
-        const x = numeratorX / denominator;
-        const y = numeratorY / denominator;
-
-        return { x, y };
-    }
-
-    function removeHandles() {
-        // Remove handles from the canvas
-        for (const key in handles) {
-            canvas.remove(handles[key]);
-        }
     }
 
     window.onload = function() {
-        // Load image from URL
         fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg?orient=&auto=compress', function(img) {
             // Add padding around the image
             const padding = 50;
