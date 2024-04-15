@@ -131,21 +131,16 @@
     const left1 = handles['left1'];
     const left2 = handles['left2'];
 
-    const intersections = [
-        fabric.Intersection.intersectLineLine(top1.left, top1.top, bottom1.left, bottom1.top, left1.left, left1.top, right1.left, right1.top),
-        fabric.Intersection.intersectLineLine(top2.left, top2.top, bottom2.left, bottom2.top, left2.left, left2.top, right2.left, right2.top),
-        fabric.Intersection.intersectLineLine(left1.left, left1.top, right1.left, right1.top, top1.left, top1.top, bottom2.left, bottom2.top),
-        fabric.Intersection.intersectLineLine(left2.left, left2.top, right2.left, right2.top, top2.left, top2.top, bottom1.left, bottom1.top)
+    const points = [
+        { x: top1.left, y: top1.top },
+        { x: top2.left, y: top2.top },
+        { x: right2.left, y: right2.top },
+        { x: right1.left, y: right1.top },
+        { x: bottom1.left, y: bottom1.top },
+        { x: bottom2.left, y: bottom2.top },
+        { x: left2.left, y: left2.top },
+        { x: left1.left, y: left1.top }
     ];
-
-    console.log("Intersections:", intersections);
-
-    const points = intersections.map(intersection => ({
-        x: intersection && intersection.x,
-        y: intersection && intersection.y
-    }));
-
-    console.log("Points:", points);
 
     const quadrilateral = new fabric.Polygon(points, {
         fill: '',
