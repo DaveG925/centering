@@ -41,12 +41,11 @@
     }
 
     function createHandle(left, top, horizontalLock) {
-        const handle = new fabric.Rect({
+        const handle = new fabric.Circle({
             left: left,
             top: top,
             fill: 'blue',
-            width: 10,
-            height: 10,
+            radius: 10,
             originX: 'center',
             originY: 'center',
             hasBorders: false,
