@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
         body {
-            margin: 20;
+            margin: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -121,10 +121,17 @@
             // Add padding around the image
             const padding = 50;
 
-            // Set the position of the image to the center of the canvas
+            // Calculate scaled width and height to maintain aspect ratio
+            const scaleFactor = Math.min((canvas.width - 2 * padding) / img.width, (canvas.height - 2 * padding) / img.height);
+            const scaledWidth = img.width * scaleFactor;
+            const scaledHeight = img.height * scaleFactor;
+
+            // Set position to center with padding
             img.set({
-                left: (canvas.width - img.width) / 2,
-                top: (canvas.height - img.height) / 2,
+                left: (canvas.width - scaledWidth) / 2,
+                top: (canvas.height - scaledHeight) / 2,
+                scaleX: scaleFactor,
+                scaleY: scaleFactor,
                 selectable: false
             });
 
