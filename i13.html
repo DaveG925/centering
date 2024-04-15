@@ -14,7 +14,7 @@
         }
         canvas {
             border: 1px solid #ccc;
-            max-width: 90%;
+            max-width: 100%;
             max-height: 95vh; /* Maintain aspect ratio and fit screen */
             box-sizing: border-box;
         }
@@ -105,10 +105,10 @@
     function updateLines() {
         lines.forEach(line => canvas.remove(line));
         lines = [
-            new fabric.Line([handles.top1.left, handles.top1.top, handles.bottom1.left, handles.bottom1.top], { stroke: 'red', selectable: false }),
-            new fabric.Line([handles.top2.left, handles.top2.top, handles.bottom2.left, handles.bottom2.top], { stroke: 'red', selectable: false }),
-            new fabric.Line([handles.left1.left, handles.left1.top, handles.right1.left, handles.right1.top], { stroke: 'red', selectable: false }),
-            new fabric.Line([handles.left2.left, handles.left2.top, handles.right2.left, handles.right2.top], { stroke: 'red', selectable: false }),
+            new fabric.Line([handles.top1.left, handles.top1.top, handles.bottom1.left, handles.bottom1.top], { stroke: 'red', strokeWidth: 3, selectable: false }),
+            new fabric.Line([handles.top2.left, handles.top2.top, handles.bottom2.left, handles.bottom2.top], { stroke: 'red', strokeWidth: 3, selectable: false }),
+            new fabric.Line([handles.left1.left, handles.left1.top, handles.right1.left, handles.right1.top], { stroke: 'red', strokeWidth: 3, selectable: false }),
+            new fabric.Line([handles.left2.left, handles.left2.top, handles.right2.left, handles.right2.top], { stroke: 'red', strokeWidth: 3, selectable: false }),
         ];
 
         lines.forEach(line => canvas.add(line));
