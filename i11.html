@@ -115,17 +115,26 @@
         canvas.renderAll();
     }
 
-    window.onload = function() {
+     window.onload = function() {
         // Load image from URL
-        fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg', function(img) {
-            img.scaleToWidth(canvas.width); // Scale the image to fit the canvas width
-            img.scaleToHeight(canvas.height); // Scale the image to fit the canvas height
+        fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg?orient=&auto=compress', function(img) {
+            // Scale the image to fit within the canvas while maintaining aspect ratio
+            const scaleFactor = Math.min(canvas.width / img.width, canvas.height / img.height);
+            img.scale(scaleFactor);
+
+            // Calculate the position to center the image on the canvas
+            const leftPosition = (canvas.width - img.width * scaleFactor) / 2;
+            const topPosition = (canvas.height - img.height * scaleFactor) / 2;
+
+            // Set the image's position and make it non-selectable
             img.set({
-                left: 0, // Set the image's left position to 0
-                top: 0, // Set the image's top position to 0
-                selectable: false // Make the image non-selectable
+                left: leftPosition,
+                top: topPosition,
+                selectable: false
             });
-            canvas.add(img); // Add the image to the canvas
+
+            // Add the image to the canvas
+            canvas.add(img);
         });
         
         updateLines();
