@@ -122,30 +122,36 @@
     }
 
     function createQuadrilateral() {
-        const top1 = handles['top1'];
-        const top2 = handles['top2'];
-        const right1 = handles['right1'];
-        const right2 = handles['right2'];
-        const bottom1 = handles['bottom1'];
-        const bottom2 = handles['bottom2'];
-        const left1 = handles['left1'];
-        const left2 = handles['left2'];
+    const top1 = handles['top1'];
+    const top2 = handles['top2'];
+    const right1 = handles['right1'];
+    const right2 = handles['right2'];
+    const bottom1 = handles['bottom1'];
+    const bottom2 = handles['bottom2'];
+    const left1 = handles['left1'];
+    const left2 = handles['left2'];
 
-        const points = [
-            { x: (top1.left + top2.left) / 2, y: (top1.top + top2.top) / 2 },
-            { x: (right1.left + right2.left) / 2, y: (right1.top + right2.top) / 2 },
-            { x: (bottom1.left + bottom2.left) / 2, y: (bottom1.top + bottom2.top) / 2 },
-            { x: (left1.left + left2.left) / 2, y: (left1.top + left2.top) / 2 }
-        ];
+    const intersections = [
+        fabric.Intersection.intersectLineLine(top1.left, top1.top, bottom1.left, bottom1.top, left1.left, left1.top, right1.left, right1.top),
+        fabric.Intersection.intersectLineLine(top2.left, top2.top, bottom2.left, bottom2.top, left2.left, left2.top, right2.left, right2.top),
+        fabric.Intersection.intersectLineLine(left1.left, left1.top, right1.left, right1.top, top1.left, top1.top, bottom2.left, bottom2.top),
+        fabric.Intersection.intersectLineLine(left2.left, left2.top, right2.left, right2.top, top2.left, top2.top, bottom1.left, bottom1.top)
+    ];
 
-        const quadrilateral = new fabric.Polygon(points, {
-            fill: '',
-            stroke: 'green',
-            strokeWidth: 2,
-            selectable: false
-        });
-        canvas.add(quadrilateral);
-    }
+    const points = intersections.map(intersection => ({
+        x: intersection && intersection.x,
+        y: intersection && intersection.y
+    }));
+
+    const quadrilateral = new fabric.Polygon(points, {
+        fill: '',
+        stroke: 'green',
+        strokeWidth: 2,
+        selectable: false
+    });
+    canvas.add(quadrilateral);
+}
+
 
     window.onload = function() {
         fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg?orient=&auto=compress', function(img) {
