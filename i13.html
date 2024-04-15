@@ -63,41 +63,50 @@
         });
     }
 
-    function createHandle(xRatio, yRatio, horizontalLock) {
-        const handle = new fabric.Circle({
-            left: canvas.width * xRatio,
-            top: canvas.height * yRatio,
-            fill: 'red',
-            radius: 25,
-            originX: 'center',
-            originY: 'center',
-            hasBorders: false,
-            hasControls: false,
-            selectable: true,
+    function createHandle(xRatio, yRatio, horizontalLock, shape) {
+    let handle;
+    if (shape === 'circle') {
+        handle = new fabric.Circle({
+            // Circle properties
         });
-
-        handle.on('moving', function() {
-            if (horizontalLock) {
-                this.set('top', canvas.height * yRatio);
-            } else {
-                this.set('left', canvas.width * xRatio);
-            }
-            updateLines();
+    } else if (shape === 'rectangle') {
+        handle = new fabric.Rect({
+            // Rectangle properties
         });
+    } else if (shape === 'triangle') {
+        handle = new fabric.Triangle({
+            // Triangle properties
+        });
+    } // Add more conditions for other shapes as needed
 
-        canvas.add(handle);
-        return handle;
-    }
+    handle.left = canvas.width * xRatio;
+    handle.top = canvas.height * yRatio;
+    handle.lockMovementX = horizontalLock;
+    // Set other properties as needed
+
+    handle.on('moving', function() {
+        if (horizontalLock) {
+            this.set('top', canvas.height * yRatio);
+        } else {
+            this.set('left', canvas.width * xRatio);
+        }
+        updateLines();
+    });
+
+    canvas.add(handle);
+    return handle;
+}
+
 
     const handles = {
-        top1: createHandle(0.15, 0, true),
-        top2: createHandle(0.85, 0, true),
-        right1: createHandle(1, 0.15, false),
-        right2: createHandle(1, 0.6, false),
-        bottom1: createHandle(0.15, 1, true),
-        bottom2: createHandle(0.85, 1, true),
-        left1: createHandle(0, 0.15, false),
-        left2: createHandle(0, 0.6, false),
+        top1: createHandle(0.15, 0, true, 'circle'),
+        top2: createHandle(0.85, 0, true, 'circle'),
+        right1: createHandle(1, 0.15, false, 'circle'),
+        right2: createHandle(1, 0.6, false, 'circle'),
+        bottom1: createHandle(0.15, 1, true, 'circle'),
+        bottom2: createHandle(0.85, 1, true, 'circle'),
+        left1: createHandle(0, 0.15, false, 'circle'),
+        left2: createHandle(0, 0.6, false, 'circle'),
     };
 
     let lines = [];
