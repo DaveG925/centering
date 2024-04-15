@@ -117,23 +117,14 @@
 
     window.onload = function() {
         // Load image from URL
-        fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg', function(img) {
+        fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg?orient=&auto=compress', function(img) {
             // Add padding around the image
             const padding = 50;
-            const scaledWidth = canvas.width;
-            const scaleFactor = scaledWidth / img.width;
-            const scaledHeight = img.height * scaleFactor;
 
-            // Calculate the position to center the image on the canvas
-            const leftPosition = (canvas.width - scaledWidth) / 2;
-            const topPosition = (canvas.height - scaledHeight) / 2;
-
-            // Set the image's position and size
+            // Set the position of the image to the center of the canvas
             img.set({
-                left: leftPosition,
-                top: topPosition + padding, // Add padding to the top
-                width: scaledWidth,
-                height: scaledHeight - 2 * padding, // Subtract padding from top and bottom
+                left: (canvas.width - img.width) / 2,
+                top: (canvas.height - img.height) / 2,
                 selectable: false
             });
 
