@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
         body {
-            margin: 50;
+            margin: 20;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -117,23 +117,19 @@
 
     window.onload = function() {
         // Load image from URL
-        fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg', function(img) {
-            // Add padding to top and bottom of the image
-            const padding = 50;
-            const scaledWidth = canvas.width;
-            const scaleFactor = scaledWidth / img.width;
-            const scaledHeight = img.height * scaleFactor;
+        fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg?orient=&auto=compress', function(img) {
+            // Scale the image to fit within the canvas while maintaining aspect ratio
+            const scaleFactor = Math.min(canvas.width / img.width, canvas.height / img.height);
+            img.scale(scaleFactor);
 
             // Calculate the position to center the image on the canvas
-            const leftPosition = (canvas.width - scaledWidth) / 2;
-            const topPosition = (canvas.height - scaledHeight) / 2;
+            const leftPosition = (canvas.width - img.width * scaleFactor) / 2;
+            const topPosition = (canvas.height - img.height * scaleFactor) / 2;
 
-            // Set the image's position and size
+            // Set the image's position and make it non-selectable
             img.set({
                 left: leftPosition,
-                top: topPosition + padding, // Add padding to the top
-                width: scaledWidth,
-                height: scaledHeight - 2 * padding, // Subtract padding from top and bottom
+                top: topPosition,
                 selectable: false
             });
 
