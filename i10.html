@@ -40,10 +40,33 @@
         updateLines();
     }
 
-    function createHandle(left, top, horizontalLock) {
+    // Updated function to adjust handle positions based on canvas size
+    function updateHandlesPositions() {
+        const positions = [
+            {handle: 'top1', x: 0.15, y: 0},
+            {handle: 'top2', x: 0.85, y: 0},
+            {handle: 'right1', x: 1, y: 0.15},
+            {handle: 'right2', x: 1, y: 0.6},
+            {handle: 'bottom1', x: 0.15, y: 1},
+            {handle: 'bottom2', x: 0.85, y: 1},
+            {handle: 'left1', x: 0, y: 0.15},
+            {handle: 'left2', x: 0, y: 0.6}
+        ];
+
+        positions.forEach(pos => {
+            const handle = handles[pos.handle];
+            handle.set({
+                left: canvas.width * pos.x,
+                top: canvas.height * pos.y
+            });
+            handle.setCoords(); // Update the handle's coordinates after moving it
+        });
+    }
+
+    function createHandle(xRatio, yRatio, horizontalLock) {
         const handle = new fabric.Rect({
-            left: left,
-            top: top,
+            left: canvas.width * xRatio,
+            top: canvas.height * yRatio,
             fill: 'blue',
             width: 10,
             height: 10,
@@ -56,9 +79,9 @@
 
         handle.on('moving', function() {
             if (horizontalLock) {
-                this.set('top', top);
+                this.set('top', canvas.height * yRatio);
             } else {
-                this.set('left', left);
+                this.set('left', canvas.width * xRatio);
             }
             updateLines();
         });
@@ -67,26 +90,15 @@
         return handle;
     }
 
-    function updateHandlesPositions() {
-        handles.top1.set({ left: canvas.width * 0.15, top: 10 });
-        handles.top2.set({ left: canvas.width * 0.85, top: 10 });
-        handles.right1.set({ left: canvas.width - 10, top: canvas.height * 0.15 });
-        handles.right2.set({ left: canvas.width - 10, top: canvas.height * 0.6 });
-        handles.bottom1.set({ left: canvas.width * 0.15, top: canvas.height - 10 });
-        handles.bottom2.set({ left: canvas.width * 0.85, top: canvas.height - 10 });
-        handles.left1.set({ left: 10, top: canvas.height * 0.15 });
-        handles.left2.set({ left: 10, top: canvas.height * 0.6 });
-    }
-
     const handles = {
-        top1: createHandle(150, 10, true),
-        top2: createHandle(874, 10, true),
-        right1: createHandle(canvas.width - 10, 150, false),
-        right2: createHandle(canvas.width - 10, 618, false),
-        bottom1: createHandle(150, canvas.height - 10, true),
-        bottom2: createHandle(874, canvas.height - 10, true),
-        left1: createHandle(10, 150, false),
-        left2: createHandle(10, 618, false),
+        top1: createHandle(0.15, 0, true),
+        top2: createHandle(0.85, 0, true),
+        right1: createHandle(1, 0.15, false),
+        right2: createHandle(1, 0.6, false),
+        bottom1: createHandle(0.15, 1, true),
+        bottom2: createHandle(0.85, 1, true),
+        left1: createHandle(0, 0.15, false),
+        left2: createHandle(0, 0.6, false),
     };
 
     let lines = [];
@@ -108,6 +120,7 @@
     window.addEventListener('resize', adjustCanvas);
     adjustCanvas(); // Initial setup
 </script>
+
 
 </body>
 </html>
