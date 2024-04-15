@@ -118,22 +118,28 @@
     window.onload = function() {
         // Load image from URL
         fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg?orient=&auto=compress', function(img) {
+            // Measure aspect ratio of the image
+            const aspectRatio = img.width / img.height;
+
             // Add padding around the image
             const padding = 50;
 
-            // Calculate scaled width and height to maintain aspect ratio
-            const scaleFactor = Math.min((canvas.width - 2 * padding) / img.width, (canvas.height - 2 * padding) / img.height);
-
-            // Adjust scaled dimensions to maintain aspect ratio
-            const scaledWidth = img.width * scaleFactor;
-            const scaledHeight = img.height * scaleFactor;
+            // Calculate scaled dimensions to maintain aspect ratio
+            let scaledWidth, scaledHeight;
+            if (canvas.width > canvas.height) {
+                scaledWidth = canvas.height - 2 * padding;
+                scaledHeight = scaledWidth / aspectRatio;
+            } else {
+                scaledHeight = canvas.width - 2 * padding;
+                scaledWidth = scaledHeight * aspectRatio;
+            }
 
             // Set position to center with padding
             img.set({
                 left: (canvas.width - scaledWidth) / 2,
                 top: (canvas.height - scaledHeight) / 2,
-                scaleX: scaleFactor,
-                scaleY: scaleFactor,
+                width: scaledWidth,
+                height: scaledHeight,
                 selectable: false
             });
 
