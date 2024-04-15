@@ -131,30 +131,24 @@
     const left1 = handles['left1'];
     const left2 = handles['left2'];
 
-    const lines = [
-        { points: [left1.left, left1.top, right1.left, right1.top], label: 'Horizontal 1' },
-        { points: [left2.left, left2.top, right2.left, right2.top], label: 'Horizontal 2' },
-        { points: [top1.left, top1.top, bottom1.left, bottom1.top], label: 'Vertical 1' },
-        { points: [top2.left, top2.top, bottom2.left, bottom2.top], label: 'Vertical 2' }
+    const points = [
+        fabric.Intersection.intersectLineLine(left1.left, left1.top, right1.left, right1.top, top1.left, top1.top, bottom1.left, bottom1.top),
+        fabric.Intersection.intersectLineLine(left2.left, left2.top, right2.left, right2.top, top2.left, top2.top, bottom2.left, bottom2.top),
+        fabric.Intersection.intersectLineLine(left1.left, left1.top, right1.left, right1.top, top2.left, top2.top, bottom2.left, bottom2.top),
+        fabric.Intersection.intersectLineLine(left2.left, left2.top, right2.left, right2.top, top1.left, top1.top, bottom1.left, bottom1.top)
     ];
 
-    lines.forEach(lineData => {
-        const lineObj = new fabric.Line(lineData.points, {
-            stroke: 'blue',
-            strokeWidth: 2,
-            selectable: false
-        });
-        canvas.add(lineObj);
+    const filteredPoints = points.filter(point => point);
 
-        // Add label
-        const label = new fabric.Text(lineData.label, {
-            left: (lineData.points[0] + lineData.points[2]) / 2,
-            top: (lineData.points[1] + lineData.points[3]) / 2,
-            fontSize: 16,
-            selectable: false
-        });
-        canvas.add(label);
+    console.log("Intersection Points:", filteredPoints);
+
+    const quadrilateral = new fabric.Polygon(filteredPoints, {
+        fill: '',
+        stroke: 'green',
+        strokeWidth: 2,
+        selectable: false
     });
+    canvas.add(quadrilateral);
 }
 
 
