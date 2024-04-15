@@ -137,9 +137,11 @@
         fabric.Intersection.intersectLineLine(left2.left, left2.top, right2.left, right2.top, top1.left, top1.top, bottom1.left, bottom1.top)
     ];
 
+    console.log("Intersection Points:", points);
+
     const filteredPoints = points.filter(point => point);
 
-    console.log("Intersection Points:", filteredPoints);
+    console.log("Filtered Intersection Points:", filteredPoints);
 
     const quadrilateral = new fabric.Polygon(filteredPoints, {
         fill: '',
@@ -149,6 +151,7 @@
     });
     canvas.add(quadrilateral);
 }
+
 
 
 
