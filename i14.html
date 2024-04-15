@@ -132,10 +132,10 @@
     const left2 = handles['left2'];
 
     const points = [
-        fabric.Intersection.intersectLineLine(left1.left, left1.top, right1.left, right1.top, top1.left, top1.top, bottom2.left, bottom2.top),
-        fabric.Intersection.intersectLineLine(left2.left, left2.top, right2.left, right2.top, top2.left, top2.top, bottom1.left, bottom1.top),
-        fabric.Intersection.intersectLineLine(top1.left, top1.top, bottom1.left, bottom1.top, left1.left, left1.top, right1.left, right1.top),
-        fabric.Intersection.intersectLineLine(top2.left, top2.top, bottom2.left, bottom2.top, left2.left, left2.top, right2.left, right2.top)
+        fabric.Intersection.intersectLineLine(left1.left, left1.top, right1.left, right1.top, top1.left, top1.top, bottom1.left, bottom1.top),
+        fabric.Intersection.intersectLineLine(left2.left, left2.top, right2.left, right2.top, top2.left, top2.top, bottom2.left, bottom2.top),
+        fabric.Intersection.intersectLineLine(left1.left, left1.top, right1.left, right1.top, top2.left, top2.top, bottom2.left, bottom2.top),
+        fabric.Intersection.intersectLineLine(left2.left, left2.top, right2.left, right2.top, top1.left, top1.top, bottom1.left, bottom1.top)
     ];
 
     const filteredPoints = points.filter(point => point);
@@ -150,6 +150,7 @@
     });
     canvas.add(quadrilateral);
 }
+
 
 
 
