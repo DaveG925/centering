@@ -138,10 +138,14 @@
         fabric.Intersection.intersectLineLine(left2.left, left2.top, right2.left, right2.top, top2.left, top2.top, bottom1.left, bottom1.top)
     ];
 
+    console.log("Intersections:", intersections);
+
     const points = intersections.map(intersection => ({
         x: intersection && intersection.x,
         y: intersection && intersection.y
     }));
+
+    console.log("Points:", points);
 
     const quadrilateral = new fabric.Polygon(points, {
         fill: '',
