@@ -135,25 +135,9 @@
         fabric.Intersection.intersectLineLine(left2.left, left2.top, right2.left, right2.top, top2.left, top2.top, bottom2.left, bottom2.top),
         fabric.Intersection.intersectLineLine(left1.left, left1.top, right1.left, right1.top, top2.left, top2.top, bottom2.left, bottom2.top),
         fabric.Intersection.intersectLineLine(left2.left, left2.top, right2.left, right2.top, top1.left, top1.top, bottom1.left, bottom1.top)
-    ];
+    ].filter(point => point);
 
-    const filteredPoints = points.filter(point => point);
-
-    const intersectionCircles = filteredPoints.map(point => {
-        return new fabric.Circle({
-            left: point.x,
-            top: point.y,
-            radius: 50,
-            fill: 'blue',
-            selectable: false
-        });
-    });
-
-    intersectionCircles.forEach(circle => {
-        canvas.add(circle);
-    });
-
-    const quadrilateral = new fabric.Polygon(filteredPoints, {
+    const quadrilateral = new fabric.Polygon(points, {
         fill: '',
         stroke: 'green',
         strokeWidth: 2,
@@ -161,6 +145,7 @@
     });
     canvas.add(quadrilateral);
 }
+
 
 
     window.onload = function() {
