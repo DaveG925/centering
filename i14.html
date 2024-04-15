@@ -131,24 +131,26 @@
     const left1 = handles['left1'];
     const left2 = handles['left2'];
 
-    const lines = [
-        [top1.left, top1.top, bottom1.left, bottom1.top],
-        [top2.left, top2.top, bottom2.left, bottom2.top],
-        [left1.left, left1.top, right1.left, right1.top],
-        [left2.left, left2.top, right2.left, right2.top]
+    const points = [
+        fabric.Intersection.intersectLineLine(left1.left, left1.top, right1.left, right1.top, top1.left, top1.top, bottom2.left, bottom2.top),
+        fabric.Intersection.intersectLineLine(left2.left, left2.top, right2.left, right2.top, top2.left, top2.top, bottom1.left, bottom1.top),
+        fabric.Intersection.intersectLineLine(top1.left, top1.top, bottom1.left, bottom1.top, left1.left, left1.top, right1.left, right1.top),
+        fabric.Intersection.intersectLineLine(top2.left, top2.top, bottom2.left, bottom2.top, left2.left, left2.top, right2.left, right2.top)
     ];
 
-    console.log("Lines:", lines);
+    const filteredPoints = points.filter(point => point);
 
-    lines.forEach(line => {
-        const lineObj = new fabric.Line(line, {
-            stroke: 'blue',
-            strokeWidth: 2,
-            selectable: false
-        });
-        canvas.add(lineObj);
+    console.log("Intersection Points:", filteredPoints);
+
+    const quadrilateral = new fabric.Polygon(filteredPoints, {
+        fill: '',
+        stroke: 'green',
+        strokeWidth: 2,
+        selectable: false
     });
+    canvas.add(quadrilateral);
 }
+
 
 
     window.onload = function() {
