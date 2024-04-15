@@ -64,25 +64,24 @@
     }
 
     function createHandle(left, top, horizontalLock) {
-    const handle = new fabric.Triangle({
+    const handle = new fabric.Rect({
         left: left,
         top: top,
         fill: 'blue',
-        width: 20,
-        height: 20,
+        width: 10,  // The width of the handle
+        height: 10, // The height of the handle
         originX: 'center',
         originY: 'center',
         hasBorders: false,
         hasControls: false,
         selectable: true,
-        angle: 90
     });
 
     handle.on('moving', function() {
         if (horizontalLock) {
-            this.set('top', top);
+            this.set('top', top); // Locks vertical movement by resetting 'top' to its original value.
         } else {
-            this.set('left', left);
+            this.set('left', left); // Locks horizontal movement by resetting 'left' to its original value.
         }
         updateLines();
     });
