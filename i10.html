@@ -63,32 +63,33 @@
         });
     }
 
-    function createHandle(xRatio, yRatio, horizontalLock) {
-        const handle = new fabric.Rect({
-            left: canvas.width * xRatio,
-            top: canvas.height * yRatio,
-            fill: 'blue',
-            width: 50,
-            height: 50,
-            originX: 'center',
-            originY: 'center',
-            hasBorders: false,
-            hasControls: false,
-            selectable: true,
-        });
+    function createHandle(left, top, horizontalLock) {
+    const handle = new fabric.Triangle({
+        left: left,
+        top: top,
+        fill: 'blue',
+        width: 20,
+        height: 20,
+        originX: 'center',
+        originY: 'center',
+        hasBorders: false,
+        hasControls: false,
+        selectable: true,
+        angle: 90
+    });
 
-        handle.on('moving', function() {
-            if (horizontalLock) {
-                this.set('top', canvas.height * yRatio);
-            } else {
-                this.set('left', canvas.width * xRatio);
-            }
-            updateLines();
-        });
+    handle.on('moving', function() {
+        if (horizontalLock) {
+            this.set('top', top);
+        } else {
+            this.set('left', left);
+        }
+        updateLines();
+    });
 
-        canvas.add(handle);
-        return handle;
-    }
+    canvas.add(handle);
+    return handle;
+}
 
     const handles = {
         top1: createHandle(0.15, 0, true),
