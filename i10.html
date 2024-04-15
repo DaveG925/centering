@@ -64,12 +64,11 @@
     }
 
     function createHandle(xRatio, yRatio, horizontalLock) {
-        const handle = new fabric.Rect({
+        const handle = new fabric.Circle({
             left: canvas.width * xRatio,
             top: canvas.height * yRatio,
             fill: 'blue',
-            width: 25,
-            height: 25,
+            radius: 25,
             originX: 'center',
             originY: 'center',
             hasBorders: false,
