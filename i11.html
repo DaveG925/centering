@@ -115,20 +115,22 @@
         canvas.renderAll();
     }
 
-    // Load image from URL
-    fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg?', function(img) {
-        img.scaleToWidth(100); // Scale the image to fit within a width of 100px
-        img.set({
-            left: canvas.width / 2 - img.width / 2, // Center the image horizontally
-            top: canvas.height / 2 - img.height / 2, // Center the image vertically
-            selectable: false // Make the image non-selectable
+    window.onload = function() {
+        // Load image from URL
+        fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg?orient=&auto=compress', function(img) {
+            img.scaleToWidth(100); // Scale the image to fit within a width of 100px
+            img.set({
+                left: canvas.width / 2 - img.width / 2, // Center the image horizontally
+                top: canvas.height / 2 - img.height / 2, // Center the image vertically
+                selectable: false // Make the image non-selectable
+            });
+            canvas.add(img);
         });
-        canvas.add(img);
-    });
-
-    updateLines();
-    window.addEventListener('resize', adjustCanvas);
-    adjustCanvas(); // Initial setup
+        
+        updateLines();
+        window.addEventListener('resize', adjustCanvas);
+        adjustCanvas(); // Initial setup
+    };
 </script>
 
 </body>
