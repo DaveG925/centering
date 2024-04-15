@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <style>
+        body {
+            margin: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 95vh;
+            background-color: #f7f7f7;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            max-width: 100%;
+            max-height: 95vh; /* Maintain aspect ratio and fit screen */
+            box-sizing: border-box;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+    <title>Canvas with Padding Around Image</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+<button onclick="drawQuadrilateral()">Draw Quadrilateral</button>
+
+<script>
+    const canvas = new fabric.Canvas('canvas', {
+        selection: false,
+        hoverCursor: 'pointer',
+    });
+
+    function adjustCanvas() {
+        const size = Math.min(window.innerWidth, window.innerHeight);
+        canvas.setWidth(size);
+        canvas.setHeight(size);
+        updateHandlesPositions();
+        updateLines();
+    }
+
+    // Rest of your code...
+
+    function drawQuadrilateral() {
+        // Get handle positions
+        const top1 = handles['top1'];
+        const top2 = handles['top2'];
+        const right1 = handles['right1'];
+        const right2 = handles['right2'];
+        const bottom1 = handles['bottom1'];
+        const bottom2 = handles['bottom2'];
+        const left1 = handles['left1'];
+        const left2 = handles['left2'];
+
+        // Calculate intersection points of the lines represented by handles
+        const intersection1 = intersection(top1, left1, right1, bottom1);
+        const intersection2 = intersection(top2, left2, right2, bottom2);
+        const intersection3 = intersection(top1, right1, left2, bottom2);
+        const intersection4 = intersection(top2, right2, left1, bottom1);
+
+        // Draw quadrilateral using intersection points
+        const quadrilateral = new fabric.Polygon([
+            intersection1, intersection2, intersection3, intersection4
+        ], {
+            fill: 'green',
+            selectable: false
+        });
+        canvas.add(quadrilateral);
+
+        // Remove handles from the canvas
+        removeHandles();
+    }
+
+    function intersection(p1, p2, p3, p4) {
+        const x1 = p1.left, y1 = p1.top;
+        const x2 = p2.left, y2 = p2.top;
+        const x3 = p3.left, y3 = p3.top;
+        const x4 = p4.left, y4 = p4.top;
+
+        const numeratorX = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4));
+        const numeratorY = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4));
+        const denominator = ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
+
+        const x = numeratorX / denominator;
+        const y = numeratorY / denominator;
+
+        return { x, y };
+    }
+
+    function removeHandles() {
+        // Remove handles from the canvas
+        for (const key in handles) {
+            canvas.remove(handles[key]);
+        }
+    }
+</script>
+
+</body>
+</html>
