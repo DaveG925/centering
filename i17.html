@@ -52,57 +52,57 @@
     }
 
     function updateHandlesPositions() {
-        const positions = [
-            { handle: 'top1', x: 0.15, y: offset },
-            { handle: 'top2', x: 0.85, y: offset },
-            { handle: 'right1', x: canvas.width - offset, y: 0.15 },
-            { handle: 'right2', x: canvas.width - offset, y: 0.85 },
-            { handle: 'bottom1', x: 0.15, y: canvas.height - offset },
-            { handle: 'bottom2', x: 0.85, y: canvas.height - offset },
-            { handle: 'left1', x: offset, y: 0.15 },
-            { handle: 'left2', x: offset, y: 0.85 }
-        ];
+    const radius = 25; // Radius of the handle
+    // Define the handle positions based on canvas dimensions minus double the radius
+    const positions = [
+        { handle: 'top1', x: 0.15, y: 0 },
+        { handle: 'top2', x: 0.85, y: 0 },
+        { handle: 'right1', x: 1, y: 0.15 },
+        { handle: 'right2', x: 1, y: 0.85 },
+        { handle: 'bottom1', x: 0.15, y: 1 },
+        { handle: 'bottom2', x: 0.85, y: 1 },
+        { handle: 'left1', x: 0, y: 0.15 },
+        { handle: 'left2', x: 0, y: 0.85 }
+    ];
 
-        positions.forEach(pos => {
-            const handle = handles[pos.handle];
-            handle.set({
-                left: pos.x,
-                top: pos.y
-            });
-            handle.setCoords();
+    positions.forEach(pos => {
+        const handle = handles[pos.handle];
+        handle.set({
+            left: (canvas.width - radius * 2) * pos.x + radius,
+            top: (canvas.height - radius * 2) * pos.y + radius
         });
-        updateLines();
-    }
+        handle.setCoords(); // This ensures the handle's coordinates are updated
+    });
+    canvas.renderAll(); // Re-render the canvas to show updated positions
+}
 
-    function createHandle(xRatio, yRatio, horizontalLock) {
-        let adjustedXRatio = xRatio === 1 ? canvas.width - offset : xRatio * canvas.width;
-        let adjustedYRatio = yRatio === 1 ? canvas.height - offset : yRatio * canvas.height;
-        
-        const handle = new fabric.Circle({
-            left: adjustedXRatio,
-            top: adjustedYRatio,
-            fill: 'red',
-            radius: radius,
-            originX: 'center',
-            originY: 'center',
-            hasBorders: false,
-            hasControls: false,
-            selectable: true,
-            cornerSize: 75,
-        });
+function createHandle(xRatio, yRatio, horizontalLock) {
+    const radius = 25; // Radius of the handle
+    const handle = new fabric.Circle({
+        left: (canvas.width - radius * 2) * xRatio + radius,
+        top: (canvas.height - radius * 2) * yRatio + radius,
+        fill: 'red',
+        radius: radius,
+        originX: 'center',
+        originY: 'center',
+        hasBorders: false,
+        hasControls: false,
+        selectable: true,
+    });
 
-        handle.on('moving', function() {
-            if (horizontalLock) {
-                this.set('top', yRatio === 1 ? canvas.height - offset : yRatio * canvas.height);
-            } else {
-                this.set('left', xRatio === 1 ? canvas.width - offset : xRatio * canvas.width);
-            }
-            updateLines();
-        });
+    handle.on('moving', function() {
+        if (horizontalLock) {
+            this.set('top', (canvas.height - radius * 2) * yRatio + radius);
+        } else {
+            this.set('left', (canvas.width - radius * 2) * xRatio + radius);
+        }
+        handle.setCoords(); // This ensures the handle's coordinates are updated
+        updateLines(); // Call to redraw lines after moving handle
+    });
 
-        canvas.add(handle);
-        return handle;
-    }
+    canvas.add(handle);
+    return handle;
+}
 
     const handles = {
         top1: createHandle(0.15, 0, true),
