@@ -159,7 +159,17 @@ function drawQuadrilateral() {
     canvas.add(polygon);
     window.quadrilateral = polygon; // Store the reference for future removal
 }
+function debounce(func, wait) {
+    let timeout;
+    return function() {
+        const context = this, args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+}
 
+// Usage
+window.addEventListener('resize', debounce(adjustCanvas, 100));
 
 
 
