@@ -17,7 +17,7 @@
         
     canvas {
     border: 1px solid #ccc;
-    max-width: calc(100% - 30px); /* Subtract 25px from both sides */
+    max-width: calc(100% - 30px); /* Subtract 15px from both sides */
     max-height: 100vh; /* Maintain aspect ratio and fit screen */
     box-sizing: border-box;
     margin-bottom: 15px; /* Adds space between the canvas and any elements that follow */
@@ -37,7 +37,7 @@
 <body>
 
 <canvas id="canvas"></canvas>
-<button id="drawBorder">Draw Outer Border</button>
+<button id="drawBorder">Lock Outer Border</button>
 <script>
     const canvas = new fabric.Canvas('canvas', {
         selection: false,
@@ -118,10 +118,10 @@
     function updateLines() {
         lines.forEach(line => canvas.remove(line));
         lines = [
-            new fabric.Line([handles.top1.left, handles.top1.top, handles.bottom1.left, handles.bottom1.top], { stroke: 'red', strokeWidth: 3, selectable: false }),
-            new fabric.Line([handles.top2.left, handles.top2.top, handles.bottom2.left, handles.bottom2.top], { stroke: 'red', strokeWidth: 3, selectable: false }),
-            new fabric.Line([handles.left1.left, handles.left1.top, handles.right1.left, handles.right1.top], { stroke: 'red', strokeWidth: 3, selectable: false }),
-            new fabric.Line([handles.left2.left, handles.left2.top, handles.right2.left, handles.right2.top], { stroke: 'red', strokeWidth: 3, selectable: false }),
+            new fabric.Line([handles.top1.left, handles.top1.top, handles.bottom1.left, handles.bottom1.top], { stroke: 'red', strokeWidth: 1, selectable: false }),
+            new fabric.Line([handles.top2.left, handles.top2.top, handles.bottom2.left, handles.bottom2.top], { stroke: 'red', strokeWidth: 1, selectable: false }),
+            new fabric.Line([handles.left1.left, handles.left1.top, handles.right1.left, handles.right1.top], { stroke: 'red', strokeWidth: 1, selectable: false }),
+            new fabric.Line([handles.left2.left, handles.left2.top, handles.right2.left, handles.right2.top], { stroke: 'red', strokeWidth: 1, selectable: false }),
         ];
 
         lines.forEach(line => canvas.add(line));
@@ -148,7 +148,7 @@ function drawQuadrilateral() {
 
     // Create the polygon
     var polygon = new fabric.Polygon(polygonPoints, {
-        fill: 'rgba(0,255,0,0.5)', // Green with some transparency
+        fill: 'rgba(0,255,0,0.2)', // Green with some transparency
         stroke: 'green',
         strokeWidth: 2,
         selectable: false,
