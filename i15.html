@@ -115,15 +115,15 @@
         canvas.renderAll();
     }
     function drawQuadrilateral() {
-    // Points of the quadrilateral based on the handlers' positions
+    // Points of the quadrilateral based on the intersections of the handlers' lines
     var points = [
-        // Top left corner
+        // Top left intersection
         { x: handles.left1.left, y: handles.top1.top },
-        // Top right corner
+        // Top right intersection
         { x: handles.right1.left, y: handles.top2.top },
-        // Bottom right corner
+        // Bottom right intersection
         { x: handles.right2.left, y: handles.bottom2.top },
-        // Bottom left corner
+        // Bottom left intersection
         { x: handles.left2.left, y: handles.bottom1.top }
     ];
 
