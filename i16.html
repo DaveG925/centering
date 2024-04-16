@@ -5,21 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
-        body {
-            margin: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 95vh;
-            background-color: #f7f7f7;
-        }
-        canvas {
-            border: 1px solid #ccc;
-            max-width: 100%;
-            max-height: 95vh; /* Maintain aspect ratio and fit screen */
-            box-sizing: border-box;
-        }
-    </style>
+    body {
+        margin: 20px;
+        display: flex;
+        flex-direction: column; /* Stack items vertically */
+        align-items: center;
+        height: calc(95vh - 40px); /* Adjust the height taking into account the body margin */
+        background-color: #f7f7f7;
+    }
+    canvas {
+        border: 1px solid #ccc;
+        max-width: 100%;
+        max-height: 95vh; /* Maintain aspect ratio and fit screen */
+        box-sizing: border-box;
+        margin-bottom: 25px; /* Adds space between the canvas and any elements that follow */
+    }
+    #drawBorder {
+        margin-top: 25px; /* Space above the button */
+        display: block; /* Makes the button a block-level element so the margin-top is applied */
+    }
+</style>
+
     <title>Canvas with Padding Around Image</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
 </head>
