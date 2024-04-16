@@ -115,12 +115,16 @@
         canvas.renderAll();
     }
     function drawQuadrilateral() {
-    // Points of the quadrilateral based on the line ends
+    // Points of the quadrilateral based on the handlers' positions
     var points = [
-        { x: handles.top1.left, y: handles.top1.top },
-        { x: handles.top2.left, y: handles.top2.top },
-        { x: handles.bottom2.left, y: handles.bottom2.top },
-        { x: handles.bottom1.left, y: handles.bottom1.top }
+        // Top left corner
+        { x: handles.left1.left, y: handles.top1.top },
+        // Top right corner
+        { x: handles.right1.left, y: handles.top2.top },
+        // Bottom right corner
+        { x: handles.right2.left, y: handles.bottom2.top },
+        // Bottom left corner
+        { x: handles.left2.left, y: handles.bottom1.top }
     ];
 
     // Convert points to format required by fabric.Polygon
