@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -149,7 +148,7 @@ function drawQuadrilateral() {
 
     // Create the polygon
     var polygon = new fabric.Polygon(polygonPoints, {
-        fill: 'rgba(0,255,0,0.5)', // Green with some transparency
+        // fill: 'rgba(0,255,0,0.5)', // Green with some transparency
         stroke: 'green',
         strokeWidth: 2,
         selectable: false,
@@ -188,7 +187,7 @@ document.getElementById('drawBorder').addEventListener('click', function() {
         // Load image from URL
         fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg?orient=&auto=compress', function(img) {
             // Add padding around the image
-            const padding = 50;
+            const padding = 25;
 
             // Calculate scaled width and height to maintain aspect ratio
             const scaleFactor = Math.min((canvas.width - 2 * padding) / img.width, (canvas.height - 2 * padding) / img.height);
