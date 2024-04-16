@@ -1,0 +1,255 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <style>
+    body, html {
+    overflow: hidden; /* Prevents scrolling in all directions */
+    margin: 20px;
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    align-items: center;
+    height: calc(95vh - 40px); /* Adjust the height taking into account the body margin */
+    background-color: #f7f7f7;
+    }
+        
+    canvas {
+    border: 1px solid #ccc;
+    max-width: calc(100% - 50px); /* Subtract 25px from both sides */
+    max-height: 100vh; /* Maintain aspect ratio and fit screen */
+    box-sizing: border-box;
+    margin-bottom: 25px; /* Adds space between the canvas and any elements that follow */
+    margin-left: 25px; /* Left margin */
+    margin-right: 25px; /* Right margin */
+}
+
+    #drawBorder {
+        margin-top: 25px; /* Space above the button */
+        display: block; /* Makes the button a block-level element so the margin-top is applied */
+    }
+</style>
+
+    <title>Canvas with Padding Around Image</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+<button id="drawBorder">Draw Outer Border</button>
+<script>
+    const canvas = new fabric.Canvas('canvas', {
+        selection: false,
+        hoverCursor: 'pointer',
+    });
+
+    function adjustCanvas() {
+        const size = Math.min(window.innerWidth, window.innerHeight);
+        canvas.setWidth(size);
+        canvas.setHeight(size);
+        updateHandlesPositions();
+        updateLines();
+    }
+
+    // Updated function to adjust handle positions based on canvas size
+    function updateHandlesPositions() {
+        const positions = [
+            {handle: 'top1', x: 0.15, y: 0},
+            {handle: 'top2', x: 0.85, y: 0},
+            {handle: 'right1', x: 1, y: 0.09},
+            {handle: 'right2', x: 1, y: 0.91},
+            {handle: 'bottom1', x: 0.15, y: 1},
+            {handle: 'bottom2', x: 0.85, y: 1},
+            {handle: 'left1', x: 0, y: 0.09},
+            {handle: 'left2', x: 0, y: 0.91}
+        ];
+
+        positions.forEach(pos => {
+            const handle = handles[pos.handle];
+            handle.set({
+                left: canvas.width * pos.x,
+                top: canvas.height * pos.y
+            });
+            handle.setCoords(); // Update the handle's coordinates after moving it
+        });
+    }
+
+// Function to create a handle, adjusted to keep the entire circle inside the canvas
+function createHandle(xRatio, yRatio, horizontalLock) {
+    // Adjustments to keep the handles fully inside the canvas boundaries
+    const offset = 25; // Use the radius of the handle
+    let adjustedXRatio = xRatio;
+    let adjustedYRatio = yRatio;
+
+    // Adjust the ratio if handle is at the very edge of the canvas
+    if (xRatio === 0) adjustedXRatio = offset / canvas.width;
+    if (xRatio === 1) adjustedXRatio = 1 - offset / canvas.width;
+    if (yRatio === 0) adjustedYRatio = offset / canvas.height;
+    if (yRatio === 1) adjustedYRatio = 1 - offset / canvas.height;
+
+    const handle = new fabric.Circle({
+        left: canvas.width * adjustedXRatio,
+        top: canvas.height * adjustedYRatio,
+        fill: 'red',
+        radius: offset,
+        originX: 'center',
+        originY: 'center',
+        hasBorders: false,
+        hasControls: false,
+        selectable: true,
+        cornerSize: 75, // Increase if handles are too hard to select
+    });
+
+    handle.on('moving', function() {
+        if (horizontalLock) {
+            this.set('top', canvas.height * yRatio);
+        } else {
+            this.set('left', canvas.width * xRatio);
+        }
+        updateLines();
+    });
+
+    canvas.add(handle);
+    return handle;
+}
+
+// Function to update handle positions, ensuring they stay fully inside the canvas
+function updateHandlesPositions() {
+    const offset = 25; // Use the radius of the handle
+    const positions = [
+        {handle: 'top1', x: 0.15, y: 0},
+        {handle: 'top2', x: 0.85, y: 0},
+        {handle: 'right1', x: 1, y: 0.09},
+        {handle: 'right2', x: 1, y: 0.91},
+        {handle: 'bottom1', x: 0.15, y: 1},
+        {handle: 'bottom2', x: 0.85, y: 1},
+        {handle: 'left1', x: 0, y: 0.09},
+        {handle: 'left2', x: 0, y: 0.91}
+    ];
+
+    positions.forEach(pos => {
+        const handle = handles[pos.handle];
+        let adjustedLeft = canvas.width * pos.x;
+        let adjustedTop = canvas.height * pos.y;
+
+        // Adjust the positions if handle is at the very edge of the canvas
+        if (pos.x === 0) adjustedLeft += offset;
+        if (pos.x === 1) adjustedLeft -= offset;
+        if (pos.y === 0) adjustedTop += offset;
+        if (pos.y === 1) adjustedTop -= offset;
+
+        handle.set({
+            left: adjustedLeft,
+            top: adjustedTop
+        });
+        handle.setCoords(); // Update the handle's coordinates after moving it
+    });
+}
+
+
+
+    let lines = [];
+
+    function updateLines() {
+        lines.forEach(line => canvas.remove(line));
+        lines = [
+            new fabric.Line([handles.top1.left, handles.top1.top, handles.bottom1.left, handles.bottom1.top], { stroke: 'red', strokeWidth: 3, selectable: false }),
+            new fabric.Line([handles.top2.left, handles.top2.top, handles.bottom2.left, handles.bottom2.top], { stroke: 'red', strokeWidth: 3, selectable: false }),
+            new fabric.Line([handles.left1.left, handles.left1.top, handles.right1.left, handles.right1.top], { stroke: 'red', strokeWidth: 3, selectable: false }),
+            new fabric.Line([handles.left2.left, handles.left2.top, handles.right2.left, handles.right2.top], { stroke: 'red', strokeWidth: 3, selectable: false }),
+        ];
+
+        lines.forEach(line => canvas.add(line));
+        canvas.renderAll();
+    }
+// Function to draw the quadrilateral based on handler positions
+function drawQuadrilateral() {
+    // Points of the quadrilateral based on the intersections of the handlers' lines
+    var points = [
+        // Top left intersection
+        { x: handles.top1.left, y: handles.left1.top },
+        // Top right intersection
+        { x: handles.top2.left, y: handles.right1.top },
+        // Bottom right intersection
+        { x: handles.bottom2.left, y: handles.right2.top },
+        // Bottom left intersection
+        { x: handles.bottom1.left, y: handles.left2.top }
+    ];
+
+    // Convert points to format required by fabric.Polygon
+    var polygonPoints = points.map(function(point) {
+        return new fabric.Point(point.x, point.y);
+    });
+
+    // Create the polygon
+    var polygon = new fabric.Polygon(polygonPoints, {
+        fill: 'rgba(0,255,0,0.5)', // Green with some transparency
+        stroke: 'green',
+        strokeWidth: 2,
+        selectable: false,
+        evented: false, // Make the polygon non-interactive
+    });
+
+    // Remove previous quadrilateral if it exists
+    if (window.quadrilateral) {
+        canvas.remove(window.quadrilateral);
+    }
+
+    // Add the new quadrilateral to the canvas
+    canvas.add(polygon);
+    window.quadrilateral = polygon; // Store the reference for future removal
+}
+function debounce(func, wait) {
+    let timeout;
+    return function() {
+        const context = this, args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+}
+
+// Usage
+window.addEventListener('resize', debounce(adjustCanvas, 100));
+
+
+
+// Event listener for the button
+document.getElementById('drawBorder').addEventListener('click', function() {
+    drawQuadrilateral();
+    canvas.renderAll(); // Re-render the canvas to show the changes
+});
+    window.onload = function() {
+        // Load image from URL
+        fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg?orient=&auto=compress', function(img) {
+            // Add padding around the image
+            const padding = 50;
+
+            // Calculate scaled width and height to maintain aspect ratio
+            const scaleFactor = Math.min((canvas.width - 2 * padding) / img.width, (canvas.height - 2 * padding) / img.height);
+            const scaledWidth = img.width * scaleFactor;
+            const scaledHeight = img.height * scaleFactor;
+
+            // Set position to center with padding
+            img.set({
+                left: (canvas.width - scaledWidth) / 2,
+                top: (canvas.height - scaledHeight) / 2,
+                scaleX: scaleFactor,
+                scaleY: scaleFactor,
+                selectable: false
+            });
+
+            // Add the image to the canvas
+            canvas.add(img);
+            img.sendToBack(); // Send the image to the back so that other objects appear on top of it
+        });
+        
+        updateLines();
+        window.addEventListener('resize', adjustCanvas);
+        adjustCanvas(); // Initial setup
+    };
+</script>
+
+</body>
+</html>
