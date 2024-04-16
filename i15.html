@@ -114,18 +114,18 @@
         lines.forEach(line => canvas.add(line));
         canvas.renderAll();
     }
-   // Function to draw the quadrilateral based on handler positions
+// Function to draw the quadrilateral based on handler positions
 function drawQuadrilateral() {
     // Points of the quadrilateral based on the intersections of the handlers' lines
     var points = [
         // Top left intersection
-        { x: handles.left1.left, y: handles.top1.top },
+        { x: handles.top1.left, y: handles.left1.top },
         // Top right intersection
-        { x: handles.right1.left, y: handles.top2.top },
+        { x: handles.top2.left, y: handles.right1.top },
         // Bottom right intersection
-        { x: handles.right2.left, y: handles.bottom2.top },
+        { x: handles.bottom2.left, y: handles.right2.top },
         // Bottom left intersection
-        { x: handles.left2.left, y: handles.bottom1.top }
+        { x: handles.bottom1.left, y: handles.left2.top }
     ];
 
     // Convert points to format required by fabric.Polygon
@@ -151,6 +151,7 @@ function drawQuadrilateral() {
     canvas.add(polygon);
     window.quadrilateral = polygon; // Store the reference for future removal
 }
+
 
 
 
