@@ -177,12 +177,20 @@ function debounce(func, wait) {
 window.addEventListener('resize', debounce(adjustCanvas, 100));
 
 
-
 // Event listener for the button
 document.getElementById('drawBorder').addEventListener('click', function() {
     drawQuadrilateral();
     canvas.renderAll(); // Re-render the canvas to show the changes
+
+    // Toggle button text
+    const button = document.getElementById('drawBorder');
+    if (button.textContent === 'Lock Outer Border') {
+        button.textContent = 'Unlock Outer Border';
+    } else {
+        button.textContent = 'Lock Outer Border';
+    }
 });
+    
     window.onload = function() {
         // Load image from URL
         fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg?orient=&auto=compress', function(img) {
