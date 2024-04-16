@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Enhanced Card Centering Tool</title>
+    <title>Card Centering Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
     <style>
         body, html {
@@ -34,14 +34,13 @@
 </div>
 
 <canvas id="canvas"></canvas>
+
 <script>
-  // Define global variables
   const canvas = new fabric.Canvas('canvas', { selection: false });
   const points = { outer: [], inner: [] };
   const lines = { outer: [], inner: [] };
   const controlPointOffset = 50; // Global offset for the control points
 
-  // Debounce function to improve performance on resize
   function debounce(func, wait) {
     let timeout;
     return function () {
@@ -52,7 +51,6 @@
     };
   }
 
-  // Adjust the canvas size
   function adjustCanvas() {
     const size = Math.min(window.innerWidth, window.innerHeight);
     canvas.setWidth(size);
@@ -64,7 +62,6 @@
     canvas.renderAll();
   }
 
-  // Initialize or adjust the quadrilaterals on the canvas
   function initQuadrilaterals() {
     // Clear any existing objects from the canvas, except the loaded image
     canvas.getObjects().forEach((obj) => {
@@ -75,10 +72,12 @@
 
     // Define your default corner positions for outer and inner quadrilaterals
     const defaultOuterCorners = [
-      // Define your default outer corners
+      { x: 50, y: 50 }, { x: canvas.width - 50, y: 50 },
+      { x: canvas.width - 50, y: canvas.height - 50 }, { x: 50, y: canvas.height - 50 }
     ];
     const defaultInnerCorners = [
-      // Define your default inner corners
+      { x: 150, y: 150 }, { x: canvas.width - 150, y: 150 },
+      { x: canvas.width - 150, y: canvas.height - 150 }, { x: 150, y: canvas.height - 150 }
     ];
 
     // Create or adjust the corner points
@@ -93,13 +92,15 @@
     drawLines();
   }
 
-  // Create a draggable corner point on the canvas
   function createCorner(point, borderType) {
+    let offsetX = borderType === 'outer' ? controlPointOffset : -controlPointOffset;
+    let offsetY = offsetX; // Assuming the offset is uniform in both directions
+
     let circle = new fabric.Circle({
       radius: 10, // Radius of control points for better touch response
       fill: borderType === 'outer' ? 'red' : 'blue',
-      left: point.x + (borderType === 'outer' ? controlPointOffset : -controlPointOffset),
-      top: point.y + (borderType === 'outer' ? controlPointOffset : -controlPointOffset),
+      left: point.x + offsetX,
+      top: point.y + offsetY,
       originX: 'center',
       originY: 'center',
       hasBorders: false,
@@ -113,8 +114,8 @@
 
     circle.on('moving', function () {
       // Update the true corner position when the control point moves
-      this.trueX = this.left - (borderType === 'outer' ? controlPointOffset : -controlPointOffset);
-      this.trueY = this.top - (borderType === 'outer' ? controlPointOffset : -controlPointOffset);
+      this.trueX = this.left - offsetX;
+      this.trueY = this.top - offsetY;
       drawLines();
     });
 
@@ -122,7 +123,6 @@
     return circle;
   }
 
-  // Draw lines connecting the corner points
   function drawLines() {
     // Remove existing lines from the canvas
     Object.values(lines).forEach(borderLines => {
@@ -154,7 +154,6 @@
     });
   }
 
-  // Update the image on the canvas
   function updateImageOnCanvas(img) {
     const padding = 50; // Padding around the image
     const scaleFactor = Math.min(
@@ -170,7 +169,6 @@
     canvas.renderAll();
   }
 
-  // Load an image onto the canvas
   function loadImage() {
     fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg?orient=&auto=compress', function (img) {
       window.loadedImage = img;
@@ -181,14 +179,12 @@
     });
   }
 
-  // Event listener for resizing the window
   window.addEventListener('resize', debounce(adjustCanvas, 100));
 
-  // Initialization
   window.onload = function () {
-    adjustCanvas(); // Adjust the canvas initially
-    loadImage();    // Load the background image
-    initQuadrilaterals(); // Initialize the quadrilaterals
+    adjustCanvas();
+    loadImage();
+    initQuadrilaterals();
   };
 </script>
 </body>
