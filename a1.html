@@ -110,10 +110,6 @@
         alert(`Centering Ratios - Horizontal: ${ratios.horizontal} / Vertical: ${ratios.vertical}`);
     });
 
-</script>
-<script>
-    // Remaining JavaScript code
-
     function calculateCenteringRatios(outerCorners, innerCorners) {
         // Calculating total width and height of the outer and inner rectangles
         const totalOuterWidth = Math.abs(outerCorners[1].x - outerCorners[0].x);
@@ -151,8 +147,8 @@
         fabric.Image.fromURL('https://m.media-amazon.com/images/I/71MWz5besdL._AC_SY679_.jpg', function(oImg) {
             // Maintain aspect ratio of the image
             const aspectRatio = oImg.width / oImg.height;
-            const maxWidth = canvas.width * 0.8; // Set maximum width for the image
-            const maxHeight = canvas.height * 0.8; // Set maximum height for the image
+            const maxWidth = canvas.width * 0.9; // Set maximum width for the image
+            const maxHeight = canvas.height * 0.9; // Set maximum height for the image
 
             let scale = 1;
             if (oImg.width > maxWidth || oImg.height > maxHeight) {
