@@ -7,22 +7,22 @@
     <style>
     body, html {
     overflow: hidden; /* Prevents scrolling in all directions */
-    margin: 20px;
+    margin: 10px;
     display: flex;
     flex-direction: column; /* Stack items vertically */
     align-items: center;
-    height: calc(95vh - 40px); /* Adjust the height taking into account the body margin */
+    height: calc(100vh - 20px); /* Adjust the height taking into account the body margin */
     background-color: #f7f7f7;
     }
         
     canvas {
     border: 1px solid #ccc;
-    max-width: calc(100% - 50px); /* Subtract 25px from both sides */
+    max-width: calc(100% - 30px); /* Subtract 15px from both sides */
     max-height: 100vh; /* Maintain aspect ratio and fit screen */
     box-sizing: border-box;
-    margin-bottom: 25px; /* Adds space between the canvas and any elements that follow */
-    margin-left: 25px; /* Left margin */
-    margin-right: 25px; /* Right margin */
+    margin-bottom: 15px; /* Adds space between the canvas and any elements that follow */
+    margin-left: 15px; /* Left margin */
+    margin-right: 15px; /* Right margin */
 }
 
     #drawBorder {
@@ -37,7 +37,7 @@
 <body>
 
 <canvas id="canvas"></canvas>
-<button id="drawBorder">Draw Outer Border</button>
+<button id="drawBorder">Lock Outer Border</button>
 <script>
     const canvas = new fabric.Canvas('canvas', {
         selection: false,
@@ -148,7 +148,7 @@ function drawQuadrilateral() {
 
     // Create the polygon
     var polygon = new fabric.Polygon(polygonPoints, {
-        fill: 'rgba(0,255,0,0.1)', // Green with some transparency
+        fill: 'rgba(0,255,0,0.2)', // Green with some transparency
         stroke: 'green',
         strokeWidth: 2,
         selectable: false,
@@ -163,27 +163,7 @@ function drawQuadrilateral() {
     // Add the new quadrilateral to the canvas
     canvas.add(polygon);
     window.quadrilateral = polygon; // Store the reference for future removal
-
-    // Create a mask to dim everything outside the drawn border
-    var mask = new fabric.Rect({
-        left: 0,
-        top: 0,
-        width: canvas.width,
-        height: canvas.height,
-        fill: 'rgba(0,0,0,0.5)', // Semi-transparent black
-        selectable: false,
-        evented: false // Make the mask non-interactive
-    });
-
-    // Subtract the area inside the drawn quadrilateral from the mask
-    mask.excludeFromExport = mask.excludeFromBackup = true;
-    mask.globalCompositeOperation = 'destination-out';
-
-    // Add the mask to the canvas
-    canvas.add(mask);
 }
-
-
 function debounce(func, wait) {
     let timeout;
     return function() {
@@ -207,7 +187,7 @@ document.getElementById('drawBorder').addEventListener('click', function() {
         // Load image from URL
         fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg?orient=&auto=compress', function(img) {
             // Add padding around the image
-            const padding = 25;
+            const padding = 50;
 
             // Calculate scaled width and height to maintain aspect ratio
             const scaleFactor = Math.min((canvas.width - 2 * padding) / img.width, (canvas.height - 2 * padding) / img.height);
