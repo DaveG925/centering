@@ -176,11 +176,15 @@ function debounce(func, wait) {
 // Usage
 window.addEventListener('resize', debounce(adjustCanvas, 100));
 
-
 // Event listener for the button
 document.getElementById('drawBorder').addEventListener('click', function() {
     drawQuadrilateral();
     canvas.renderAll(); // Re-render the canvas to show the changes
+
+    // Lock handlers in place
+    Object.values(handles).forEach(handle => {
+        handle.selectable = false;
+    });
 
     // Toggle button text
     const button = document.getElementById('drawBorder');
@@ -190,7 +194,7 @@ document.getElementById('drawBorder').addEventListener('click', function() {
         button.textContent = 'Lock Outer Border';
     }
 });
-    
+
     window.onload = function() {
         // Load image from URL
         fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg?orient=&auto=compress', function(img) {
