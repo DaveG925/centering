@@ -36,6 +36,11 @@
 <canvas id="canvas"></canvas>
 
 <script>
+    document.getElementById('calculateCentering').addEventListener('click', function() {
+    const ratios = calculateCenteringRatios();
+    alert(`Centering Ratios - Horizontal: ${ratios.horizontal}% / Vertical: ${ratios.vertical}%`);
+});
+
   const canvas = new fabric.Canvas('canvas', { selection: false });
   const points = { outer: [], inner: [] };
   const lines = { outer: [], inner: [] };
@@ -178,6 +183,28 @@
       img.sendToBack();
     });
   }
+function calculateCenteringRatios() {
+    // Get the true corners for the outer quadrilateral
+    const outerCorners = points.outer.map(p => ({ x: p.trueX, y: p.trueY }));
+    // Get the true corners for the inner quadrilateral
+    const innerCorners = points.inner.map(p => ({ x: p.trueX, y: p.trueY }));
+
+    // Calculate the horizontal and vertical ratios
+    const totalOuterWidth = Math.abs(outerCorners[1].x - outerCorners[0].x);
+    const totalOuterHeight = Math.abs(outerCorners[3].y - outerCorners[0].y);
+    const leftSpace = Math.abs(innerCorners[0].x - outerCorners[0].x);
+    const rightSpace = Math.abs(outerCorners[1].x - innerCorners[1].x);
+    const topSpace = Math.abs(innerCorners[0].y - outerCorners[0].y);
+    const bottomSpace = Math.abs(outerCorners[3].y - innerCorners[3].y);
+
+    const horizontalRatio = (leftSpace / totalOuterWidth) * 100;
+    const verticalRatio = (topSpace / totalOuterHeight) * 100;
+
+    return {
+        horizontal: horizontalRatio.toFixed(2),
+        vertical: verticalRatio.toFixed(2)
+    };
+}
 
   window.addEventListener('resize', debounce(adjustCanvas, 100));
 
