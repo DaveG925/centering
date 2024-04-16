@@ -48,40 +48,60 @@
     }
 
     function adjustCanvas() {
-        const size = Math.min(window.innerWidth, window.innerHeight);
+        const size = Math.min(window.innerWidth, window.innerHeight - 50); // Adjust size and leave space for buttons and other UI elements
         canvas.setWidth(size);
         canvas.setHeight(size);
-        initQuadrilaterals(); // Reinitialize to adjust corner positions
+        initQuadrilaterals(true); // Adjust quadrilaterals without clearing
         if (window.loadedImage) {
             updateImageOnCanvas(window.loadedImage); // Update image position after canvas size change
         }
         canvas.renderAll();
     }
-    window.addEventListener('resize', debounce(adjustCanvas, 100));
 
-    function initQuadrilaterals() {
-        canvas.clear(); // Clear the existing canvas before redrawing
+    function initQuadrilaterals(adjustOnly = false) {
+        if (!adjustOnly) {
+            canvas.clear(); // Clear the existing canvas before redrawing only when not adjusting
+        }
 
-        const defaultOuterCorners = [
-            { x: 0.15 * canvas.width, y: 0.1 * canvas.height },
-            { x: 0.85 * canvas.width, y: 0.1 * canvas.height },
-            { x: 0.85 * canvas.width, y: 0.9 * canvas.height },
-            { x: 0.15 * canvas.width, y: 0.9 * canvas.height }
+        // Define corners with proportional positions to the canvas size
+        const outerCoords = [
+            { x: 0.15, y: 0.1 },
+            { x: 0.85, y: 0.1 },
+            { x: 0.85, y: 0.9 },
+            { x: 0.15, y: 0.9 }
         ];
-        const defaultInnerCorners = [
-            { x: 0.35 * canvas.width, y: 0.3 * canvas.height },
-            { x: 0.65 * canvas.width, y: 0.3 * canvas.height },
-            { x: 0.65 * canvas.width, y: 0.7 * canvas.height },
-            { x: 0.35 * canvas.width, y: 0.7 * canvas.height }
+        const innerCoords = [
+            { x: 0.35, y: 0.3 },
+            { x: 0.65, y: 0.3 },
+            { x: 0.65, y: 0.7 },
+            { x: 0.35, y: 0.7 }
         ];
 
-        defaultOuterCorners.forEach((point, index) => {
-            points.outer[index] = createCorner(point, 'outer');
+        // Create or adjust quadrilateral corners
+        outerCoords.forEach((coord, index) => {
+            let point = { x: coord.x * canvas.width, y: coord.y * canvas.height };
+            if (points.outer[index]) {
+                points.outer[index].set({ left: point.x, top: point.y }).setCoords();
+            } else {
+                points.outer[index] = createCorner(point, 'outer');
+            }
         });
-        defaultInnerCorners.forEach((point, index) => {
-            points.inner[index] = createCorner(point, 'inner');
+        innerCoords.forEach((coord, index) => {
+            let point = { x: coord.x * canvas.width, y: coord.y * canvas.height };
+            if (points.inner[index]) {
+                points.inner[index].set({ left: point.x, top: point.y }).setCoords();
+            } else {
+                points.inner[index] = createCorner(point, 'inner');
+            }
         });
+
+        // Redraw lines for all quadrilaterals
+        drawLines('outer');
+        drawLines('inner');
     }
+
+    const points = { outer: [], inner: [] }; // Holds references to corner points
+    const lines = { outer: [], inner: [] }; // Holds references to lines
 
     function createCorner(point, borderType) {
         let circle = new fabric.Circle({
@@ -101,21 +121,17 @@
     }
 
     function drawLines(borderType) {
-        lines[borderType].forEach(line => canvas.remove(line));
-        lines[borderType] = [];
-        let corners = points[borderType];
-        for (let i = 0; i < corners.length; i++) {
-            let startPoint = corners[i];
-            let endPoint = corners[(i + 1) % corners.length];
+        lines[borderType].forEach(line => canvas.remove(line)); // Clear old lines
+        lines[borderType] = points[borderType].map((startPoint, i) => {
+            let endPoint = points[borderType][(i + 1) % points[borderType].length];
             let line = new fabric.Line([startPoint.left, startPoint.top, endPoint.left, endPoint.top], {
                 stroke: borderType === 'outer' ? 'red' : 'blue',
                 strokeWidth: 2,
                 selectable: false,
             });
             canvas.add(line);
-            lines[borderType].push(line);
-        }
-        canvas.renderAll();
+            return line;
+        });
     }
 
     function updateImageOnCanvas(img) {
