@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Enhanced Card Centering Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f7f7f7;
+        }
+        canvas {
+            border: 1px solid #ccc;
+        }
+        .button-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        button {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="button-container">
+    <button id="calculateCentering">Calculate Centering Ratios</button>
+</div>
+
+<canvas id="canvas"></canvas>
+<script>
+  // Define global variables
+  const canvas = new fabric.Canvas('canvas', { selection: false });
+  const points = { outer: [], inner: [] };
+  const lines = { outer: [], inner: [] };
+  const controlPointOffset = 50; // Global offset for the control points
+
+  // Debounce function to improve performance on resize
+  function debounce(func, wait) {
+    let timeout;
+    return function () {
+      const context = this,
+        args = arguments;
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+  }
+
+  // Adjust the canvas size
+  function adjustCanvas() {
+    const size = Math.min(window.innerWidth, window.innerHeight);
+    canvas.setWidth(size);
+    canvas.setHeight(size);
+    initQuadrilaterals(); // Reinitialize to adjust corner positions
+    if (window.loadedImage) {
+      updateImageOnCanvas(window.loadedImage); // Update image position after canvas size change
+    }
+    canvas.renderAll();
+  }
+
+  // Initialize or adjust the quadrilaterals on the canvas
+  function initQuadrilaterals() {
+    // Clear any existing objects from the canvas, except the loaded image
+    canvas.getObjects().forEach((obj) => {
+      if (obj !== window.loadedImage) {
+        canvas.remove(obj);
+      }
+    });
+
+    // Define your default corner positions for outer and inner quadrilaterals
+    const defaultOuterCorners = [
+      // Define your default outer corners
+    ];
+    const defaultInnerCorners = [
+      // Define your default inner corners
+    ];
+
+    // Create or adjust the corner points
+    defaultOuterCorners.forEach((point, index) => {
+      points.outer[index] = createCorner(point, 'outer');
+    });
+    defaultInnerCorners.forEach((point, index) => {
+      points.inner[index] = createCorner(point, 'inner');
+    });
+
+    // Draw lines connecting the corners
+    drawLines();
+  }
+
+  // Create a draggable corner point on the canvas
+  function createCorner(point, borderType) {
+    let circle = new fabric.Circle({
+      radius: 10, // Radius of control points for better touch response
+      fill: borderType === 'outer' ? 'red' : 'blue',
+      left: point.x + (borderType === 'outer' ? controlPointOffset : -controlPointOffset),
+      top: point.y + (borderType === 'outer' ? controlPointOffset : -controlPointOffset),
+      originX: 'center',
+      originY: 'center',
+      hasBorders: false,
+      hasControls: false,
+      selectable: true,
+    });
+
+    // Store the true corner position inside the circle object for easy access
+    circle.trueX = point.x;
+    circle.trueY = point.y;
+
+    circle.on('moving', function () {
+      // Update the true corner position when the control point moves
+      this.trueX = this.left - (borderType === 'outer' ? controlPointOffset : -controlPointOffset);
+      this.trueY = this.top - (borderType === 'outer' ? controlPointOffset : -controlPointOffset);
+      drawLines();
+    });
+
+    canvas.add(circle);
+    return circle;
+  }
+
+  // Draw lines connecting the corner points
+  function drawLines() {
+    // Remove existing lines from the canvas
+    Object.values(lines).forEach(borderLines => {
+      borderLines.forEach(line => canvas.remove(line));
+    });
+
+    // Draw new lines for the outer quadrilateral
+    points.outer.forEach((point, index) => {
+      let startPoint = point;
+      let endPoint = points.outer[(index + 1) % points.outer.length];
+      lines.outer[index] = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
+        stroke: 'red',
+        strokeWidth: 2,
+        selectable: false,
+      });
+      canvas.add(lines.outer[index]);
+    });
+
+    // Draw new lines for the inner quadrilateral
+    points.inner.forEach((point, index) => {
+      let startPoint = point;
+      let endPoint = points.inner[(index + 1) % points.inner.length];
+      lines.inner[index] = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
+        stroke: 'blue',
+        strokeWidth: 2,
+        selectable: false,
+      });
+      canvas.add(lines.inner[index]);
+    });
+  }
+
+  // Update the image on the canvas
+  function updateImageOnCanvas(img) {
+    const padding = 50; // Padding around the image
+    const scaleFactor = Math.min(
+      (canvas.width - 2 * padding) / img.width,
+      (canvas.height - 2 * padding) / img.height
+    );
+    img.set({
+      scaleX: scaleFactor,
+      scaleY: scaleFactor,
+      left: (canvas.width - img.width * scaleFactor) / 2,
+      top: (canvas.height - img.height * scaleFactor) / 2
+    });
+    canvas.renderAll();
+  }
+
+  // Load an image onto the canvas
+  function loadImage() {
+    fabric.Image.fromURL('path-to-your-image.jpg', function (img) {
+      window.loadedImage = img;
+      updateImageOnCanvas(img);
+      img.selectable = false;
+      canvas.add(img);
+      img.sendToBack();
+    });
+  }
+
+  // Event listener for resizing the window
+  window.addEventListener('resize', debounce(adjustCanvas, 100));
+
+  // Initialization
+  window.onload = function () {
+    adjustCanvas(); // Adjust the canvas initially
+    loadImage();    // Load the background image
+    initQuadrilaterals(); // Initialize the quadrilaterals
+  };
+</script>
