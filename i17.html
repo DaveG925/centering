@@ -181,19 +181,25 @@ document.getElementById('drawBorder').addEventListener('click', function() {
     drawQuadrilateral();
     canvas.renderAll(); // Re-render the canvas to show the changes
 
-    // Lock handlers in place
-    Object.values(handles).forEach(handle => {
-        handle.selectable = false;
-    });
-
     // Toggle button text
     const button = document.getElementById('drawBorder');
     if (button.textContent === 'Lock Outer Border') {
         button.textContent = 'Unlock Outer Border';
+        
+        // Lock handlers in place
+        Object.values(handles).forEach(handle => {
+            handle.selectable = false;
+        });
     } else {
         button.textContent = 'Lock Outer Border';
+        
+        // Unlock handlers
+        Object.values(handles).forEach(handle => {
+            handle.selectable = true;
+        });
     }
 });
+
 
     window.onload = function() {
         // Load image from URL
