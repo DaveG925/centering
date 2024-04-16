@@ -175,10 +175,9 @@ function drawQuadrilateral() {
         evented: false // Make the mask non-interactive
     });
 
-    // Clip the mask with the drawn quadrilateral
-    mask.clipTo = function(ctx) {
-        polygon.render(ctx);
-    };
+    // Subtract the area inside the drawn quadrilateral from the mask
+    mask.excludeFromExport = mask.excludeFromBackup = true;
+    mask.globalCompositeOperation = 'destination-out';
 
     // Add the mask to the canvas
     canvas.add(mask);
