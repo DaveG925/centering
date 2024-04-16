@@ -114,7 +114,7 @@
         lines.forEach(line => canvas.add(line));
         canvas.renderAll();
     }
-    // Function to draw the quadrilateral based on handler positions
+   // Function to draw the quadrilateral based on handler positions
 function drawQuadrilateral() {
     // Points of the quadrilateral based on the intersections of the handlers' lines
     var points = [
@@ -151,6 +151,7 @@ function drawQuadrilateral() {
     canvas.add(polygon);
     window.quadrilateral = polygon; // Store the reference for future removal
 }
+
 
 
 // Event listener for the button
