@@ -164,22 +164,21 @@ function drawQuadrilateral() {
     canvas.add(polygon);
     window.quadrilateral = polygon; // Store the reference for future removal
 
-    // Get the bounding box of the drawn quadrilateral
-    var boundingBox = polygon.getBoundingRect();
-
     // Create a mask to dim everything outside the drawn border
     var mask = new fabric.Rect({
-        left: boundingBox.left,
-        top: boundingBox.top,
-        width: boundingBox.width,
-        height: boundingBox.height,
+        left: 0,
+        top: 0,
+        width: canvas.width,
+        height: canvas.height,
         fill: 'rgba(0,0,0,0.5)', // Semi-transparent black
         selectable: false,
         evented: false // Make the mask non-interactive
     });
 
     // Clip the mask with the drawn quadrilateral
-    mask.clipPath = polygon;
+    mask.clipTo = function(ctx) {
+        polygon.render(ctx);
+    };
 
     // Add the mask to the canvas
     canvas.add(mask);
