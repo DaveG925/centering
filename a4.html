@@ -37,8 +37,13 @@
 
 <script>
     document.getElementById('calculateCentering').addEventListener('click', function() {
-    const ratios = calculateCenteringRatios();
-    alert(`Centering Ratios - Horizontal: ${ratios.horizontal}% / Vertical: ${ratios.vertical}%`);
+    // Gather the true corners for outer and inner quadrilaterals
+    const outerCorners = points.outer.map(p => ({ x: p.trueX, y: p.trueY }));
+    const innerCorners = points.inner.map(p => ({ x: p.trueX, y: p.trueY }));
+
+    // Calculate the centering ratios using the true corners
+    const ratios = calculateCenteringRatios(outerCorners, innerCorners);
+    alert(`Centering Ratios - Horizontal: ${ratios.horizontal} / Vertical: ${ratios.vertical}`);
 });
 
   const canvas = new fabric.Canvas('canvas', { selection: false });
@@ -183,26 +188,36 @@
       img.sendToBack();
     });
   }
-function calculateCenteringRatios() {
-    // Get the true corners for the outer quadrilateral
-    const outerCorners = points.outer.map(p => ({ x: p.trueX, y: p.trueY }));
-    // Get the true corners for the inner quadrilateral
-    const innerCorners = points.inner.map(p => ({ x: p.trueX, y: p.trueY }));
-
-    // Calculate the horizontal and vertical ratios
+function calculateCenteringRatios(outerCorners, innerCorners) {
+    // Calculating total width and height of the outer and inner rectangles
     const totalOuterWidth = Math.abs(outerCorners[1].x - outerCorners[0].x);
     const totalOuterHeight = Math.abs(outerCorners[3].y - outerCorners[0].y);
+    
+    // Calculating space on each side of the inner rectangle within the outer rectangle
     const leftSpace = Math.abs(innerCorners[0].x - outerCorners[0].x);
     const rightSpace = Math.abs(outerCorners[1].x - innerCorners[1].x);
     const topSpace = Math.abs(innerCorners[0].y - outerCorners[0].y);
     const bottomSpace = Math.abs(outerCorners[3].y - innerCorners[3].y);
+    
+    // Calculating horizontal and vertical ratios based on the spaces
+    const horizontalRatioLeft = (leftSpace / totalOuterWidth) * 100;
+    const horizontalRatioRight = (rightSpace / totalOuterWidth) * 100;
+    const verticalRatioTop = (topSpace / totalOuterHeight) * 100;
+    const verticalRatioBottom = (bottomSpace / totalOuterHeight) * 100;
 
-    const horizontalRatio = (leftSpace / totalOuterWidth) * 100;
-    const verticalRatio = (topSpace / totalOuterHeight) * 100;
+    // Ensuring the sum of ratios for each direction equals 100%
+    const horizontalTotal = horizontalRatioLeft + horizontalRatioRight;
+    const verticalTotal = verticalRatioTop + verticalRatioBottom;
+
+    // Adjusting ratios to ensure they sum up to 100% accurately
+    const adjustedHorizontalLeft = (horizontalRatioLeft / horizontalTotal) * 100;
+    const adjustedHorizontalRight = 100 - adjustedHorizontalLeft; // ensures the sum is 100%
+    const adjustedVerticalTop = (verticalRatioTop / verticalTotal) * 100;
+    const adjustedVerticalBottom = 100 - adjustedVerticalTop; // ensures the sum is 100%
 
     return {
-        horizontal: horizontalRatio.toFixed(2),
-        vertical: verticalRatio.toFixed(2)
+        horizontal: `${adjustedHorizontalLeft.toFixed(1)}/${adjustedHorizontalRight.toFixed(1)}`,
+        vertical: `${adjustedVerticalTop.toFixed(1)}/${adjustedVerticalBottom.toFixed(1)}`
     };
 }
 
