@@ -68,6 +68,15 @@
       if (obj !== window.loadedImage) {
         canvas.remove(obj);
       }
+        defaultOuterCorners.forEach((point, index) => {
+        points.outer[index] = createCorner(point, 'outer', index);
+    });
+
+    defaultInnerCorners.forEach((point, index) => {
+        points.inner[index] = createCorner(point, 'inner', index);
+    });
+
+    drawLines();
     });
 
     // Define your default corner positions for outer and inner quadrilaterals
@@ -92,21 +101,37 @@
     drawLines();
   }
 
-  function createCorner(point, borderType) {
-    let offsetX = borderType === 'outer' ? controlPointOffset : -controlPointOffset;
-    let offsetY = offsetX; // Assuming the offset is uniform in both directions
+  function createCorner(point, borderType, index) {
+    // Determine the direction of the offset based on the corner
+    let offsetX = (index === 0 || index === 3) ? -controlPointOffset : controlPointOffset;
+    let offsetY = (index === 0 || index === 1) ? -controlPointOffset : controlPointOffset;
 
     let circle = new fabric.Circle({
-      radius: 10, // Radius of control points for better touch response
-      fill: borderType === 'outer' ? 'red' : 'blue',
-      left: point.x + offsetX,
-      top: point.y + offsetY,
-      originX: 'center',
-      originY: 'center',
-      hasBorders: false,
-      hasControls: false,
-      selectable: true,
+        radius: 10, // Radius of control points for better touch response
+        fill: borderType === 'outer' ? 'red' : 'blue',
+        left: point.x + offsetX,
+        top: point.y + offsetY,
+        originX: 'center',
+        originY: 'center',
+        hasBorders: false,
+        hasControls: false,
+        selectable: true,
     });
+
+    // Store the true corner position inside the circle object for easy access
+    circle.trueX = point.x;
+    circle.trueY = point.y;
+
+    circle.on('moving', function () {
+        // Update the true corner position when the control point moves
+        this.trueX = this.left - offsetX;
+        this.trueY = this.top - offsetY;
+        drawLines();
+    });
+
+    canvas.add(circle);
+    return circle;
+}
 
     // Store the true corner position inside the circle object for easy access
     circle.trueX = point.x;
