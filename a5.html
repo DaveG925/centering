@@ -73,25 +73,28 @@
     };
   }
 function adjustCanvas() {
-    // Define the padding for the left and right sides
-    const horizontalPadding = 20; // Total horizontal padding (left + right)
-
-    // Adjust the canvas size accounting for padding
+    // Subtract horizontal padding from the window's width
+    const horizontalPadding = 40; // 20px on each side
     const width = window.innerWidth - horizontalPadding;
-    const height = window.innerHeight;
+    const height = window.innerHeight; // Full height for now
+
+    // Determine the size of the canvas, while keeping the aspect ratio
+    // If you have a specific aspect ratio, calculate the height based on that and the width
     const size = Math.min(width, height);
 
     // Set canvas dimensions
-    canvas.setWidth(size);
-    canvas.setHeight(size); // Maintain square aspect ratio, adjust as necessary
-    initQuadrilaterals(); // Reinitialize to adjust corner positions
+    canvas.setWidth(size); // Width is the smaller dimension or the width minus padding
+    canvas.setHeight(size); // Height is initially set to the same as width to maintain aspect ratio
 
-    // Update image position after canvas size change
+    // If you want the canvas height to be taller (to use more vertical space), you can set it like this:
+    // canvas.setHeight(height - someVerticalPadding);
+    // Replace someVerticalPadding with the actual vertical padding you want to apply.
+
+    initQuadrilaterals(); // Reinitialize to adjust corner positions
     if (window.loadedImage) {
-      updateImageOnCanvas(window.loadedImage);
+      updateImageOnCanvas(window.loadedImage); // Update image position after canvas size change
     }
 
-    // Re-render the canvas to apply visual updates
     canvas.renderAll();
 }
 
