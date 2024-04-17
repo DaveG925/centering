@@ -49,7 +49,7 @@
   const canvas = new fabric.Canvas('canvas', { selection: false });
   const points = { outer: [], inner: [] };
   const lines = { outer: [], inner: [] };
-  const controlPointOffset = 50; // Global offset for the control points
+  const controlPointOffset = 25; // Global offset for the control points
 
   function debounce(func, wait) {
     let timeout;
@@ -107,7 +107,7 @@
     let offsetY = (index === 0 || index === 1) ? -controlPointOffset : controlPointOffset;
 
     let circle = new fabric.Circle({
-      radius: 10, // Radius of control points for better touch response
+      radius: 15, // Radius of control points for better touch response
       fill: borderType === 'outer' ? 'red' : 'blue',
       left: point.x + offsetX,
       top: point.y + offsetY,
@@ -165,7 +165,7 @@
   }
 
   function updateImageOnCanvas(img) {
-    const padding = 50; // Padding around the image
+    const padding = 10; // Padding around the image
     const scaleFactor = Math.min(
       (canvas.width - 2 * padding) / img.width,
       (canvas.height - 2 * padding) / img.height
