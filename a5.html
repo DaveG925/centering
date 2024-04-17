@@ -64,14 +64,14 @@
   }
 
   function adjustCanvas() {
-    const horizontalPadding = 40; // 20px on each side
-    const verticalPadding = 0; // 50px on top and bottom for example
+    const horizontalPadding = 20; // 20px on each side
+    const verticalPadding = 20; // 50px on top and bottom for example
     const canvasWidth = window.innerWidth - horizontalPadding;
     const canvasHeight = window.innerHeight - verticalPadding;
 
     // You may want to maintain a specific aspect ratio for the canvas.
     // For example, if you want an aspect ratio of 4:3, you would calculate the height based on the width:
-    const aspectRatio = 3 / 6;
+    const aspectRatio = 4 / 6;
     const heightBasedOnWidth = canvasWidth / aspectRatio;
 
     // Then, choose the smaller of the two heights to ensure the canvas fits in the window.
