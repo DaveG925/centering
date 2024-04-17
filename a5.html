@@ -7,6 +7,10 @@
     <title>Card Centering Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
     <style>
+    *, *::before, *::after {
+        box-sizing: border-box; /* Apply box-sizing to all elements */
+    }
+
     body, html {
         margin: 0;
         padding: 0 20px; /* Add horizontal padding */
@@ -16,22 +20,26 @@
         height: 100vh;
         background-color: #f7f7f7;
     }
+
     canvas {
         border: 1px solid #ccc;
         max-width: calc(100% - 40px); /* Adjust max-width to account for padding */
-        max-height: calc(100vh - 40px); /* Adjust max-height to use more vertical space */
-        box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        height: auto; /* Adjust height automatically */
+        margin: auto; /* Auto margins for centering */
     }
+
     .button-container {
         position: absolute;
         top: 20px;
-        left: 5x; /* Position the button inside the padded area */
+        left: 20px; /* Maintain left position inside the padded area */
     }
+
     button {
         display: block;
         margin-bottom: 5px;
     }
 </style>
+
 
 
 </head>
@@ -64,17 +72,29 @@
       timeout = setTimeout(() => func.apply(context, args), wait);
     };
   }
+function adjustCanvas() {
+    // Define the padding for the left and right sides
+    const horizontalPadding = 20; // Total horizontal padding (left + right)
 
-  function adjustCanvas() {
-    const size = Math.min(window.innerWidth, window.innerHeight);
+    // Adjust the canvas size accounting for padding
+    const width = window.innerWidth - horizontalPadding;
+    const height = window.innerHeight;
+    const size = Math.min(width, height);
+
+    // Set canvas dimensions
     canvas.setWidth(size);
-    canvas.setHeight(size);
+    canvas.setHeight(size); // Maintain square aspect ratio, adjust as necessary
     initQuadrilaterals(); // Reinitialize to adjust corner positions
+
+    // Update image position after canvas size change
     if (window.loadedImage) {
-      updateImageOnCanvas(window.loadedImage); // Update image position after canvas size change
+      updateImageOnCanvas(window.loadedImage);
     }
+
+    // Re-render the canvas to apply visual updates
     canvas.renderAll();
-  }
+}
+
 
   function initQuadrilaterals() {
     // Clear any existing objects from the canvas, except the loaded image
