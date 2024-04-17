@@ -94,38 +94,42 @@
 
 
     function createCorner(point, borderType, index) {
-        let offsetX = (index === 0 || index === 3) ? -controlPointOffset : controlPointOffset;
-        let offsetY = (index === 0 || index === 1) ? -controlPointOffset : controlPointOffset;
+    let offsetX = (index === 0 || index === 3) ? -controlPointOffset : controlPointOffset;
+    let offsetY = (index === 0 || index === 1) ? -controlPointOffset : controlPointOffset;
 
-        if (borderType === 'inner') {
-            offsetX *= -1;
-            offsetY *= -1;
-        }
-
-        let circle = new fabric.Circle({
-            radius: 10,
-            fill: borderType === 'outer' ? 'red' : 'blue',
-            left: point.x + offsetX,
-            top: point.y + offsetY,
-            originX: 'center',
-            originY: 'center',
-            hasBorders: false,
-            hasControls: false,
-            selectable: true
-        });
-
-        circle.trueX = point.x;
-        circle.trueY = point.y;
-
-        circle.on('moving', function () {
-            this.trueX = this.left - offsetX;
-            this.trueY = this.top - offsetY;
-            drawLines();
-        });
-
-        canvas.add(circle);
-        return circle;
+    // Invert the offsets for inner corners
+    if (borderType === 'inner') {
+        offsetX *= -1;
+        offsetY *= -1;
     }
+
+    let circle = new fabric.Circle({
+        radius: 10, // Control point radius
+        fill: borderType === 'outer' ? 'red' : 'blue',
+        left: point.x + offsetX,
+        top: point.y + offsetY,
+        originX: 'center',
+        originY: 'center',
+        hasBorders: false,
+        hasControls: false,
+        selectable: true
+    });
+
+    // Attach true corner positions to the circle object
+    circle.trueX = point.x;
+    circle.trueY = point.y;
+
+    circle.on('moving', function () {
+        // Update the true corner positions based on control point movements
+        this.trueX = this.left - offsetX;
+        this.trueY = this.top - offsetY;
+        drawLines();  // Redraw lines connecting the updated corners
+        canvas.renderAll();  // Ensure the entire canvas is re-rendered to reflect changes
+    });
+
+    canvas.add(circle);
+    return circle;
+}
 
     function drawLines() {
         lines.outer.forEach(line => canvas.remove(line));
