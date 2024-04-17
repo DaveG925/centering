@@ -5,28 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Card Centering Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
-    <style>
-        body, html {
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f7f7f7;
-        }
-        canvas {
-            border: 1px solid #ccc;
-        }
-        .button-container {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-        }
-        button {
-            display: block;
-            margin-bottom: 5px;
-        }
-    </style>
+<style>
+    body, html {
+        margin: 0;
+        padding: 0; /* No padding here, handled in adjustCanvas function */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f7f7f7;
+    }
+    canvas {
+        border: 1px solid #ccc;
+        /* Remove max-width and max-height if you are setting the size in JS */
+    }
+    .button-container {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+    }
+    button {
+        display: block;
+        margin-bottom: 5px;
+    }
+</style>
+
 </head>
 <body>
 <div class="button-container">
@@ -61,15 +64,27 @@
   }
 
   function adjustCanvas() {
-    const size = Math.min(window.innerWidth, window.innerHeight);
-    canvas.setWidth(size);
-    canvas.setHeight(size);
+    const horizontalPadding = 20; // 20px on each side
+    const verticalPadding = 20; // 50px on top and bottom for example
+    const canvasWidth = window.innerWidth - horizontalPadding;
+    const canvasHeight = window.innerHeight - verticalPadding;
+
+    // You may want to maintain a specific aspect ratio for the canvas.
+    // For example, if you want an aspect ratio of 4:3, you would calculate the height based on the width:
+    const aspectRatio = 4 / 6;
+    const heightBasedOnWidth = canvasWidth / aspectRatio;
+
+    // Then, choose the smaller of the two heights to ensure the canvas fits in the window.
+    const finalCanvasHeight = Math.min(canvasHeight, heightBasedOnWidth);
+
+    canvas.setWidth(canvasWidth);
+    canvas.setHeight(finalCanvasHeight);
     initQuadrilaterals(); // Reinitialize to adjust corner positions
     if (window.loadedImage) {
-      updateImageOnCanvas(window.loadedImage); // Update image position after canvas size change
+        updateImageOnCanvas(window.loadedImage); // Update image position after canvas size change
     }
     canvas.renderAll();
-  }
+}
 
   function initQuadrilaterals() {
     // Clear any existing objects from the canvas, except the loaded image
