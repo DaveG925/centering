@@ -63,34 +63,35 @@
     }
 
     function initQuadrilaterals() {
-        // Clear any existing objects from the canvas, except the loaded image
-        canvas.getObjects().forEach((obj) => {
-            if (obj !== window.loadedImage) {
-                canvas.remove(obj);
-            }
-        });
+    // Clear any existing objects from the canvas, except the loaded image
+    canvas.getObjects().forEach((obj) => {
+        if (obj !== window.loadedImage) {
+            canvas.remove(obj);
+        }
+    });
 
-        // Define your default corner positions for outer and inner quadrilaterals
-        const defaultOuterCorners = [
-            { x: 50, y: 50 }, { x: canvas.width - 50, y: 50 },
-            { x: canvas.width - 50, y: canvas.height - 50 }, { x: 50, y: canvas.height - 50 }
-        ];
-        const defaultInnerCorners = [
-            { x: 150, y: 150 }, { x: canvas.width - 150, y: 150 },
-            { x: canvas.width - 150, y: canvas.height - 150 }, { x: 150, y: canvas.height - 150 }
-        ];
+    // Define your default corner positions for outer and inner quadrilaterals
+    const defaultOuterCorners = [
+        { x: 50, y: 50 }, { x: canvas.width - 50, y: 50 },
+        { x: canvas.width - 50, y: canvas.height - 50 }, { x: 50, y: canvas.height - 50 }
+    ];
+    const defaultInnerCorners = [
+        { x: 150, y: 150 }, { x: canvas.width - 150, y: 150 },
+        { x: canvas.width - 150, y: canvas.height - 150 }, { x: 150, y: canvas.height - 150 }
+    ];
 
-        // Create or adjust the corner points
-        defaultOuterCorners.forEach((point, index) => {
-            points.outer[index] = createCorner(point, 'outer', index);
-        });
-        defaultInnerCorners.forEach((point, index) => {
-            points.inner[index] = createCorner(point, 'inner', index);
-        });
+    // Create or adjust the corner points
+    defaultOuterCorners.forEach((point, index) => {
+        points.outer[index] = createCorner(point, 'outer', index);
+    });
+    defaultInnerCorners.forEach((point, index) => {
+        points.inner[index] = createCorner(point, 'inner', index);
+    });
 
-        // Draw lines connecting the corners
-        drawLines();
-    }
+    // Draw lines connecting the corners
+    drawLines();
+}
+
 
     function createCorner(point, borderType, index) {
         let offsetX = (index === 0 || index === 3) ? -controlPointOffset : controlPointOffset;
@@ -223,10 +224,11 @@
     window.addEventListener('resize', debounce(adjustCanvas, 100));
 
     window.onload = function () {
-        adjustCanvas();
-        loadImage();
-        initQuadrilaterals();
-    };
+    adjustCanvas(); // This sets the canvas size and should be called first
+    loadImage();    // Loads the image onto the canvas
+    initQuadrilaterals(); // Initializes the corners based on the canvas size
+};
+
 </script>
 </body>
 </html>
