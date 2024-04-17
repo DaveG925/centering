@@ -29,6 +29,15 @@
         margin-bottom: 5px;
     }
 </style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const imageURL = urlParams.get('imageURL');
+        if (imageURL) {
+            loadImage(imageURL);
+        }
+    });
+</script>
 
 </head>
 <body>
@@ -194,15 +203,15 @@
     canvas.renderAll();
   }
 
-  function loadImage() {
-    fabric.Image.fromURL('https://adalo-uploads.imgix.net/2294bfe63b06be8b5060e90aa743364f6eaafbbecbf293ae574aafd4103c16d6.jpg?orient=&auto=compress', function (img) {
-      window.loadedImage = img;
-      updateImageOnCanvas(img);
-      img.selectable = false;
-      canvas.add(img);
-      img.sendToBack();
+  function loadImage(imageURL) {
+    fabric.Image.fromURL(imageURL, function (img) {
+        window.loadedImage = img;
+        updateImageOnCanvas(img);
+        img.selectable = false;
+        canvas.add(img);
+        img.sendToBack();
     });
-  }
+}
 function calculateCenteringRatios(outerCorners, innerCorners) {
     // Calculating total width and height of the outer and inner rectangles
     const totalOuterWidth = Math.abs(outerCorners[1].x - outerCorners[0].x);
@@ -239,9 +248,13 @@ function calculateCenteringRatios(outerCorners, innerCorners) {
   window.addEventListener('resize', debounce(adjustCanvas, 100));
 
   window.onload = function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const imageURL = urlParams.get('imageURL') || 'your-default-image-url.jpg';
     adjustCanvas();
-    loadImage();
+    loadImage(imageURL);
     initQuadrilaterals();
+};
+
   };
 </script>
 </body>
