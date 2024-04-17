@@ -54,7 +54,7 @@
   const canvas = new fabric.Canvas('canvas', { selection: false });
   const points = { outer: [], inner: [] };
   const lines = { outer: [], inner: [] };
-  const controlPointOffset = 50; // Global offset for the control points
+  const controlPointOffset = 25; // Global offset for the control points
 
   function debounce(func, wait) {
     let timeout;
@@ -194,7 +194,7 @@ function adjustCanvas() {
   }
 
   function updateImageOnCanvas(img) {
-    const padding = 50; // Padding around the image
+    const padding = 10; // Padding around the image
     const scaleFactor = Math.min(
       (canvas.width - 2 * padding) / img.width,
       (canvas.height - 2 * padding) / img.height
