@@ -80,7 +80,7 @@
 
     // You may want to maintain a specific aspect ratio for the canvas.
     // For example, if you want an aspect ratio of 4:3, you would calculate the height based on the width:
-    const aspectRatio = 4 / 6;
+    const aspectRatio = 3 / 4;
     const heightBasedOnWidth = canvasWidth / aspectRatio;
 
     // Then, choose the smaller of the two heights to ensure the canvas fits in the window.
@@ -189,7 +189,7 @@
   }
 
   function updateImageOnCanvas(img) {
-    const padding = 5; // Padding around the image
+    const padding = 20; // Padding around the image
     const scaleFactor = Math.min(
       (canvas.width - 1.5 * padding) / img.width,
       (canvas.height - 1.5 * padding) / img.height
