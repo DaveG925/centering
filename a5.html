@@ -31,12 +31,23 @@
 </style>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const imageURL = urlParams.get('imageURL');
-        if (imageURL) {
-            loadImage(imageURL);
-        }
-    });
+    const urlParams = new URLSearchParams(window.location.search);
+    const imageURL = urlParams.get('imageURL');
+    const cardID = urlParams.get('CardID');  // Retrieve CardID from URL
+    const isFront = urlParams.get('isFront'); // Retrieve isFront from URL
+
+    // You can now use these values as needed within your application
+    if (imageURL) {
+        loadImage(imageURL);
+    }
+
+    console.log("Card ID:", cardID);
+    console.log("Is Front:", isFront);
+
+    // Depending on the application, you may want to handle these variables differently
+    // For example, adjust functionality based on whether isFront is 'true'
+});
+
 </script>
 
 </head>
