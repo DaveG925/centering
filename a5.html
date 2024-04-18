@@ -66,8 +66,48 @@
 
     // Calculate the centering ratios using the true corners
     const ratios = calculateCenteringRatios(outerCorners, innerCorners);
-    alert(`Centering Ratios - Horizontal: ${ratios.horizontal} / Vertical: ${ratios.vertical}`);
+
+    // Retrieve additional parameters from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const cardID = urlParams.get('CardID');
+    const isFront = urlParams.get('isFront');
+
+    // Prepare the data to be sent
+    const postData = {
+        cardID: cardID,
+        isFront: isFront,
+        horizontal: ratios.horizontal,
+        vertical: ratios.vertical
+    };
+
+    // Endpoint URL from Make (Integromat)
+    const postUrl = 'https://hook.us1.make.com/mwe021mqqhkeagv191rfs50y6c2chjae';
+
+    // Use the Fetch API to send the POST request
+    fetch(postUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postData)
+    })
+    .then(response => {
+        if(response.ok) {
+            return response.json();
+        } else {
+            throw new Error('Something went wrong on API server!');
+        }
+    })
+    .then(response => {
+        console.log('Success:', response);
+        alert('Data successfully sent!');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to send data.');
+    });
 });
+
 
   const canvas = new fabric.Canvas('canvas', { selection: false });
   const points = { outer: [], inner: [] };
