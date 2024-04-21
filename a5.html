@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,25 +8,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
 <style>
     body, html {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column; /* Changes layout to vertical stacking */
-    justify-content: center; /* Centers vertically */
-    align-items: center; /* Centers horizontally */
-    height: 100vh;
-    background-color: #f7f7f7;
-}
-
-canvas {
-    border: 1px solid #ccc;
-}
-
-.button-container {
-    margin-top: 20px; /* Space between canvas and button */
-}
-
-
+        margin: 0;
+        padding: 0; /* No padding here, handled in adjustCanvas function */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f7f7f7;
+    }
+    canvas {
+        border: 1px solid #ccc;
+        /* Remove max-width and max-height if you are setting the size in JS */
+    }
+    .button-container {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+    }
     button {
         display: block;
         margin-bottom: 5px;
@@ -54,12 +53,12 @@ canvas {
 
 </head>
 <body>
-
-
-<canvas id="canvas"></canvas>
 <div class="button-container">
     <button id="calculateCentering">Calculate Centering Ratios</button>
 </div>
+
+<canvas id="canvas"></canvas>
+
 <script>
     document.getElementById('calculateCentering').addEventListener('click', function() {
     // Gather the true corners for outer and inner quadrilaterals
@@ -87,29 +86,28 @@ canvas {
 
     // Use the Fetch API to send the POST request
     fetch(postUrl, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(postData)
-})
-.then(response => {
-    if(response.ok) {
-        return response.json();
-    } else {
-        console.error('Server responded with non-2xx status:', response.status);
-        throw new Error(`Server responded with status ${response.status}`);
-    }
-})
-.then(response => {
-    console.log('Success:', response);
-    alert('Data successfully sent!');
-})
-.catch(error => {
-    console.error('Error during fetch operation:', error.message);
-    alert('Failed to send data: ' + error.message);
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postData)
+    })
+    .then(response => {
+        if(response.ok) {
+            return response.json();
+        } else {
+            throw new Error('Something went wrong on API server!');
+        }
+    })
+    .then(response => {
+        console.log('Success:', response);
+        alert('Data successfully sent!');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to send data.');
+    });
 });
-
 
 
   const canvas = new fabric.Canvas('canvas', { selection: false });
