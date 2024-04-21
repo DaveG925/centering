@@ -18,7 +18,28 @@
     background-color: #f7f7f7;
 }
 
-canvas {
+.button-terms {
+            background-color: #4A90E2; /* Blue background */
+            color: white; /* White text */
+            padding: 10px 25px; /* Vertical and horizontal padding */
+            font-size: 18px; /* Font size */
+            border: none; /* No border */
+            border-radius: 25px; /* Rounded borders */
+            text-transform: uppercase; /* Uppercase text */
+            font-weight: bold; /* Bold text */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+            border: 1px solid #3271B9; /* Slightly darker border */
+            outline: none; /* Remove the outline */
+            cursor: pointer; /* Cursor to pointer */
+            transition: background-color 0.3s, box-shadow 0.3s; /* Smooth transitions for hover effects */
+        }
+        
+        .button-terms:hover {
+            background-color: #3C7DCB; /* Slightly darker background on hover */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Larger shadow for a "lifted" effect on hover */
+        }
+
+    canvas {
     border: 1px solid #ccc;
 }
 
@@ -53,7 +74,7 @@ canvas {
 
 </head>
 <body>
-
+<button class="button-terms" id="calculateCentering">Calculate Centering Ratios</button>
 <canvas id="canvas"></canvas>
 <div class="button-container">
     <button id="calculateCentering">Calculate Centering Ratios</button>
