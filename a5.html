@@ -44,7 +44,7 @@ canvas {
         font-size: 16px; /* The font size of the text */
         cursor: pointer; /* Change mouse pointer on hover */
         border-radius: 6px; /* Rounded corners of the button */
-        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); /* Shadow to give depth */
+        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.4); /* Shadow to give depth */
         transition: all 0.3s; /* Transition for smooth color change on hover */
     }
 </style>
@@ -118,11 +118,11 @@ canvas {
     })
     .then(response => {
         console.log('Success:', response);
-        alert('Data successfully sent!');
+        // alert('Data successfully sent!');
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Failed to send data.');
+        // alert('Failed to send data.');
     });
 });
 
