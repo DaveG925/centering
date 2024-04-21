@@ -87,12 +87,12 @@ canvas {
 
     // Retrieve additional parameters from the URL
     const urlParams = new URLSearchParams(window.location.search);
-    const cardID = urlParams.get('CardID');
+    const cardID = urlParams.get('CardID').replace(/,/g, ''); // Sanitize CardID to remove any commas
     const isFront = urlParams.get('isFront');
 
     // Prepare the data to be sent
     const postData = {
-        cardID: cardID,
+        cardID: cardID, // Using sanitized CardID
         isFront: isFront,
         horizontal: ratios.horizontal,
         vertical: ratios.vertical
@@ -118,13 +118,14 @@ canvas {
     })
     .then(response => {
         console.log('Success:', response);
-        // alert('Data successfully sent!');
+        // Optionally, handle response data here, such as updating the UI or logging success
     })
     .catch(error => {
         console.error('Error:', error);
-        // alert('Failed to send data.');
+        // Optionally, handle errors, such as updating the UI to show an error message
     });
 });
+
 
 
   const canvas = new fabric.Canvas('canvas', { selection: false });
