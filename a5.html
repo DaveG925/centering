@@ -5,32 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Card Centering Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
-<style>
-    body, html {
-        margin: 0;
-        padding: 0; /* No padding here, handled in adjustCanvas function */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background-color: #f7f7f7;
-    }
-    canvas {
-        border: 1px solid #ccc;
-        /* Remove max-width and max-height if you are setting the size in JS */
-    }
-    .button-container {
-    position: absolute;
-    top: calc(50% + 25px); /* Center vertically and add 25px */
-    left: 50%; /* Center horizontally */
-    transform: translate(-50%, -50%); /* Center horizontally and vertically */
-}
+<body>
+    <div class="button-container">
+        <button id="calculateCentering">Calculate Centering Ratios</button>
+    </div>
 
-    button {
-        display: block;
-        margin-bottom: 5px;
-    }
-</style>
+    <canvas id="canvas"></canvas>
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0; /* No padding here, handled in adjustCanvas function */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f7f7f7;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            /* Remove max-width and max-height if you are setting the size in JS */
+        }
+        .button-container {
+            position: absolute;
+            top: calc(50% + 25px); /* Center vertically and add 25px */
+            left: 50%; /* Center horizontally */
+            transform: translate(-50%, -50%); /* Center horizontally and vertically */
+        }
+        button {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+    <!-- JavaScript code goes here -->
+</body>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
