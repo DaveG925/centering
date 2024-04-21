@@ -20,10 +20,8 @@
         /* Remove max-width and max-height if you are setting the size in JS */
     }
     .button-container {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-    }
+    margin-top: 20px; /* Add space above the button */
+}
     button {
         display: block;
         margin-bottom: 5px;
@@ -52,12 +50,12 @@
 
 </head>
 <body>
+
+
+<canvas id="canvas"></canvas>
 <div class="button-container">
     <button id="calculateCentering">Calculate Centering Ratios</button>
 </div>
-
-<canvas id="canvas"></canvas>
-
 <script>
     document.getElementById('calculateCentering').addEventListener('click', function() {
     // Gather the true corners for outer and inner quadrilaterals
