@@ -78,7 +78,8 @@ canvas {
     // Gather the true corners for outer and inner quadrilaterals
     const outerCorners = points.outer.map(p => ({ x: p.trueX, y: p.trueY }));
     const innerCorners = points.inner.map(p => ({ x: p.trueX, y: p.trueY }));
-
+    alert('Button has been clicked!');  // User-friendly message when button is clicked
+    
     // Calculate the centering ratios using the true corners
     const ratios = calculateCenteringRatios(outerCorners, innerCorners);
 
