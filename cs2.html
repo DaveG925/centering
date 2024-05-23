@@ -6,252 +6,288 @@
     <title>Card Centering Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
 <style>
-    body, html {
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        height: 100vh;
-        background-color: #FFFFFF;
-    }
+   body, html {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #FFFFFF;
+}
 
-    canvas {
-        border: 1px solid #ccc;
-        flex: 1;
-        max-width: 100%;
-    }
+canvas {
+    border: 1px solid #ccc;
+}
 
-    .button-container {
-        margin-top: 20px;
-        text-align: center;
+.button-container {
+        margin-top: 20px; /* Space between canvas and button */
+        text-align: center; /* Ensure the button text is centered */
     }
 
     button {
         display: block;
         margin-bottom: 5px;
     }
-
     #calculateCentering {
-        background-color: #446d8b;
-        border: 1px solid #446d8b;
-        color: white;
-        padding: 8px 24px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 14px;
-        cursor: pointer;
-        border-radius: 4px;
-        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.4);
-        transition: all 0.3s;
+        background-color: #446d8b; /* The button's background color */
+        border: 1px solid #446d8b; /* The button's border */
+        color: white; /* The text color of the button */
+        padding: 8px 24px; /* Top and bottom padding of 12px, left and right padding of 24px */
+        text-align: center; /* Center the text inside the button */
+        text-decoration: none; /* Remove underline from text */
+        display: inline-block; /* Allow the button to be inline but also set dimensions */
+        font-size: 14px; /* The font size of the text */
+        cursor: pointer; /* Change mouse pointer on hover */
+        border-radius: 4px; /* Rounded corners of the button */
+        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.4); /* Shadow to give depth */
+        transition: all 0.3s; /* Transition for smooth color change on hover */
     }
 </style>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const imageURL = urlParams.get('imageURL');
-        const cardID = urlParams.get('CardID');  
-        const isFront = urlParams.get('isFront'); 
+    const urlParams = new URLSearchParams(window.location.search);
+    const imageURL = urlParams.get('imageURL');
+    const cardID = urlParams.get('CardID');  // Retrieve CardID from URL
+    const isFront = urlParams.get('isFront'); // Retrieve isFront from URL
 
-        if (imageURL) {
-            loadImage(imageURL);
-        }
-
-        console.log("Card ID:", cardID);
-        console.log("Is Front:", isFront);
-    });
-
-    document.getElementById('calculateCentering').addEventListener('click', function() {
-        const outerCorners = points.outer.map(p => ({ x: p.trueX, y: p.trueY }));
-        const innerCorners = points.inner.map(p => ({ x: p.trueX, y: p.trueY }));
-
-        const ratios = calculateCenteringRatios(outerCorners, innerCorners);
-
-        alert(`Horizontal Centering: ${ratios.horizontal}%, Vertical Centering: ${ratios.vertical}%`);
-    });
-
-    const canvas = new fabric.Canvas('canvas', { selection: false });
-    const points = { outer: [], inner: [] };
-    const lines = { outer: [], inner: [] };
-    const controlPointOffset = 30;
-
-    function debounce(func, wait) {
-        let timeout;
-        return function () {
-            const context = this, args = arguments;
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(context, args), wait);
-        };
-    }
-
-    function adjustCanvas() {
-        const canvasContainer = document.getElementById('canvas-container');
-        const canvasWidth = canvasContainer.clientWidth;
-        const canvasHeight = canvasContainer.clientHeight - 40; // Deduct space for the button
-
-        canvas.setWidth(canvasWidth);
-        canvas.setHeight(canvasHeight);
-        initQuadrilaterals();
-        if (window.loadedImage) {
-            updateImageOnCanvas(window.loadedImage);
-        }
-        canvas.renderAll();
-    }
-
-    function initQuadrilaterals() {
-        canvas.getObjects().forEach((obj) => {
-            if (obj !== window.loadedImage) {
-                canvas.remove(obj);
-            }
-        });
-
-        const defaultOuterCorners = [
-            { x: 50, y: 50 }, { x: canvas.width - 50, y: 50 },
-            { x: canvas.width - 50, y: canvas.height - 50 }, { x: 50, y: canvas.height - 50 }
-        ];
-        const defaultInnerCorners = [
-            { x: 150, y: 150 }, { x: canvas.width - 150, y: 150 },
-            { x: canvas.width - 150, y: canvas.height - 150 }, { x: 150, y: canvas.height - 150 }
-        ];
-
-        defaultOuterCorners.forEach((point, index) => {
-            points.outer[index] = createCorner(point, 'outer', index);
-        });
-        defaultInnerCorners.forEach((point, index) => {
-            points.inner[index] = createCorner(point, 'inner', index);
-        });
-
-        drawLines();
-    }
-
-    function createCorner(point, borderType, index) {
-        let offsetX = (index === 0 || index === 3) ? -controlPointOffset : controlPointOffset;
-        let offsetY = (index === 0 || index === 1) ? -controlPointOffset : controlPointOffset;
-
-        let circle = new fabric.Circle({
-            radius: 15,
-            fill: borderType === 'outer' ? 'red' : 'blue',
-            left: point.x + offsetX,
-            top: point.y + offsetY,
-            originX: 'center',
-            originY: 'center',
-            hasBorders: false,
-            hasControls: false,
-            selectable: true,
-        });
-
-        circle.trueX = point.x;
-        circle.trueY = point.y;
-
-        circle.on('moving', function () {
-            this.trueX = this.left - offsetX;
-            this.trueY = this.top - offsetY;
-            drawLines();
-        });
-
-        canvas.add(circle);
-        return circle;
-    }
-
-    function drawLines() {
-        Object.values(lines).forEach(borderLines => {
-            borderLines.forEach(line => canvas.remove(line));
-        });
-
-        points.outer.forEach((point, index) => {
-            let startPoint = point;
-            let endPoint = points.outer[(index + 1) % points.outer.length];
-            lines.outer[index] = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
-                stroke: 'red',
-                strokeWidth: 2,
-                selectable: false,
-            });
-            canvas.add(lines.outer[index]);
-        });
-
-        points.inner.forEach((point, index) => {
-            let startPoint = point;
-            let endPoint = points.inner[(index + 1) % points.inner.length];
-            lines.inner[index] = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
-                stroke: 'blue',
-                strokeWidth: 2,
-                selectable: false,
-            });
-            canvas.add(lines.inner[index]);
-        });
-    }
-
-    function updateImageOnCanvas(img) {
-        const padding = 30;
-        const scaleFactor = Math.min(
-            (canvas.width - 1.5 * padding) / img.width,
-            (canvas.height - 1.5 * padding) / img.height
-        );
-        img.set({
-            scaleX: scaleFactor,
-            scaleY: scaleFactor,
-            left: (canvas.width - img.width * scaleFactor) / 1.5,
-            top: (canvas.height - img.height * scaleFactor) / 1.5
-        });
-        canvas.renderAll();
-    }
-
-    function loadImage(imageURL) {
-        fabric.Image.fromURL(imageURL, function (img) {
-            window.loadedImage = img;
-            updateImageOnCanvas(img);
-            img.selectable = false;
-            canvas.add(img);
-            img.sendToBack();
-        });
-    }
-
-    function calculateCenteringRatios(outerCorners, innerCorners) {
-        const totalOuterWidth = Math.abs(outerCorners[1].x - outerCorners[0].x);
-        const totalOuterHeight = Math.abs(outerCorners[3].y - outerCorners[0].y);
-        
-        const leftSpace = Math.abs(innerCorners[0].x - outerCorners[0].x);
-        const rightSpace = Math.abs(outerCorners[1].x - innerCorners[1].x);
-        const topSpace = Math.abs(innerCorners[0].y - outerCorners[0].y);
-        const bottomSpace = Math.abs(outerCorners[3].y - innerCorners[3].y);
-        
-        const horizontalRatioLeft = (leftSpace / totalOuterWidth) * 100;
-        const horizontalRatioRight = (rightSpace / totalOuterWidth) * 100;
-        const verticalRatioTop = (topSpace / totalOuterHeight) * 100;
-        const verticalRatioBottom = (bottomSpace / totalOuterHeight) * 100;
-
-        const horizontalTotal = horizontalRatioLeft + horizontalRatioRight;
-        const verticalTotal = verticalRatioTop + verticalRatioBottom;
-
-        const adjustedHorizontalLeft = (horizontalRatioLeft / horizontalTotal) * 100;
-        const adjustedHorizontalRight = 100 - adjustedHorizontalLeft;
-        const adjustedVerticalTop = (verticalRatioTop / verticalTotal) * 100;
-        const adjustedVerticalBottom = 100 - adjustedVerticalTop;
-
-        return {
-            horizontal: `${adjustedHorizontalLeft.toFixed(1)}/${adjustedHorizontalRight.toFixed(1)}`,
-            vertical: `${adjustedVerticalTop.toFixed(1)}/${adjustedVerticalBottom.toFixed(1)}`
-        };
-    }
-
-    window.addEventListener('resize', debounce(adjustCanvas, 100));
-
-    window.onload = function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const imageURL = urlParams.get('imageURL') || 'your-default-image-url.jpg';
-        adjustCanvas();
+    // You can now use these values as needed within your application
+    if (imageURL) {
         loadImage(imageURL);
-        initQuadrilaterals();
-    };
+    }
+
+    console.log("Card ID:", cardID);
+    console.log("Is Front:", isFront);
+
+    // Depending on the application, you may want to handle these variables differently
+    // For example, adjust functionality based on whether isFront is 'true'
+});
+
 </script>
+
 </head>
 <body>
-<div id="canvas-container" style="flex: 1; width: 100%; display: flex; justify-content: center; align-items: center;">
-    <canvas id="canvas"></canvas>
-</div>
+
+<canvas id="canvas"></canvas>
 <div class="button-container">
     <button id="calculateCentering">CALCULATE</button>
 </div>
+<script>
+    document.getElementById('calculateCentering').addEventListener('click', function() {
+    // Gather the true corners for outer and inner quadrilaterals
+    const outerCorners = points.outer.map(p => ({ x: p.trueX, y: p.trueY }));
+    const innerCorners = points.inner.map(p => ({ x: p.trueX, y: p.trueY }));
+
+    // Calculate the centering ratios using the true corners
+    const ratios = calculateCenteringRatios(outerCorners, innerCorners);
+
+    // Display the ratios in an alert
+    alert(`Horizontal Centering: ${ratios.horizontal}%, Vertical Centering: ${ratios.vertical}%`);
+
+    // User-friendly message when button is clicked
+    // alert('Submitted, please close this alert and click next below to continue');
+});
+
+
+
+  const canvas = new fabric.Canvas('canvas', { selection: false });
+  const points = { outer: [], inner: [] };
+  const lines = { outer: [], inner: [] };
+  const controlPointOffset = 30; // Global offset for the control points
+
+  function debounce(func, wait) {
+    let timeout;
+    return function () {
+      const context = this, args = arguments;
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+  }
+
+  function adjustCanvas() {
+    const horizontalPadding = 20; // 20px on each side
+    const verticalPadding = 20; // 50px on top and bottom for example
+    const canvasWidth = window.innerWidth - horizontalPadding;
+    const canvasHeight = window.innerHeight - verticalPadding - 50; // Deduct space for the button
+
+    // You may want to maintain a specific aspect ratio for the canvas.
+    // For example, if you want an aspect ratio of 4:3, you would calculate the height based on the width:
+    const aspectRatio = 3 / 4;
+    const heightBasedOnWidth = canvasWidth / aspectRatio;
+
+    // Then, choose the smaller of the two heights to ensure the canvas fits in the window.
+    const finalCanvasHeight = Math.min(canvasHeight, heightBasedOnWidth);
+
+    canvas.setWidth(canvasWidth);
+    canvas.setHeight(finalCanvasHeight);
+    initQuadrilaterals(); // Reinitialize to adjust corner positions
+    if (window.loadedImage) {
+        updateImageOnCanvas(window.loadedImage); // Update image position after canvas size change
+    }
+    canvas.renderAll();
+}
+
+  function initQuadrilaterals() {
+    // Clear any existing objects from the canvas, except the loaded image
+    canvas.getObjects().forEach((obj) => {
+      if (obj !== window.loadedImage) {
+        canvas.remove(obj);
+      }
+    });
+
+    // Define your default corner positions for outer and inner quadrilaterals
+    const defaultOuterCorners = [
+      { x: 50, y: 50 }, { x: canvas.width - 50, y: 50 },
+      { x: canvas.width - 50, y: canvas.height - 50 }, { x: 50, y: canvas.height - 50 }
+    ];
+    const defaultInnerCorners = [
+      { x: 150, y: 150 }, { x: canvas.width - 150, y: 150 },
+      { x: canvas.width - 150, y: canvas.height - 150 }, { x: 150, y: canvas.height - 150 }
+    ];
+
+    // Create or adjust the corner points
+    defaultOuterCorners.forEach((point, index) => {
+      points.outer[index] = createCorner(point, 'outer', index);
+    });
+    defaultInnerCorners.forEach((point, index) => {
+      points.inner[index] = createCorner(point, 'inner', index);
+    });
+
+    // Draw lines connecting the corners
+    drawLines();
+  }
+
+  function createCorner(point, borderType, index) {
+    // Determine the direction of the offset based on the corner
+    let offsetX = (index === 0 || index === 3) ? -controlPointOffset : controlPointOffset;
+    let offsetY = (index === 0 || index === 1) ? -controlPointOffset : controlPointOffset;
+
+    let circle = new fabric.Circle({
+      radius: 15, // Radius of control points for better touch response
+      fill: borderType === 'outer' ? 'red' : 'blue',
+      left: point.x + offsetX,
+      top: point.y + offsetY,
+      originX: 'center',
+      originY: 'center',
+      hasBorders: false,
+      hasControls: false,
+      selectable: true,
+    });
+
+    // Store the true corner position inside the circle object for easy access
+    circle.trueX = point.x;
+    circle.trueY = point.y;
+
+    circle.on('moving', function () {
+      // Update the true corner position when the control point moves
+      this.trueX = this.left - offsetX;
+      this.trueY = this.top - offsetY;
+      drawLines();
+    });
+
+    canvas.add(circle);
+    return circle;
+  }
+
+  function drawLines() {
+    // Remove existing lines from the canvas
+    Object.values(lines).forEach(borderLines => {
+      borderLines.forEach(line => canvas.remove(line));
+    });
+
+    // Draw new lines for the outer quadrilateral
+    points.outer.forEach((point, index) => {
+      let startPoint = point;
+      let endPoint = points.outer[(index + 1) % points.outer.length];
+      lines.outer[index] = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
+        stroke: 'red',
+        strokeWidth: 2,
+        selectable: false,
+      });
+      canvas.add(lines.outer[index]);
+    });
+
+    // Draw new lines for the inner quadrilateral
+    points.inner.forEach((point, index) => {
+      let startPoint = point;
+      let endPoint = points.inner[(index + 1) % points.inner.length];
+      lines.inner[index] = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
+        stroke: 'blue',
+        strokeWidth: 2,
+        selectable: false,
+      });
+      canvas.add(lines.inner[index]);
+    });
+  }
+
+  function updateImageOnCanvas(img) {
+    const padding = 30; // Padding around the image
+    const scaleFactor = Math.min(
+      (canvas.width - 1.5 * padding) / img.width,
+      (canvas.height - 1.5 * padding) / img.height
+    );
+    img.set({
+      scaleX: scaleFactor,
+      scaleY: scaleFactor,
+      left: (canvas.width - img.width * scaleFactor) / 1.5,
+      top: (canvas.height - img.height * scaleFactor) / 1.5
+    });
+    canvas.renderAll();
+  }
+
+  function loadImage(imageURL) {
+    fabric.Image.fromURL(imageURL, function (img) {
+        window.loadedImage = img;
+        updateImageOnCanvas(img);
+        img.selectable = false;
+        canvas.add(img);
+        img.sendToBack();
+    });
+}
+function calculateCenteringRatios(outerCorners, innerCorners) {
+    // Calculating total width and height of the outer and inner rectangles
+    const totalOuterWidth = Math.abs(outerCorners[1].x - outerCorners[0].x);
+    const totalOuterHeight = Math.abs(outerCorners[3].y - outerCorners[0].y);
+    
+    // Calculating space on each side of the inner rectangle within the outer rectangle
+    const leftSpace = Math.abs(innerCorners[0].x - outerCorners[0].x);
+    const rightSpace = Math.abs(outerCorners[1].x - innerCorners[1].x);
+    const topSpace = Math.abs(innerCorners[0].y - outerCorners[0].y);
+    const bottomSpace = Math.abs(outerCorners[3].y - innerCorners[3].y);
+    
+    // Calculating horizontal and vertical ratios based on the spaces
+    const horizontalRatioLeft = (leftSpace / totalOuterWidth) * 100;
+    const horizontalRatioRight = (rightSpace / totalOuterWidth) * 100;
+    const verticalRatioTop = (topSpace / totalOuterHeight) * 100;
+    const verticalRatioBottom = (bottomSpace / totalOuterHeight) * 100;
+
+    // Ensuring the sum of ratios for each direction equals 100%
+    const horizontalTotal = horizontalRatioLeft + horizontalRatioRight;
+    const verticalTotal = verticalRatioTop + verticalRatioBottom;
+
+    // Adjusting ratios to ensure they sum up to 100% accurately
+    const adjustedHorizontalLeft = (horizontalRatioLeft / horizontalTotal) * 100;
+    const adjustedHorizontalRight = 100 - adjustedHorizontalLeft; // ensures the sum is 100%
+    const adjustedVerticalTop = (verticalRatioTop / verticalTotal) * 100;
+    const adjustedVerticalBottom = 100 - adjustedVerticalTop; // ensures the sum is 100%
+
+    return {
+        horizontal: `${adjustedHorizontalLeft.toFixed(1)}/${adjustedHorizontalRight.toFixed(1)}`,
+        vertical: `${adjustedVerticalTop.toFixed(1)}/${adjustedVerticalBottom.toFixed(1)}`
+    };
+}
+
+  window.addEventListener('resize', debounce(adjustCanvas, 100));
+
+  window.onload = function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const imageURL = urlParams.get('imageURL') || 'your-default-image-url.jpg';
+    adjustCanvas();
+    loadImage(imageURL);
+    initQuadrilaterals();
+
+  };
+</script>
 </body>
 </html>
