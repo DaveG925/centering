@@ -11,7 +11,6 @@
         padding: 0;
         display: flex;
         flex-direction: column;
-        justify-content: center;
         align-items: center;
         height: 100vh;
         background-color: #FFFFFF;
@@ -19,6 +18,7 @@
 
     canvas {
         border: 1px solid #ccc;
+        margin-bottom: 20px; /* Add margin at the bottom of the canvas */
     }
 
     .button-container {
@@ -88,7 +88,7 @@
         const horizontalPadding = 20;
         const verticalPadding = 20;
         const canvasWidth = window.innerWidth - horizontalPadding;
-        const canvasHeight = window.innerHeight - verticalPadding;
+        const canvasHeight = window.innerHeight - verticalPadding - 100; // Deduct space for button
 
         const aspectRatio = 3 / 4;
         const heightBasedOnWidth = canvasWidth / aspectRatio;
