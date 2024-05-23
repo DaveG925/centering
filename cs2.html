@@ -18,7 +18,8 @@
 
     canvas {
         border: 1px solid #ccc;
-        margin-bottom: 20px; /* Add margin at the bottom of the canvas */
+        flex: 1;
+        max-width: 100%;
     }
 
     .button-container {
@@ -85,17 +86,12 @@
     }
 
     function adjustCanvas() {
-        const horizontalPadding = 20;
-        const verticalPadding = 20;
-        const canvasWidth = window.innerWidth - horizontalPadding;
-        const canvasHeight = window.innerHeight - verticalPadding - 100; // Deduct space for button
-
-        const aspectRatio = 3 / 4;
-        const heightBasedOnWidth = canvasWidth / aspectRatio;
-        const finalCanvasHeight = Math.min(canvasHeight, heightBasedOnWidth);
+        const canvasContainer = document.getElementById('canvas-container');
+        const canvasWidth = canvasContainer.clientWidth;
+        const canvasHeight = canvasContainer.clientHeight - 40; // Deduct space for the button
 
         canvas.setWidth(canvasWidth);
-        canvas.setHeight(finalCanvasHeight);
+        canvas.setHeight(canvasHeight);
         initQuadrilaterals();
         if (window.loadedImage) {
             updateImageOnCanvas(window.loadedImage);
@@ -249,5 +245,13 @@
         initQuadrilaterals();
     };
 </script>
+</head>
+<body>
+<div id="canvas-container" style="flex: 1; width: 100%; display: flex; justify-content: center; align-items: center;">
+    <canvas id="canvas"></canvas>
+</div>
+<div class="button-container">
+    <button id="calculateCentering">CALCULATE</button>
+</div>
 </body>
 </html>
