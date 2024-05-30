@@ -218,7 +218,7 @@ function loadImage(imageURL) {
 function overlayImageInQuadrilateral() {
     const outerCorners = points.outer.map(p => ({ x: p.trueX, y: p.trueY }));
     
-    fabric.Image.fromURL('https://yourusername.github.io/yourrepository/centering2.png', function (img) {
+    fabric.Image.fromURL('https://github.com/DaveG925/centering/blob/main/centering2.png', function (img) {
         const polygon = new fabric.Polygon(outerCorners, {
             selectable: false,
             objectCaching: false
