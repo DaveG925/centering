@@ -75,8 +75,8 @@ document.addEventListener('DOMContentLoaded', function () {
 </div>
 <script>
 document.getElementById('calculateCentering').addEventListener('click', function() {
-    // Overlay the predefined image within the outer quadrilateral
-    overlayImageInQuadrilateral();
+    // Fill the quadrilateral with a semi-transparent color for testing
+    fillQuadrilateral();
 });
 
 const canvas = new fabric.Canvas('canvas', { selection: false });
@@ -215,45 +215,18 @@ function loadImage(imageURL) {
     });
 }
 
-function overlayImageInQuadrilateral() {
+function fillQuadrilateral() {
     const outerCorners = points.outer.map(p => ({ x: p.trueX, y: p.trueY }));
 
     console.log('Outer Corners:', outerCorners);
 
-    fabric.Image.fromURL('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', function (img) {
-        console.log('Image loaded:', img);
-
-        const srcPoints = [
-            { x: 0, y: 0 },
-            { x: img.width, y: 0 },
-            { x: img.width, y: img.height },
-            { x: 0, y: img.height }
-        ];
-
-        console.log('Source Points:', srcPoints);
-
-        const destPoints = outerCorners.map(point => {
-            return new fabric.Point(point.x, point.y);
-        });
-
-        console.log('Destination Points:', destPoints);
-
-        const transformMatrix = fabric.util.createTransformMatrix(srcPoints, destPoints);
-
-        console.log('Transform Matrix:', transformMatrix);
-
-        img.set({
-            left: 0,
-            top: 0,
-            originX: 'left',
-            originY: 'top',
-            transformMatrix: transformMatrix
-        });
-
-        canvas.add(img);
-        img.moveTo(1);
-        canvas.renderAll();
+    const polygon = new fabric.Polygon(outerCorners, {
+        fill: 'rgba(0, 0, 255, 0.5)', // Semi-transparent blue
+        selectable: false
     });
+
+    canvas.add(polygon);
+    canvas.renderAll();
 }
 
 window.addEventListener('resize', debounce(adjustCanvas, 100));
