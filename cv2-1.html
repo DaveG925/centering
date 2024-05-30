@@ -217,13 +217,8 @@ function loadImage(imageURL) {
 
 function overlayImageInQuadrilateral() {
     const outerCorners = points.outer.map(p => ({ x: p.trueX, y: p.trueY }));
-    
-    fabric.Image.fromURL('https://github.com/DaveG925/centering/blob/main/centering2.png', function (img) {
-        const polygon = new fabric.Polygon(outerCorners, {
-            selectable: false,
-            objectCaching: false
-        });
 
+    fabric.Image.fromURL('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', function (img) {
         const srcPoints = [
             { x: 0, y: 0 },
             { x: img.width, y: 0 },
@@ -235,19 +230,14 @@ function overlayImageInQuadrilateral() {
             return new fabric.Point(point.x, point.y);
         });
 
+        const transformMatrix = fabric.util.createTransformMatrix(srcPoints, destPoints);
+
         img.set({
             left: 0,
             top: 0,
             originX: 'left',
-            originY: 'top'
-        });
-
-        img.setCoords();
-
-        const transform = fabric.util.createTransformMatrix(srcPoints, destPoints);
-
-        img.set({
-            transformMatrix: transform
+            originY: 'top',
+            transformMatrix: transformMatrix
         });
 
         canvas.add(img);
