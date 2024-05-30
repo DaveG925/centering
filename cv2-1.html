@@ -75,8 +75,8 @@ document.addEventListener('DOMContentLoaded', function () {
 </div>
 <script>
 document.getElementById('calculateCentering').addEventListener('click', function() {
-    // Fill the quadrilateral with a semi-transparent color for testing
-    fillQuadrilateral();
+    // Overlay the predefined image within the outer quadrilateral
+    overlayImageInQuadrilateral();
 });
 
 const canvas = new fabric.Canvas('canvas', { selection: false });
@@ -215,18 +215,52 @@ function loadImage(imageURL) {
     });
 }
 
-function fillQuadrilateral() {
+function overlayImageInQuadrilateral() {
     const outerCorners = points.outer.map(p => ({ x: p.trueX, y: p.trueY }));
 
     console.log('Outer Corners:', outerCorners);
 
-    const polygon = new fabric.Polygon(outerCorners, {
-        fill: 'rgba(0, 0, 255, 0.5)', // Semi-transparent blue
-        selectable: false
-    });
+    fabric.Image.fromURL('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', function (img) {
+        console.log('Image loaded:', img);
 
-    canvas.add(polygon);
-    canvas.renderAll();
+        const srcPoints = [
+            { x: 0, y: 0 },
+            { x: img.width, y: 0 },
+            { x: img.width, y: img.height },
+            { x: 0, y: img.height }
+        ];
+
+        console.log('Source Points:', srcPoints);
+
+        const destPoints = outerCorners.map(point => {
+            return new fabric.Point(point.x, point.y);
+        });
+
+        console.log('Destination Points:', destPoints);
+
+        const transformMatrix = fabric.util.qrDecompose(fabric.util.multiplyTransformMatrices(
+            fabric.util.createTransformMatrix(srcPoints),
+            fabric.util.createTransformMatrix(destPoints)
+        ));
+
+        console.log('Transform Matrix:', transformMatrix);
+
+        img.set({
+            left: destPoints[0].x,
+            top: destPoints[0].y,
+            originX: 'left',
+            originY: 'top',
+            scaleX: transformMatrix.scaleX,
+            scaleY: transformMatrix.scaleY,
+            angle: transformMatrix.angle,
+            skewX: transformMatrix.skewX,
+            skewY: transformMatrix.skewY
+        });
+
+        canvas.add(img);
+        img.moveTo(1);
+        canvas.renderAll();
+    });
 }
 
 window.addEventListener('resize', debounce(adjustCanvas, 100));
