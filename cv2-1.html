@@ -216,19 +216,42 @@ function loadImage(imageURL) {
 }
 
 function overlayImageInQuadrilateral() {
+    const outerCorners = points.outer.map(p => ({ x: p.trueX, y: p.trueY }));
+
+    console.log('Outer Corners:', outerCorners);
+
     fabric.Image.fromURL('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', function (img) {
         console.log('Image loaded:', img);
 
-        // Set the image position to the top-left corner for now
+        const srcPoints = [
+            { x: 0, y: 0 },
+            { x: img.width, y: 0 },
+            { x: img.width, y: img.height },
+            { x: 0, y: img.height }
+        ];
+
+        console.log('Source Points:', srcPoints);
+
+        const destPoints = outerCorners.map(point => {
+            return new fabric.Point(point.x, point.y);
+        });
+
+        console.log('Destination Points:', destPoints);
+
+        const transformMatrix = fabric.util.findTransformMatrix(srcPoints, destPoints);
+
+        console.log('Transform Matrix:', transformMatrix);
+
         img.set({
             left: 0,
             top: 0,
             originX: 'left',
-            originY: 'top'
+            originY: 'top',
+            transformMatrix: transformMatrix
         });
 
         canvas.add(img);
-        img.bringToFront();  // Bring the image to the front
+        img.bringToFront();
         canvas.renderAll();
     });
 }
