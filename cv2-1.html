@@ -228,7 +228,7 @@ function overlayImageInQuadrilateral() {
         });
 
         canvas.add(img);
-        img.moveTo(1);
+        img.bringToFront();  // Bring the image to the front
         canvas.renderAll();
     });
 }
