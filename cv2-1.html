@@ -216,37 +216,15 @@ function loadImage(imageURL) {
 }
 
 function overlayImageInQuadrilateral() {
-    const outerCorners = points.outer.map(p => ({ x: p.trueX, y: p.trueY }));
-
-    console.log('Outer Corners:', outerCorners);
-
     fabric.Image.fromURL('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', function (img) {
         console.log('Image loaded:', img);
 
-        const width = img.width;
-        const height = img.height;
-
-        // Calculate the perspective transform matrix
-        const transformMatrix = fabric.util.makePerspectiveTransformMatrix(
-            [0, 0, width, 0, width, height, 0, height], // Source points (rectangle)
-            [
-                outerCorners[0].x, outerCorners[0].y,
-                outerCorners[1].x, outerCorners[1].y,
-                outerCorners[2].x, outerCorners[2].y,
-                outerCorners[3].x, outerCorners[3].y
-            ] // Destination points (quadrilateral)
-        );
-
-        console.log('Transform Matrix:', transformMatrix);
-
+        // Set the image position to the top-left corner for now
         img.set({
             left: 0,
             top: 0,
             originX: 'left',
-            originY: 'top',
-            scaleX: 1,
-            scaleY: 1,
-            transformMatrix: transformMatrix
+            originY: 'top'
         });
 
         canvas.add(img);
