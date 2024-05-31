@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Warping Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/wanadev/perspective.js/dist/perspective.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@finos/perspective@1.1.3/dist/umd/perspective.js"></script>
     <style>
         body, html {
             margin: 0;
@@ -61,7 +61,7 @@
         positions.forEach(pos => {
             const circle = new fabric.Circle({
                 radius: 5,
-                fill: 'red',
+                fill: 'blue',
                 left: pos.left,
                 top: pos.top,
                 originX: 'center',
@@ -87,10 +87,20 @@
 
         const destCorners = controlPoints.map(p => [p.left, p.top]);
 
-        const perspT = PerspT(srcCorners, destCorners);
+        const perspT = perspective.transform(destCorners, srcCorners);
 
-        const ctx = canvas.getContext('2d');
-        ctx.setTransform(...perspT);
+        const matrix = [
+            perspT[0][0], perspT[0][1], perspT[0][2],
+            perspT[1][0], perspT[1][1], perspT[1][2],
+            perspT[2][0], perspT[2][1], perspT[2][2]
+        ];
+
+        overlayImg.set({
+            left: 0,
+            top: 0,
+            transformMatrix: matrix
+        });
+
         canvas.renderAll();
     }
 
