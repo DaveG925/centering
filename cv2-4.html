@@ -46,9 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 const canvas = new fabric.Canvas('canvas', { selection: false });
-const points = { outer: [] };
-const lines = { outer: [] };
-const controlPointOffset = 30; // Global offset for the control points
+let overlayImage;
 
 function debounce(func, wait) {
     let timeout;
@@ -75,99 +73,9 @@ function adjustCanvas() {
 
     canvas.setWidth(canvasWidth);
     canvas.setHeight(finalCanvasHeight);
-    initQuadrilaterals(); // Reinitialize to adjust corner positions
     if (window.loadedImage) {
         updateImageOnCanvas(window.loadedImage); // Update image position after canvas size change
     }
-    canvas.renderAll();
-}
-
-function initQuadrilaterals() {
-    // Clear any existing objects from the canvas, except the loaded image
-    canvas.getObjects().forEach((obj) => {
-        if (obj !== window.loadedImage) {
-            canvas.remove(obj);
-        }
-    });
-
-    // Define your default corner positions for outer quadrilaterals
-    const defaultOuterCorners = [
-        { x: 50, y: 50 }, { x: canvas.width - 50, y: 50 },
-        { x: canvas.width - 50, y: canvas.height - 50 }, { x: 50, y: canvas.height - 50 }
-    ];
-
-    // Create or adjust the corner points
-    defaultOuterCorners.forEach((point, index) => {
-        points.outer[index] = createCorner(point, 'outer', index);
-    });
-
-    // Draw lines connecting the corners
-    drawLines();
-}
-
-function createCorner(point, borderType, index) {
-    // Determine the direction of the offset based on the corner
-    let offsetX = (index === 0 || index === 3) ? -controlPointOffset : controlPointOffset;
-    let offsetY = (index === 0 || index === 1) ? -controlPointOffset : controlPointOffset;
-
-    let circle = new fabric.Circle({
-        radius: 15, // Radius of control points for better touch response
-        fill: 'red',
-        left: point.x + offsetX,
-        top: point.y + offsetY,
-        originX: 'center',
-        originY: 'center',
-        hasBorders: false,
-        hasControls: false,
-        selectable: true,
-    });
-
-    // Store the true corner position inside the circle object for easy access
-    circle.trueX = point.x;
-    circle.trueY = point.y;
-
-    circle.on('moving', function () {
-        // Update the true corner position when the control point moves
-        this.trueX = this.left - offsetX;
-        this.trueY = this.top - offsetY;
-        drawLines();
-    });
-
-    canvas.add(circle);
-    return circle;
-}
-
-function drawLines() {
-    // Remove existing lines from the canvas
-    Object.values(lines).forEach(borderLines => {
-        borderLines.forEach(line => canvas.remove(line));
-    });
-
-    // Draw new lines for the outer quadrilateral
-    points.outer.forEach((point, index) => {
-        let startPoint = point;
-        let endPoint = points.outer[(index + 1) % points.outer.length];
-        lines.outer[index] = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
-            stroke: 'red',
-            strokeWidth: 2,
-            selectable: false,
-        });
-        canvas.add(lines.outer[index]);
-    });
-}
-
-function updateImageOnCanvas(img) {
-    const padding = 30; // Padding around the image
-    const scaleFactor = Math.min(
-        (canvas.width - 1.5 * padding) / img.width,
-        (canvas.height - 1.5 * padding) / img.height
-    );
-    img.set({
-        scaleX: scaleFactor,
-        scaleY: scaleFactor,
-        left: (canvas.width - img.width * scaleFactor) / 1.5,
-        top: (canvas.height - img.height * scaleFactor) / 1.5
-    });
     canvas.renderAll();
 }
 
@@ -189,23 +97,14 @@ canvas.on('mouse:down', function(options) {
 });
 
 function overlayImageInQuadrilateral(left, top) {
-    const outerCorners = points.outer.map(p => ({ x: p.trueX, y: p.trueY }));
-
-    console.log('Outer Corners:', outerCorners);
-
     fabric.Image.fromURL('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', function (img) {
         console.log('Image loaded:', img);
 
-        // Calculate the overlay width and height
-        const overlayWidth = Math.abs(outerCorners[1].x - outerCorners[0].x);
-        const overlayHeight = Math.abs(outerCorners[3].y - outerCorners[0].y);
-
-        // Set the image position and scale
         img.set({
-            left: outerCorners[0].x,
-            top: outerCorners[0].y,
-            scaleX: overlayWidth / img.width,
-            scaleY: overlayHeight / img.height,
+            left: left,
+            top: top,
+            scaleX: 0.5, // Adjust the initial scale as needed
+            scaleY: 0.5,
             originX: 'left',
             originY: 'top',
             transparentCorners: false,
@@ -241,7 +140,6 @@ window.onload = function () {
     const imageURL = urlParams.get('imageURL') || 'your-default-image-url.jpg';
     adjustCanvas();
     loadImage(imageURL);
-    initQuadrilaterals();
 };
 </script>
 </body>
