@@ -37,7 +37,7 @@
     canvas.height = window.innerHeight - 20; // Adjusted for any potential space
 
     function createControlPoint(x, y, offsetX = 0, offsetY = 0) {
-        return { x: x + offsetX, y: y + offsetY, trueX: x, trueY: y };
+        return { x: x + offsetX, y: y + offsetY, offsetX: offsetX, offsetY: offsetY };
     }
 
     function drawControlPoints() {
@@ -53,17 +53,17 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         ctx.beginPath();
-        ctx.moveTo(controlPoints[0].trueX, controlPoints[0].trueY);
-        ctx.lineTo(controlPoints[1].trueX, controlPoints[1].trueY);
-        ctx.lineTo(controlPoints[2].trueX, controlPoints[2].trueY);
-        ctx.lineTo(controlPoints[3].trueX, controlPoints[3].trueY);
+        ctx.moveTo(controlPoints[0].x - controlPoints[0].offsetX, controlPoints[0].y - controlPoints[0].offsetY);
+        ctx.lineTo(controlPoints[1].x - controlPoints[1].offsetX, controlPoints[1].y - controlPoints[1].offsetY);
+        ctx.lineTo(controlPoints[2].x - controlPoints[2].offsetX, controlPoints[2].y - controlPoints[2].offsetY);
+        ctx.lineTo(controlPoints[3].x - controlPoints[3].offsetX, controlPoints[3].y - controlPoints[3].offsetY);
         ctx.closePath();
         ctx.strokeStyle = 'blue';
         ctx.lineWidth = 2;
         ctx.stroke();
 
         drawControlPoints();
-        drawConcentricQuadrilaterals(controlPoints.map(point => ({ x: point.trueX, y: point.trueY })));
+        drawConcentricQuadrilaterals(controlPoints.map(point => ({ x: point.x - point.offsetX, y: point.y - point.offsetY })));
     }
 
     function initializeControlPoints() {
@@ -105,8 +105,6 @@
             const mousePos = getMousePosition(event);
             draggingPoint.x = mousePos.x;
             draggingPoint.y = mousePos.y;
-            draggingPoint.trueX = mousePos.x - (draggingPoint.x - draggingPoint.trueX);
-            draggingPoint.trueY = mousePos.y - (draggingPoint.y - draggingPoint.trueY);
             drawQuadrilateral();
         }
     }
@@ -116,7 +114,7 @@
     }
 
     function drawConcentricQuadrilaterals(corners) {
-        for (let i = 1; i <= 15; i++) {
+        for (let i = 1; i <= 13; i++) {
             const offset = i * 10;
             const newCorners = offsetCorners(corners, offset);
 
@@ -132,7 +130,7 @@
     }
 
     function drawQuadrilateralWithGap(corners, index) {
-        const gapSize = 20;
+        const gapSize = 25;
         const [p0, p1, p2, p3] = corners;
 
         drawLineWithGap(p0, p1, gapSize, index);
