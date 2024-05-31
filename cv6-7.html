@@ -33,7 +33,7 @@
     const canvas = new fabric.Canvas('canvas', { selection: false });
     const controlPoints = [];
     const controlPointRadius = 15;
-    const offsetDistance = -60; // 45 degrees offset distance
+    const offsetDistance = 45 / Math.sqrt(2); // 45 degrees offset distance
     let loadedImage = null;
 
     canvas.setWidth(window.innerWidth - 20);
@@ -69,10 +69,10 @@
             { x: margin, y: canvas.height - margin }
         ];
 
-        const innermostCorners = offsetCorners(outerCorners, 50); // Calculate innermost corners with a fixed offset
-
-        innermostCorners.forEach((corner, index) => {
-            controlPoints.push(createControlPoint(corner.x, corner.y, 'red'));
+        outerCorners.forEach((corner, index) => {
+            const offsetX = offsetDistance * ((index === 0 || index === 3) ? 1 : -1);
+            const offsetY = offsetDistance * ((index === 0 || index === 1) ? 1 : -1);
+            controlPoints.push(createControlPoint(corner.x + offsetX, corner.y + offsetY, 'red'));
         });
 
         updateQuadrilateral();
