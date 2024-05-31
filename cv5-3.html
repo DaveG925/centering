@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Movable Quadrilateral</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #FFFFFF;
+        }
+
+        canvas {
+            border: 1px solid #ccc;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+<button id="saveButton">Save Corners and Draw Image</button>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const controlPoints = [];
+    const pointRadius = 8;
+    let draggingPoint = null;
+
+    canvas.width = window.innerWidth - 20;
+    canvas.height = window.innerHeight - 100;  // Adjusted for button space
+
+    function createControlPoint(x, y) {
+        return { x, y };
+    }
+
+    function drawControlPoints() {
+        ctx.fillStyle = 'red';
+        controlPoints.forEach(point => {
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, pointRadius, 0, 2 * Math.PI);
+            ctx.fill();
+        });
+    }
+
+    function drawQuadrilateral() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.beginPath();
+        ctx.moveTo(controlPoints[0].x, controlPoints[0].y);
+        ctx.lineTo(controlPoints[1].x, controlPoints[1].y);
+        ctx.lineTo(controlPoints[2].x, controlPoints[2].y);
+        ctx.lineTo(controlPoints[3].x, controlPoints[3].y);
+        ctx.closePath();
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        drawControlPoints();
+    }
+
+    function initializeControlPoints() {
+        const margin = 50;
+        controlPoints.push(
+            createControlPoint(margin, margin),
+            createControlPoint(canvas.width - margin, margin),
+            createControlPoint(canvas.width - margin, canvas.height - margin),
+            createControlPoint(margin, canvas.height - margin)
+        );
+
+        drawQuadrilateral();
+    }
+
+    function getMousePosition(event) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
+    }
+
+    function isPointClicked(point, mousePos) {
+        return Math.sqrt((point.x - mousePos.x) ** 2 + (point.y - mousePos.y) ** 2) < pointRadius;
+    }
+
+    function handleMouseDown(event) {
+        const mousePos = getMousePosition(event);
+        for (const point of controlPoints) {
+            if (isPointClicked(point, mousePos)) {
+                draggingPoint = point;
+                break;
+            }
+        }
+    }
+
+    function handleMouseMove(event) {
+        if (draggingPoint) {
+            const mousePos = getMousePosition(event);
+            draggingPoint.x = mousePos.x;
+            draggingPoint.y = mousePos.y;
+            drawQuadrilateral();
+        }
+    }
+
+    function handleMouseUp() {
+        draggingPoint = null;
+    }
+
+    function handleSaveCorners() {
+        const corners = controlPoints.map(point => ({ x: point.x, y: point.y }));
+        console.log('Saved Corners:', corners);
+        alert('Corners saved! Drawing the image now.');
+
+        drawImageToQuadrilateral(corners);
+    }
+
+    function drawImageToQuadrilateral(corners) {
+        const img = new Image();
+        img.src = 'https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png';
+        img.onload = function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Define source and destination points
+            const src = [0, 0, img.width, 0, img.width, img.height, 0, img.height];
+            const dest = corners.flatMap(p => [p.x, p.y]);
+
+            // Get the perspective transform matrix
+            const matrix = getTransformMatrix(src, dest);
+
+            // Draw the image using the transform matrix
+            ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f);
+            ctx.drawImage(img, 0, 0);
+
+            // Reset the transform to default
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+            drawQuadrilateral();  // Draw the control points and quadrilateral again
+        };
+    }
+
+    function getTransformMatrix(src, dest) {
+        const m = perspectiveTransform(src, dest);
+        return {
+            a: m[0], b: m[1], c: m[2],
+            d: m[3], e: m[4], f: m[5]
+        };
+    }
+
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseup', handleMouseUp);
+
+    document.getElementById('saveButton').addEventListener('click', handleSaveCorners);
+
+    initializeControlPoints();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/perspective-transform@1.0.6/dist/perspective-transform.min.js"></script>
+</body>
+</html>
