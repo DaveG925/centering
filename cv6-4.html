@@ -7,7 +7,7 @@
     <style>
         body, html {
             margin: 20;
-            padding: 20;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: flex-start; /* Changed from center to flex-start */
@@ -18,7 +18,7 @@
 
         canvas {
             border: 1px solid #ccc;
-            margin-top: 20px; /* Add top margin for padding */
+            margin-top: 10px; /* Add top margin for padding */
         }
     </style>
 </head>
@@ -121,8 +121,8 @@
     }
 
     function drawConcentricQuadrilaterals(corners) {
-        for (let i = 1; i <= 10; i++) {
-            const offset = i * 10;
+        for (let i = 1; i <= 15; i++) {
+            const offset = i * 5;
             const newCorners = offsetCorners(corners, offset);
 
             drawQuadrilateralWithGap(newCorners, i);
