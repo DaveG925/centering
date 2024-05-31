@@ -33,6 +33,7 @@
         <canvas id="mainCanvas"></canvas>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
+    <script src="https://raw.githubusercontent.com/jlouthan/perspective-transform/master/perspective.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -133,16 +134,40 @@
                 const width = overlay.width;
                 const height = overlay.height;
 
-                const transformMatrix = fabric.util.createTransformMatrix(
-                    tl.left, tl.top,
-                    tr.left, tr.top,
-                    bl.left, bl.top,
-                    br.left, br.top,
-                    width, height
+                const srcCorners = [
+                    { x: 0, y: 0 },
+                    { x: width, y: 0 },
+                    { x: 0, y: height },
+                    { x: width, y: height }
+                ];
+
+                const destCorners = [
+                    { x: tl.left, y: tl.top },
+                    { x: tr.left, y: tr.top },
+                    { x: bl.left, y: bl.top },
+                    { x: br.left, y: br.top }
+                ];
+
+                const transform = PerspT(
+                    [srcCorners[0].x, srcCorners[0].y,
+                     srcCorners[1].x, srcCorners[1].y,
+                     srcCorners[2].x, srcCorners[2].y,
+                     srcCorners[3].x, srcCorners[3].y],
+                    [destCorners[0].x, destCorners[0].y,
+                     destCorners[1].x, destCorners[1].y,
+                     destCorners[2].x, destCorners[2].y,
+                     destCorners[3].x, destCorners[3].y]
                 );
 
-                overlay.set('transformMatrix', transformMatrix);
-                canvas.renderAll();
+                const canvasEl = document.getElementById('mainCanvas');
+                const ctx = canvasEl.getContext('2d');
+                const image = overlay._element;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.save();
+                ctx.setTransform(...transform.coeffs);
+                ctx.drawImage(image, 0, 0, width, height);
+                ctx.restore();
             }
         });
     </script>
