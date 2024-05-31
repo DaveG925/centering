@@ -223,32 +223,39 @@ function overlayImageInQuadrilateral() {
     fabric.Image.fromURL('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', function (img) {
         console.log('Image loaded:', img);
 
-        // Calculate the overlay width and height
-        const overlayWidth = Math.abs(outerCorners[1].x - outerCorners[0].x);
-        const overlayHeight = Math.abs(outerCorners[3].y - outerCorners[0].y);
+        // Define the source points (corners of the original image)
+        const srcPoints = [
+            { x: 0, y: 0 },
+            { x: img.width, y: 0 },
+            { x: img.width, y: img.height },
+            { x: 0, y: img.height }
+        ];
 
-        // Set the image position and scale
-        img.set({
-            left: outerCorners[0].x,
-            top: outerCorners[0].y,
-            scaleX: overlayWidth / img.width,
-            scaleY: overlayHeight / img.height,
-            originX: 'left',
-            originY: 'top',
+        // Define the destination points (corners of the quadrilateral)
+        const destPoints = outerCorners.map(point => {
+            return new fabric.Point(point.x, point.y);
         });
 
-        // Apply the perspective transformation
-        const transformMatrix = fabric.util.makePerspectiveTransformMatrix(
-            [
-                { x: 0, y: 0 },
-                { x: img.width, y: 0 },
-                { x: img.width, y: img.height },
-                { x: 0, y: img.height }
-            ],
-            outerCorners
-        );
+        // Calculate the perspective transform matrix
+        const transformMatrix = fabric.util.makeTransformMatrix({
+            topLeft: srcPoints[0],
+            topRight: srcPoints[1],
+            bottomRight: srcPoints[2],
+            bottomLeft: srcPoints[3],
+            destTopLeft: destPoints[0],
+            destTopRight: destPoints[1],
+            destBottomRight: destPoints[2],
+            destBottomLeft: destPoints[3]
+        });
 
-        img.set('transformMatrix', transformMatrix);
+        // Apply the transformation matrix to the image
+        img.set({
+            transformMatrix: transformMatrix,
+            left: 0,
+            top: 0,
+            originX: 'left',
+            originY: 'top'
+        });
 
         canvas.add(img);
         img.bringToFront();
