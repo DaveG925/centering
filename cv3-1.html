@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Manipulation</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+        #canvas-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <canvas id="mainCanvas"></canvas>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.6.0/fabric.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const imageUrl = urlParams.get('imageURL');
+            const overlayUrl = 'https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png';
+
+            if (!imageUrl) {
+                alert('No image URL provided');
+                return;
+            }
+
+            const canvas = new fabric.Canvas('mainCanvas', {
+                preserveObjectStacking: true,
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
+
+            fabric.Image.fromURL(imageUrl, (img) => {
+                const scaleFactor = Math.min(canvas.getWidth() / img.width, canvas.getHeight() / img.height);
+                img.set({
+                    originX: 'center',
+                    originY: 'center',
+                    left: canvas.getWidth() / 2,
+                    top: canvas.getHeight() / 2,
+                    scaleX: scaleFactor,
+                    scaleY: scaleFactor,
+                    selectable: false
+                });
+                canvas.add(img);
+
+                fabric.Image.fromURL(overlayUrl, (overlay) => {
+                    overlay.set({
+                        originX: 'center',
+                        originY: 'center',
+                        left: canvas.getWidth() / 2,
+                        top: canvas.getHeight() / 2,
+                        opacity: 0.5,
+                        lockScalingFlip: true,
+                        hasRotatingPoint: false,
+                        cornerStyle: 'circle',
+                        transparentCorners: false
+                    });
+                    overlay.setControlsVisibility({
+                        mt: false, mb: false, ml: false, mr: false,
+                        bl: true, br: true, tl: true, tr: true,
+                        mtr: false
+                    });
+                    canvas.add(overlay);
+                    canvas.setActiveObject(overlay);
+                });
+            });
+
+            window.addEventListener('resize', () => {
+                canvas.setWidth(window.innerWidth);
+                canvas.setHeight(window.innerHeight);
+                canvas.renderAll();
+            });
+        });
+    </script>
+</body>
+</html>
