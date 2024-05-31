@@ -65,10 +65,6 @@ const canvas = new fabric.Canvas('canvas', { selection: false });
 
 function loadImage(imageURL) {
     fabric.Image.fromURL(imageURL, function (img) {
-        if (!img) {
-            console.error("Failed to load user image.");
-            return;
-        }
         window.loadedImage = img;
         updateImageOnCanvas(img);
         img.selectable = false;
@@ -94,10 +90,6 @@ function updateImageOnCanvas(img) {
 
 function addOverlayImage() {
     fabric.Image.fromURL('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', function (img) {
-        if (!img) {
-            console.error("Failed to load overlay image.");
-            return;
-        }
         img.set({
             left: canvas.width / 2,
             top: canvas.height / 2,
@@ -120,13 +112,16 @@ window.onload = function () {
     loadImage(imageURL);
 };
 
+document.getElementById('calculateCentering').addEventListener('click', function() {
+    addOverlayImage();
+});
 </script>
 </head>
 <body>
 
 <canvas id="canvas"></canvas>
 <div class="button-container">
-    <button id="calculateCentering" onclick="addOverlayImage()">ADD OVERLAY</button>
+    <button id="calculateCentering">ADD OVERLAY</button>
 </div>
 
 </body>
