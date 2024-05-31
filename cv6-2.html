@@ -129,30 +129,14 @@
 
     function drawConcentricQuadrilaterals(corners) {
         for (let i = 1; i <= 10; i++) {
-            const offset = i * 15;
+            const offset = i * 5;
             const newCorners = offsetCorners(corners, offset);
 
-            ctx.beginPath();
-            ctx.moveTo(newCorners[0].x, newCorners[0].y);
-            ctx.lineTo(newCorners[1].x, newCorners[1].y);
-            ctx.lineTo(newCorners[2].x, newCorners[2].y);
-            ctx.lineTo(newCorners[3].x, newCorners[3].y);
-            ctx.closePath();
-
-            if (i % 2 === 0) {
-                ctx.setLineDash([]);
-            } else {
-                ctx.setLineDash([5, 5]);
-            }
-
-            ctx.strokeStyle = 'gray';
-            ctx.lineWidth = 1;
-            ctx.stroke();
+            drawQuadrilateralWithGap(newCorners, i);
 
             // Draw number at the midpoint of the top edge
             const midPointX = (newCorners[0].x + newCorners[1].x) / 2;
             const midPointY = (newCorners[0].y + newCorners[1].y) / 2;
-            ctx.setLineDash([]);
             ctx.fillStyle = 'black';
             ctx.font = '12px Arial';
             ctx.textBaseline = 'middle';
@@ -160,6 +144,47 @@
             ctx.fillText(i, midPointX, midPointY);
         }
         ctx.setLineDash([]); // Reset to solid lines after drawing
+    }
+
+    function drawQuadrilateralWithGap(corners, index) {
+        const gapSize = 20;
+        const [p0, p1, p2, p3] = corners;
+
+        drawLineWithGap(p0, p1, gapSize, index);
+        drawLineWithGap(p1, p2, gapSize, index);
+        drawLineWithGap(p2, p3, gapSize, index);
+        drawLineWithGap(p3, p0, gapSize, index);
+    }
+
+    function drawLineWithGap(p1, p2, gapSize, index) {
+        const midX = (p1.x + p2.x) / 2;
+        const midY = (p1.y + p2.y) / 2;
+
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        const gapRatio = gapSize / len;
+
+        const gapStartX = midX - (dx * gapRatio) / 2;
+        const gapStartY = midY - (dy * gapRatio) / 2;
+        const gapEndX = midX + (dx * gapRatio) / 2;
+        const gapEndY = midY + (dy * gapRatio) / 2;
+
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(gapStartX, gapStartY);
+        ctx.moveTo(gapEndX, gapEndY);
+        ctx.lineTo(p2.x, p2.y);
+
+        if (index % 2 === 0) {
+            ctx.setLineDash([]);
+        } else {
+            ctx.setLineDash([5, 5]);
+        }
+
+        ctx.strokeStyle = 'gray';
+        ctx.lineWidth = 1;
+        ctx.stroke();
     }
 
     function offsetCorners(corners, offset) {
