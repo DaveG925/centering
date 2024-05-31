@@ -31,9 +31,9 @@
 
 <script>
     const canvas = new fabric.Canvas('canvas', { selection: false });
+    const controlPoints = [];
     const controlPointRadius = 15;
-    const offsetDistance = 45; // 45 pixels offset distance at 45 degrees
-    let controlPoints = [];
+    const offsetDistance = 45; // 45 pixels inside the quadrilateral
     let loadedImage = null;
 
     canvas.setWidth(window.innerWidth - 20);
@@ -62,20 +62,35 @@
 
     function initializeControlPoints() {
         const margin = 50;
-        const corners = [
+        const outerCorners = [
             { x: margin, y: margin },
             { x: canvas.width - margin, y: margin },
             { x: canvas.width - margin, y: canvas.height - margin },
             { x: margin, y: canvas.height - margin }
         ];
 
-        const offsetControlPoints = corners.map((corner, index) => {
-            const offsetX = (index === 0 || index === 3) ? -offsetDistance : offsetDistance;
-            const offsetY = (index === 0 || index === 1) ? -offsetDistance : offsetDistance;
+        // Calculate the innermost corners based on the offset
+        const innermostCorners = outerCorners.map((corner, index) => {
+            const nextCorner = outerCorners[(index + 1) % outerCorners.length];
+            const prevCorner = outerCorners[(index + 3) % outerCorners.length];
+
+            const dx1 = nextCorner.x - corner.x;
+            const dy1 = nextCorner.y - corner.y;
+            const dx2 = prevCorner.x - corner.x;
+            const dy2 = prevCorner.y - corner.y;
+
+            const len1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+            const len2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+
+            const offsetX = (dx1 / len1 + dx2 / len2) * offsetDistance / Math.sqrt(2);
+            const offsetY = (dy1 / len1 + dy2 / len2) * offsetDistance / Math.sqrt(2);
+
             return { x: corner.x + offsetX, y: corner.y + offsetY };
         });
 
-        controlPoints = offsetControlPoints.map(point => createControlPoint(point.x, point.y, 'red'));
+        innermostCorners.forEach((corner, index) => {
+            controlPoints.push(createControlPoint(corner.x, corner.y, 'red'));
+        });
 
         updateQuadrilateral();
     }
