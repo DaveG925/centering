@@ -53,35 +53,54 @@ document.addEventListener('DOMContentLoaded', function () {
     const cardID = urlParams.get('CardID');  // Retrieve CardID from URL
     const isFront = urlParams.get('isFront'); // Retrieve isFront from URL
 
-    // You can now use these values as needed within your application
     if (imageURL) {
         loadImage(imageURL);
     }
 
     console.log("Card ID:", cardID);
     console.log("Is Front:", isFront);
-
-    // Depending on the application, you may want to handle these variables differently
-    // For example, adjust functionality based on whether isFront is 'true'
 });
 
 const canvas = new fabric.Canvas('canvas', { selection: false });
 
 function loadImage(imageURL) {
     fabric.Image.fromURL(imageURL, function (img) {
+        if (!img) {
+            console.error("Failed to load user image.");
+            return;
+        }
         window.loadedImage = img;
         updateImageOnCanvas(img);
         img.selectable = false;
         canvas.add(img);
         img.sendToBack();
+    }, { crossOrigin: 'anonymous' });
+}
+
+function updateImageOnCanvas(img) {
+    const padding = 30; // Padding around the image
+    const scaleFactor = Math.min(
+        (canvas.width - 1.5 * padding) / img.width,
+        (canvas.height - 1.5 * padding) / img.height
+    );
+    img.set({
+        scaleX: scaleFactor,
+        scaleY: scaleFactor,
+        left: (canvas.width - img.width * scaleFactor) / 2,
+        top: (canvas.height - img.height * scaleFactor) / 2
     });
+    canvas.renderAll();
 }
 
 function addOverlayImage() {
     fabric.Image.fromURL('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', function (img) {
+        if (!img) {
+            console.error("Failed to load overlay image.");
+            return;
+        }
         img.set({
-            left: canvas.width / 2 - img.width / 2,
-            top: canvas.height / 2 - img.height / 2,
+            left: canvas.width / 2,
+            top: canvas.height / 2,
             originX: 'center',
             originY: 'center',
             selectable: true,
@@ -90,14 +109,15 @@ function addOverlayImage() {
         });
         canvas.add(img);
         img.bringToFront();
-    });
+        canvas.setActiveObject(img);
+        canvas.renderAll();
+    }, { crossOrigin: 'anonymous' });
 }
 
 window.onload = function () {
     const urlParams = new URLSearchParams(window.location.search);
     const imageURL = urlParams.get('imageURL') || 'your-default-image-url.jpg';
     loadImage(imageURL);
-    addOverlayImage();
 };
 
 </script>
