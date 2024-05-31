@@ -30,10 +30,10 @@
 <canvas id="canvas"></canvas>
 
 <script>
-    const canvas = new fabric.Canvas('canvas', { selection: false });
-    const controlPoints = [];
+    const canvas = new fabric.Canvas('canvas');
     const controlPointRadius = 12;
-    const offsetDistance = 30; // Offset distance
+    const controlPoints = [];
+    const offsetDistance = 30 / Math.sqrt(2); // Calculate offset for 45 degrees
     let loadedImage = null;
 
     canvas.setWidth(window.innerWidth - 20);
@@ -69,7 +69,7 @@
             { x: margin, y: canvas.height - margin }
         ];
 
-        const innermostCorners = offsetCorners(outerCorners, 50); // Calculate innermost corners with a fixed offset
+        const innermostCorners = offsetCorners(outerCorners, -50); // Calculate innermost corners with a fixed offset
 
         innermostCorners.forEach((corner, index) => {
             controlPoints.push(createControlPoint(corner.x, corner.y, 'red'));
@@ -81,11 +81,6 @@
     function updateQuadrilateral() {
         canvas.getObjects('line').forEach(line => canvas.remove(line));
         canvas.getObjects('text').forEach(text => canvas.remove(text));
-        canvas.getObjects('circle').forEach(circle => {
-            if (!controlPoints.includes(circle)) {
-                canvas.remove(circle);
-            }
-        });
 
         const points = controlPoints.map(point => ({
             x: point.left,
@@ -94,9 +89,6 @@
 
         drawOuterQuadrilateral(points);
         drawConcentricQuadrilaterals(points);
-
-        // Re-draw control points after drawing the quadrilateral
-        controlPoints.forEach(point => canvas.add(point));
     }
 
     function drawOuterQuadrilateral(corners) {
