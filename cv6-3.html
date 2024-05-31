@@ -7,17 +7,18 @@
     <style>
         body, html {
             margin: 0;
-            padding: 20;
+            padding: 0;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Changed from center to flex-start */
             flex-direction: column;
-            height: 90vh;
+            height: 100vh;
             background-color: #FFFFFF;
         }
 
         canvas {
             border: 1px solid #ccc;
+            margin-top: 50px; /* Add top margin for padding */
         }
     </style>
 </head>
@@ -29,12 +30,12 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const controlPoints = [];
-    const pointRadius = 15;
+    const pointRadius = 12; // Change this value to set the size of the control circles
     let draggingPoint = null;
     const offsetDistance = 30; // Variable for offset distance
 
     canvas.width = window.innerWidth - 20;
-    canvas.height = window.innerHeight - 20; // Adjusted for any potential space
+    canvas.height = window.innerHeight - 100; // Adjusted for any potential space
 
     function createControlPoint(x, y, offsetX = 0, offsetY = 0) {
         return { x: x + offsetX, y: y + offsetY, offsetX: offsetX, offsetY: offsetY };
@@ -114,8 +115,8 @@
     }
 
     function drawConcentricQuadrilaterals(corners) {
-        for (let i = 1; i <= 13; i++) {
-            const offset = i * 10;
+        for (let i = 1; i <= 10; i++) {
+            const offset = i * 5;
             const newCorners = offsetCorners(corners, offset);
 
             drawQuadrilateralWithGap(newCorners, i);
@@ -130,7 +131,7 @@
     }
 
     function drawQuadrilateralWithGap(corners, index) {
-        const gapSize = 25;
+        const gapSize = 20;
         const [p0, p1, p2, p3] = corners;
 
         drawLineWithGap(p0, p1, gapSize, index);
