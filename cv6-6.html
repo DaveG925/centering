@@ -33,7 +33,7 @@
     const canvas = new fabric.Canvas('canvas');
     const controlPointRadius = 12;
     const controlPoints = [];
-    const offsetDistance = -30 / Math.sqrt(2); // Calculate offset for 45 degrees
+    const offsetDistance = 30 / Math.sqrt(2); // Calculate offset for 45 degrees
     let loadedImage = null;
 
     canvas.setWidth(window.innerWidth - 20);
@@ -70,10 +70,8 @@
         ];
 
         corners.forEach((corner, index) => {
-            const offsetX = offsetDistance;
-            const offsetY = offsetDistance;
-            if (index === 1 || index === 2) offsetX = -offsetDistance;
-            if (index === 2 || index === 3) offsetY = -offsetDistance;
+            const offsetX = (index === 0 || index === 3) ? -offsetDistance : offsetDistance;
+            const offsetY = (index === 0 || index === 1) ? -offsetDistance : offsetDistance;
             controlPoints.push(createControlPoint(corner.x + offsetX, corner.y + offsetY, 'red'));
         });
 
@@ -163,7 +161,7 @@
             selectable: false,
         });
 
-        const line2 = new fabric.Line([gapEndX, gapEndEndY, p2.x, p2.y], {
+        const line2 = new fabric.Line([gapEndX, gapEndY, p2.x, p2.y], {
             stroke: 'gray',
             strokeWidth: 1,
             selectable: false,
