@@ -28,7 +28,9 @@
 
 <script>
     const canvas = new fabric.Canvas('canvas', { selection: false });
+    const points = { outer: [] };
     const controlPointOffset = 30; // Global offset for the control points
+    const overlayLines = [];
 
     function debounce(func, wait) {
         let timeout;
@@ -45,59 +47,101 @@
         const canvasWidth = window.innerWidth - horizontalPadding;
         const canvasHeight = window.innerHeight - verticalPadding - 50; // Deduct space for the button
 
-        // Set canvas dimensions
         canvas.setWidth(canvasWidth);
         canvas.setHeight(canvasHeight);
-
-        // Center the overlay image
-        if (window.loadedImage) {
-            const img = window.loadedImage;
-            img.set({
-                left: (canvasWidth - img.width * img.scaleX) / 2,
-                top: (canvasHeight - img.height * img.scaleY) / 2
-            });
-            canvas.renderAll();
-        }
     }
 
-    function loadImage(imageURL) {
-        fabric.Image.fromURL(imageURL, function (img) {
-            window.loadedImage = img;
-            adjustCanvas(); // Adjust canvas dimensions and center image
-            img.selectable = false;
-            canvas.add(img);
-            img.sendToBack();
-        });
-    }
+    function overlayImageInQuadrilateral() {
+        const outerCorners = [
+            { x: 50, y: 50 }, { x: canvas.width - 50, y: 50 },
+            { x: canvas.width - 50, y: canvas.height - 50 }, { x: 50, y: canvas.height - 50 }
+        ];
 
-    function overlayImageInCenter() {
         fabric.Image.fromURL('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', function (overlayImg) {
             console.log('Image loaded:', overlayImg);
 
-            const canvasWidth = canvas.getWidth();
-            const canvasHeight = canvas.getHeight();
+            const overlayWidth = Math.abs(outerCorners[1].x - outerCorners[0].x);
+            const overlayHeight = Math.abs(outerCorners[3].y - outerCorners[0].y);
 
-            // Center the overlay image
             overlayImg.set({
-                left: (canvasWidth - overlayImg.width * overlayImg.scaleX) / 2,
-                top: (canvasHeight - overlayImg.height * overlayImg.scaleY) / 2,
+                left: outerCorners[0].x,
+                top: outerCorners[0].y,
+                scaleX: overlayWidth / overlayImg.width,
+                scaleY: overlayHeight / overlayImg.height,
+                originX: 'left',
+                originY: 'top',
                 hasControls: false, // Disable fabric.js controls for the overlay image
                 selectable: false // Make the overlay image non-selectable
             });
 
+            const overlayPoints = [];
+            outerCorners.forEach((corner, index) => {
+                const offsetX = (index === 0 || index === 3) ? -controlPointOffset : controlPointOffset;
+                const offsetY = (index === 0 || index === 1) ? -controlPointOffset : controlPointOffset;
+                const circle = new fabric.Circle({
+                    radius: 15,
+                    fill: 'red',
+                    left: corner.x + offsetX,
+                    top: corner.y + offsetY,
+                    originX: 'center',
+                    originY: 'center',
+                    hasBorders: false,
+                    hasControls: false,
+                    selectable: true,
+                });
+                circle.trueX = corner.x;
+                circle.trueY = corner.y;
+                circle.on('moving', function () {
+                    this.trueX = this.left - offsetX;
+                    this.trueY = this.top - offsetY;
+                    updateOverlayImagePosition();
+                    drawOverlayLines();
+                });
+                canvas.add(circle);
+                overlayPoints.push(circle);
+            });
+
+            function drawOverlayLines() {
+                overlayLines.forEach(line => canvas.remove(line));
+                overlayPoints.forEach((point, index) => {
+                    const startPoint = point;
+                    const endPoint = overlayPoints[(index + 1) % overlayPoints.length];
+                    const line = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
+                        stroke: 'red',
+                        strokeWidth: 2,
+                        selectable: false,
+                    });
+                    canvas.add(line);
+                    overlayLines.push(line);
+                });
+            }
+
+            function updateOverlayImagePosition() {
+                const minX = Math.min(...overlayPoints.map(p => p.trueX));
+                const minY = Math.min(...overlayPoints.map(p => p.trueY));
+                const maxX = Math.max(...overlayPoints.map(p => p.trueX));
+                const maxY = Math.max(...overlayPoints.map(p => p.trueY));
+                const newWidth = maxX - minX;
+                const newHeight = maxY - minY;
+                overlayImg.set({
+                    left: minX,
+                    top: minY,
+                    scaleX: newWidth / overlayImg.width,
+                    scaleY: newHeight / overlayImg.height,
+                });
+                canvas.renderAll();
+            }
+
             canvas.add(overlayImg);
-            canvas.renderAll();
+            drawOverlayLines();
         });
     }
 
     window.addEventListener('resize', debounce(adjustCanvas, 100));
 
     window.onload = function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const imageURL = urlParams.get('imageURL') || 'your-default-image-url.jpg';
         adjustCanvas();
-        loadImage(imageURL);
-        overlayImageInCenter(); // Add overlay image centered in the canvas
+        overlayImageInQuadrilateral(); // Add overlay image and controls directly
     };
 </script>
 </body>
