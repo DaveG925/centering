@@ -129,7 +129,7 @@
 
     function drawConcentricQuadrilaterals(corners) {
         for (let i = 0; i < 10; i++) {
-            const newCorners = offsetCorners(corners, i * 5);
+            const newCorners = offsetCorners(corners, i * 15);
 
             ctx.beginPath();
             ctx.moveTo(newCorners[0].x, newCorners[0].y);
