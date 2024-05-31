@@ -230,28 +230,93 @@ function overlayImageInQuadrilateral() {
 
     console.log('Outer Corners:', outerCorners);
 
-    fabric.Image.fromURL('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', function (img) {
-        console.log('Image loaded:', img);
+    fabric.Image.fromURL('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', function (overlayImg) {
+        console.log('Image loaded:', overlayImg);
 
         // Calculate the overlay width and height
         const overlayWidth = Math.abs(outerCorners[1].x - outerCorners[0].x);
         const overlayHeight = Math.abs(outerCorners[3].y - outerCorners[0].y);
 
         // Set the image position and scale
-        img.set({
+        overlayImg.set({
             left: outerCorners[0].x,
             top: outerCorners[0].y,
-            scaleX: overlayWidth / img.width,
-            scaleY: overlayHeight / img.height,
+            scaleX: overlayWidth / overlayImg.width,
+            scaleY: overlayHeight / overlayImg.height,
             originX: 'left',
             originY: 'top',
+            hasControls: false, // Disable fabric.js controls for the overlay image
+            selectable: false // Make the overlay image non-selectable
         });
 
-        canvas.add(img);
-        img.bringToFront();
-        canvas.renderAll();
+        // Create control points for the overlay image
+        const overlayPoints = [];
+        const overlayLines = [];
+        outerCorners.forEach((corner, index) => {
+            const offsetX = (index === 0 || index === 3) ? -controlPointOffset : controlPointOffset;
+            const offsetY = (index === 0 || index === 1) ? -controlPointOffset : controlPointOffset;
+            const circle = new fabric.Circle({
+                radius: 15,
+                fill: 'red',
+                left: corner.x + offsetX,
+                top: corner.y + offsetY,
+                originX: 'center',
+                originY: 'center',
+                hasBorders: false,
+                hasControls: false,
+                selectable: true,
+            });
+            circle.on('moving', function () {
+                // Update the corner position when the control point moves
+                const index = overlayPoints.indexOf(this);
+                overlayPoints[index].trueX = this.left - offsetX;
+                overlayPoints[index].trueY = this.top - offsetY;
+                drawOverlayLines();
+                updateOverlayImagePosition();
+            });
+            canvas.add(circle);
+            overlayPoints.push({ trueX: corner.x, trueY: corner.y });
+        });
+
+        function drawOverlayLines() {
+            // Remove existing lines from the canvas
+            overlayLines.forEach(line => canvas.remove(line));
+            // Draw new lines for the overlay quadrilateral
+            overlayPoints.forEach((point, index) => {
+                const startPoint = point;
+                const endPoint = overlayPoints[(index + 1) % overlayPoints.length];
+                const line = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
+                    stroke: 'red',
+                    strokeWidth: 2,
+                    selectable: false,
+                });
+                canvas.add(line);
+                overlayLines.push(line);
+            });
+        }
+
+        function updateOverlayImagePosition() {
+            // Calculate the new position and size of the overlay image based on control points
+            const minX = Math.min(...overlayPoints.map(p => p.trueX));
+            const minY = Math.min(...overlayPoints.map(p => p.trueY));
+            const maxX = Math.max(...overlayPoints.map(p => p.trueX));
+            const maxY = Math.max(...overlayPoints.map(p => p.trueY));
+            const newWidth = maxX - minX;
+            const newHeight = maxY - minY;
+            overlayImg.set({
+                left: minX,
+                top: minY,
+                scaleX: newWidth / overlayImg.width,
+                scaleY: newHeight / overlayImg.height,
+            });
+            canvas.renderAll();
+        }
+
+        canvas.add(overlayImg);
+        drawOverlayLines();
     });
 }
+
 
 window.addEventListener('resize', debounce(adjustCanvas, 100));
 
