@@ -33,7 +33,7 @@
     const canvas = new fabric.Canvas('canvas');
     const controlPointRadius = 12;
     const controlPoints = [];
-    const offsetDistance = 30 / Math.sqrt(2); // Calculate offset for 45 degrees
+    const offsetDistance = -60 / Math.sqrt(2); // Calculate offset for 45 degrees
     let loadedImage = null;
 
     canvas.setWidth(window.innerWidth - 20);
@@ -162,7 +162,7 @@
         });
 
         const line2 = new fabric.Line([gapEndX, gapEndY, p2.x, p2.y], {
-            stroke: 'gray',
+            stroke: 'green',
             strokeWidth: 1,
             selectable: false,
         });
