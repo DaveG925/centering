@@ -76,18 +76,11 @@
                         lockScalingFlip: true,
                         hasRotatingPoint: false,
                         cornerStyle: 'circle',
-                        transparentCorners: false
-                    });
-
-                    // Custom controls for perspective warp
-                    overlay.setControlsVisibility({
-                        mt: false, mb: false, ml: false, mr: false,
-                        bl: true, br: true, tl: true, tr: true,
-                        mtr: false
+                        transparentCorners: false,
+                        selectable: false
                     });
 
                     canvas.add(overlay);
-                    canvas.setActiveObject(overlay);
                     console.log('Overlay image added.');
 
                     addCornerControls(canvas, overlay);
@@ -101,19 +94,29 @@
             });
 
             function addCornerControls(canvas, overlay) {
-                const cornerPoints = [
-                    new fabric.Circle({ radius: 5, fill: 'red', left: overlay.left - overlay.width / 2, top: overlay.top - overlay.height / 2, originX: 'center', originY: 'center' }),
-                    new fabric.Circle({ radius: 5, fill: 'red', left: overlay.left + overlay.width / 2, top: overlay.top - overlay.height / 2, originX: 'center', originY: 'center' }),
-                    new fabric.Circle({ radius: 5, fill: 'red', left: overlay.left - overlay.width / 2, top: overlay.top + overlay.height / 2, originX: 'center', originY: 'center' }),
-                    new fabric.Circle({ radius: 5, fill: 'red', left: overlay.left + overlay.width / 2, top: overlay.top + overlay.height / 2, originX: 'center', originY: 'center' })
+                const points = [
+                    { left: overlay.left - overlay.width / 2, top: overlay.top - overlay.height / 2 }, // TL
+                    { left: overlay.left + overlay.width / 2, top: overlay.top - overlay.height / 2 }, // TR
+                    { left: overlay.left - overlay.width / 2, top: overlay.top + overlay.height / 2 }, // BL
+                    { left: overlay.left + overlay.width / 2, top: overlay.top + overlay.height / 2 }  // BR
                 ];
 
-                cornerPoints.forEach((point, index) => {
-                    point.hasControls = point.hasBorders = false;
-                    point.lockMovementX = point.lockMovementY = false;
-                    canvas.add(point);
+                const cornerPoints = points.map(point => {
+                    return new fabric.Circle({
+                        radius: 5,
+                        fill: 'red',
+                        left: point.left,
+                        top: point.top,
+                        originX: 'center',
+                        originY: 'center',
+                        hasControls: false,
+                        hasBorders: false
+                    });
+                });
 
-                    point.on('moving', function() {
+                cornerPoints.forEach((point, index) => {
+                    canvas.add(point);
+                    point.on('moving', function () {
                         updateOverlayTransform(overlay, cornerPoints);
                     });
                 });
@@ -134,20 +137,14 @@
                     'br': { x: br.left, y: br.top }
                 });
 
-                const transformMatrix = fabric.util.composeMatrix({
-                    scaleX: 1, // Adjust this according to your need
-                    scaleY: 1, // Adjust this according to your need
-                    skewX: 0,
-                    skewY: 0,
-                    angle: 0,
-                    translateX: 0,
-                    translateY: 0,
-                    flipX: false,
-                    flipY: false
+                const matrix = fabric.util.makePerspectiveMatrix({
+                    tl: { x: tl.left, y: tl.top },
+                    tr: { x: tr.left, y: tr.top },
+                    bl: { x: bl.left, y: bl.top },
+                    br: { x: br.left, y: br.top }
                 });
 
-                overlay.set('transformMatrix', transformMatrix);
-
+                overlay.set('transformMatrix', matrix);
                 canvas.renderAll();
             }
         });
