@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Card Centering Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/perspective.js/0.1.4/perspective.min.js"></script>
 <style>
    body, html {
     margin: 0;
@@ -223,16 +224,29 @@ function overlayImageInQuadrilateral() {
     fabric.Image.fromURL('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', function (img) {
         console.log('Image loaded:', img);
 
-        // Calculate the overlay width and height
-        const overlayWidth = Math.abs(outerCorners[1].x - outerCorners[0].x);
-        const overlayHeight = Math.abs(outerCorners[3].y - outerCorners[0].y);
+        // Define the source points (corners of the original image)
+        const srcPoints = [
+            { x: 0, y: 0 },
+            { x: img.width, y: 0 },
+            { x: img.width, y: img.height },
+            { x: 0, y: img.height }
+        ];
 
-        // Set the image position and scale
+        // Apply the perspective transformation
+        const perspective = new Perspective(srcPoints, outerCorners.map(p => [p.x, p.y]));
+
+        const ctx = canvas.getContext("2d");
+        const imageElement = new Image();
+        imageElement.src = 'https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png';
+
+        imageElement.onload = function () {
+            const warpedImage = perspective.warp(imageElement);
+            ctx.drawImage(warpedImage, 0, 0);
+        };
+
         img.set({
             left: outerCorners[0].x,
             top: outerCorners[0].y,
-            scaleX: overlayWidth / img.width,
-            scaleY: overlayHeight / img.height,
             originX: 'left',
             originY: 'top',
         });
@@ -242,16 +256,6 @@ function overlayImageInQuadrilateral() {
         canvas.renderAll();
     });
 }
-
-window.addEventListener('resize', debounce(adjustCanvas, 100));
-
-window.onload = function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    const imageURL = urlParams.get('imageURL') || 'your-default-image-url.jpg';
-    adjustCanvas();
-    loadImage(imageURL);
-    initQuadrilaterals();
-};
 </script>
 </body>
 </html>
