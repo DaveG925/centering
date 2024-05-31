@@ -133,10 +133,10 @@
         for (let i = 0; i < 10; i++) {
             const offset = i * 5;
 
-            const newP0 = { x: p0.x + offset, y: p0.y + offset };
-            const newP1 = { x: p1.x - offset, y: p1.y + offset };
-            const newP2 = { x: p2.x + offset, y: p2.y - offset };
-            const newP3 = { x: p3.x - offset, y: p3.y - offset };
+            const newP0 = interpolate(p0, p2, offset);
+            const newP1 = interpolate(p1, p3, offset);
+            const newP2 = interpolate(p2, p0, offset);
+            const newP3 = interpolate(p3, p1, offset);
 
             ctx.beginPath();
             ctx.moveTo(newP0.x, newP0.y);
@@ -148,6 +148,16 @@
             ctx.lineWidth = 1;
             ctx.stroke();
         }
+    }
+
+    function interpolate(pointA, pointB, offset) {
+        const totalDistance = Math.sqrt((pointB.x - pointA.x) ** 2 + (pointB.y - pointA.y) ** 2);
+        const ratio = offset / totalDistance;
+
+        return {
+            x: pointA.x + ratio * (pointB.x - pointA.x),
+            y: pointA.y + ratio * (pointB.y - pointA.y)
+        };
     }
 
     canvas.addEventListener('mousedown', handleMouseDown);
