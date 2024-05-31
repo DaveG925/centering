@@ -70,8 +70,8 @@
         ];
 
         corners.forEach((corner, index) => {
-            const offsetX = (index === 0 || index === 3) ? offsetDistance : -offsetDistance;
-            const offsetY = (index === 0 || index === 1) ? offsetDistance : -offsetDistance;
+            const offsetX = (index === 0 || index === 3) ? -offsetDistance : offsetDistance;
+            const offsetY = (index === 0 || index === 1) ? -offsetDistance : offsetDistance;
             controlPoints.push(createControlPoint(corner.x + offsetX, corner.y + offsetY, 'red'));
         });
 
