@@ -75,14 +75,19 @@
                         cornerStyle: 'circle',
                         transparentCorners: false
                     });
+
+                    // Custom controls for perspective warp
                     overlay.setControlsVisibility({
                         mt: false, mb: false, ml: false, mr: false,
                         bl: true, br: true, tl: true, tr: true,
                         mtr: false
                     });
+
                     canvas.add(overlay);
                     canvas.setActiveObject(overlay);
                     console.log('Overlay image added.');
+
+                    addCornerControls(canvas, overlay);
                 }, { crossOrigin: 'Anonymous' });
             }, { crossOrigin: 'Anonymous' });
 
@@ -91,6 +96,50 @@
                 canvas.setHeight(window.innerHeight);
                 canvas.renderAll();
             });
+
+            function addCornerControls(canvas, overlay) {
+                const cornerPoints = [
+                    new fabric.Circle({ radius: 5, fill: 'red', left: overlay.left - overlay.width / 2, top: overlay.top - overlay.height / 2, originX: 'center', originY: 'center' }),
+                    new fabric.Circle({ radius: 5, fill: 'red', left: overlay.left + overlay.width / 2, top: overlay.top - overlay.height / 2, originX: 'center', originY: 'center' }),
+                    new fabric.Circle({ radius: 5, fill: 'red', left: overlay.left - overlay.width / 2, top: overlay.top + overlay.height / 2, originX: 'center', originY: 'center' }),
+                    new fabric.Circle({ radius: 5, fill: 'red', left: overlay.left + overlay.width / 2, top: overlay.top + overlay.height / 2, originX: 'center', originY: 'center' })
+                ];
+
+                cornerPoints.forEach((point, index) => {
+                    point.hasControls = point.hasBorders = false;
+                    point.lockMovementX = point.lockMovementY = false;
+                    canvas.add(point);
+
+                    point.on('moving', function() {
+                        updateOverlayTransform(overlay, cornerPoints);
+                    });
+                });
+
+                updateOverlayTransform(overlay, cornerPoints);
+            }
+
+            function updateOverlayTransform(overlay, points) {
+                const tl = points[0];
+                const tr = points[1];
+                const bl = points[2];
+                const br = points[3];
+
+                overlay.set({
+                    'tl': { x: tl.left, y: tl.top },
+                    'tr': { x: tr.left, y: tr.top },
+                    'bl': { x: bl.left, y: bl.top },
+                    'br': { x: br.left, y: br.top }
+                });
+
+                const transformMatrix = fabric.util.multiplyTransformMatrices(
+                    [1, 0, 0, 1, overlay.left, overlay.top],
+                    fabric.util.qrDecompose(overlay.calcTransformMatrix()).inverse().slice(0, 6)
+                );
+
+                overlay.set('transformMatrix', transformMatrix);
+
+                canvas.renderAll();
+            }
         });
     </script>
 </body>
