@@ -133,26 +133,17 @@
         // Number of divisions for the grid
         const divisions = 10;
 
-        // Calculate step increments
-        const xStepTop = (p1.x - p0.x) / divisions;
-        const yStepTop = (p1.y - p0.y) / divisions;
-        const xStepBottom = (p3.x - p2.x) / divisions;
-        const yStepBottom = (p3.y - p2.y) / divisions;
-        const xStepLeft = (p2.x - p0.x) / divisions;
-        const yStepLeft = (p2.y - p0.y) / divisions;
-        const xStepRight = (p3.x - p1.x) / divisions;
-        const yStepRight = (p3.y - p1.y) / divisions;
+        // Calculate step increments for edges
+        const topEdge = interpolate(p0, p1, divisions);
+        const rightEdge = interpolate(p1, p3, divisions);
+        const bottomEdge = interpolate(p2, p3, divisions);
+        const leftEdge = interpolate(p0, p2, divisions);
 
         // Draw vertical lines
         for (let i = 0; i <= divisions; i++) {
-            const startX = p0.x + i * xStepTop;
-            const startY = p0.y + i * yStepTop;
-            const endX = p2.x + i * xStepBottom;
-            const endY = p2.y + i * yStepBottom;
-
             ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(endX, endY);
+            ctx.moveTo(topEdge[i].x, topEdge[i].y);
+            ctx.lineTo(bottomEdge[i].x, bottomEdge[i].y);
             ctx.strokeStyle = 'gray';
             ctx.lineWidth = 1;
             ctx.stroke();
@@ -160,18 +151,25 @@
 
         // Draw horizontal lines
         for (let i = 0; i <= divisions; i++) {
-            const startX = p0.x + i * xStepLeft;
-            const startY = p0.y + i * yStepLeft;
-            const endX = p1.x + i * xStepRight;
-            const endY = p1.y + i * yStepRight;
-
             ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(endX, endY);
+            ctx.moveTo(leftEdge[i].x, leftEdge[i].y);
+            ctx.lineTo(rightEdge[i].x, rightEdge[i].y);
             ctx.strokeStyle = 'gray';
             ctx.lineWidth = 1;
             ctx.stroke();
         }
+    }
+
+    function interpolate(pointA, pointB, divisions) {
+        const points = [];
+        for (let i = 0; i <= divisions; i++) {
+            const t = i / divisions;
+            points.push({
+                x: pointA.x + t * (pointB.x - pointA.x),
+                y: pointA.y + t * (pointB.y - pointA.y)
+            });
+        }
+        return points;
     }
 
     canvas.addEventListener('mousedown', handleMouseDown);
