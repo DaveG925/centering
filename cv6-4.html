@@ -34,7 +34,7 @@
     const controlPoints = [];
     const pointRadius = 12; // Change this value to set the size of the control circles
     let draggingPoint = null;
-    const offsetDistance = -50; // Variable for offset distance
+    const offsetDistance = 20; // Variable for offset distance
     let loadedImage = null;
     let imageX, imageY, imageWidth, imageHeight;
 
@@ -46,7 +46,7 @@
     }
 
     function drawControlPoints() {
-        ctx.fillStyle = 'red';
+        ctx.fillStyle = 'blue';
         controlPoints.forEach(point => {
             ctx.beginPath();
             ctx.arc(point.x, point.y, pointRadius, 0, 2 * Math.PI);
@@ -184,7 +184,7 @@
             ctx.setLineDash([5, 5]);
         }
 
-        ctx.strokeStyle = 'gray';
+        ctx.strokeStyle = 'black';
         ctx.lineWidth = 1;
         ctx.stroke();
     }
