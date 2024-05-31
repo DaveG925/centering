@@ -10,17 +10,17 @@
             padding: 0;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Changed from center to flex-start */
+            align-items: flex-start;
             flex-direction: column;
             height: 100vh;
             background-color: #FFFFFF;
-            overflow: hidden; /* Prevents scrolling */
+            overflow: hidden;
         }
 
         canvas {
             border: 1px solid #ccc;
-            margin-top: 10px; /* Add top margin for padding */
-            touch-action: none; /* Prevents default touch actions like scrolling */
+            margin-top: 10px;
+            touch-action: none;
         }
     </style>
 </head>
@@ -32,21 +32,21 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const controlPoints = [];
-    const pointRadius = 12; // Change this value to set the size of the control circles
+    const pointRadius = 12;
     let draggingPoint = null;
-    const offsetDistance = 20; // Variable for offset distance
+    const offsetDistance = -50;
     let loadedImage = null;
     let imageX, imageY, imageWidth, imageHeight;
 
     canvas.width = window.innerWidth - 20;
-    canvas.height = window.innerHeight - 100; // Adjusted for any potential space
+    canvas.height = window.innerHeight - 100;
 
     function createControlPoint(x, y, offsetX = 0, offsetY = 0) {
         return { x: x + offsetX, y: y + offsetY, offsetX: offsetX, offsetY: offsetY };
     }
 
     function drawControlPoints() {
-        ctx.fillStyle = 'blue';
+        ctx.fillStyle = 'red';
         controlPoints.forEach(point => {
             ctx.beginPath();
             ctx.arc(point.x, point.y, pointRadius, 0, 2 * Math.PI);
@@ -98,7 +98,7 @@
     }
 
     function isPointClicked(point, mousePos) {
-        const hitboxSize = 2 * pointRadius; // Define the hitbox size
+        const hitboxSize = 2 * pointRadius;
         return (
             mousePos.x >= point.x - hitboxSize &&
             mousePos.x <= point.x + hitboxSize &&
@@ -107,8 +107,8 @@
         );
     }
 
-    function handleMouseDown(event) {
-        event.preventDefault(); // Prevent default scrolling
+    function handlePointerDown(event) {
+        event.preventDefault();
         const mousePos = getMousePosition(event);
         for (const point of controlPoints) {
             if (isPointClicked(point, mousePos)) {
@@ -118,7 +118,7 @@
         }
     }
 
-    function handleMouseMove(event) {
+    function handlePointerMove(event) {
         if (draggingPoint) {
             const mousePos = getMousePosition(event);
             draggingPoint.x = mousePos.x;
@@ -127,8 +127,8 @@
         }
     }
 
-    function handleMouseUp(event) {
-        event.preventDefault(); // Prevent default scrolling
+    function handlePointerUp(event) {
+        event.preventDefault();
         draggingPoint = null;
     }
 
@@ -139,13 +139,12 @@
 
             drawQuadrilateralWithGap(newCorners, i);
 
-            // Draw number at the midpoint of each edge
             drawLabelAtMidpoint(newCorners[0], newCorners[1], i, 'top');
             drawLabelAtMidpoint(newCorners[1], newCorners[2], i, 'right');
             drawLabelAtMidpoint(newCorners[2], newCorners[3], i, 'bottom');
             drawLabelAtMidpoint(newCorners[3], newCorners[0], i, 'left');
         }
-        ctx.setLineDash([]); // Reset to solid lines after drawing
+        ctx.setLineDash([]);
     }
 
     function drawQuadrilateralWithGap(corners, index) {
@@ -184,7 +183,7 @@
             ctx.setLineDash([5, 5]);
         }
 
-        ctx.strokeStyle = 'black';
+        ctx.strokeStyle = 'gray';
         ctx.lineWidth = 1;
         ctx.stroke();
     }
@@ -257,22 +256,19 @@
         };
     }
 
-    canvas.addEventListener('mousedown', handleMouseDown);
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mouseup', handleMouseUp);
+    canvas.addEventListener('mousedown', handlePointerDown);
+    canvas.addEventListener('mousemove', handlePointerMove);
+    canvas.addEventListener('mouseup', handlePointerUp);
 
-    // Prevent scrolling when touching the canvas
+    // Add touch event listeners for touch support
     canvas.addEventListener('touchstart', function(event) {
-        event.preventDefault();
-        handleMouseDown(event.touches[0]);
+        handlePointerDown(event.touches[0]);
     });
     canvas.addEventListener('touchmove', function(event) {
-        event.preventDefault();
-        handleMouseMove(event.touches[0]);
+        handlePointerMove(event.touches[0]);
     });
     canvas.addEventListener('touchend', function(event) {
-        event.preventDefault();
-        handleMouseUp(event.changedTouches[0]);
+        handlePointerUp(event.changedTouches[0]);
     });
 
     window.onload = function() {
