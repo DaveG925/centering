@@ -77,10 +77,11 @@
                         hasRotatingPoint: false,
                         cornerStyle: 'circle',
                         transparentCorners: false,
-                        selectable: false
+                        selectable: true
                     });
 
                     canvas.add(overlay);
+                    canvas.setActiveObject(overlay);
                     console.log('Overlay image added.');
 
                     addCornerControls(canvas, overlay);
@@ -130,21 +131,23 @@
                 const bl = points[2];
                 const br = points[3];
 
-                overlay.set({
-                    'tl': { x: tl.left, y: tl.top },
-                    'tr': { x: tr.left, y: tr.top },
-                    'bl': { x: bl.left, y: bl.top },
-                    'br': { x: br.left, y: br.top }
-                });
+                const width = overlay.width;
+                const height = overlay.height;
 
-                const matrix = fabric.util.makePerspectiveMatrix({
-                    tl: { x: tl.left, y: tl.top },
-                    tr: { x: tr.left, y: tr.top },
-                    bl: { x: bl.left, y: bl.top },
-                    br: { x: br.left, y: br.top }
-                });
+                const transformMatrix = fabric.util.multiplyTransformMatrices(
+                    fabric.util.invertTransform([
+                        [1, 0, tl.left - (width / 2)],
+                        [0, 1, tl.top - (height / 2)],
+                        [0, 0, 1]
+                    ]),
+                    [
+                        [tr.left - tl.left, br.left - tr.left, tl.left],
+                        [tr.top - tl.top, br.top - tr.top, tl.top],
+                        [0, 0, 1]
+                    ]
+                );
 
-                overlay.set('transformMatrix', matrix);
+                overlay.set('transformMatrix', transformMatrix);
                 canvas.renderAll();
             }
         });
