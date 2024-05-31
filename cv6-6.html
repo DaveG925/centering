@@ -62,17 +62,17 @@
 
     function initializeControlPoints() {
         const margin = 50;
-        const corners = [
+        const outerCorners = [
             { x: margin, y: margin },
             { x: canvas.width - margin, y: margin },
             { x: canvas.width - margin, y: canvas.height - margin },
             { x: margin, y: canvas.height - margin }
         ];
 
-        corners.forEach((corner, index) => {
-            const offsetX = (index === 0 || index === 3) ? -offsetDistance : offsetDistance;
-            const offsetY = (index === 0 || index === 1) ? -offsetDistance : offsetDistance;
-            controlPoints.push(createControlPoint(corner.x + offsetX, corner.y + offsetY, 'red'));
+        const innermostCorners = offsetCorners(outerCorners, 50); // Calculate innermost corners with a fixed offset
+
+        innermostCorners.forEach((corner, index) => {
+            controlPoints.push(createControlPoint(corner.x, corner.y, 'red'));
         });
 
         updateQuadrilateral();
