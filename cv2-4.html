@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Card Centering Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+<style>
+   body, html {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #FFFFFF;
+}
+
+canvas {
+    border: 1px solid #ccc;
+}
+
+.button-container {
+    margin-top: 20px; /* Space between canvas and button */
+    text-align: center; /* Ensure the button text is centered */
+}
+
+button {
+    display: block;
+    margin-bottom: 5px;
+}
+
+#calculateCentering {
+    background-color: #446d8b; /* The button's background color */
+    border: 1px solid #446d8b; /* The button's border */
+    color: white; /* The text color of the button */
+    padding: 8px 24px; /* Top and bottom padding of 12px, left and right padding of 24px */
+    text-align: center; /* Center the text inside the button */
+    text-decoration: none; /* Remove underline from text */
+    display: inline-block; /* Allow the button to be inline but also set dimensions */
+    font-size: 14px; /* The font size of the text */
+    cursor: pointer; /* Change mouse pointer on hover */
+    border-radius: 4px; /* Rounded corners of the button */
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.4); /* Shadow to give depth */
+    transition: all 0.3s; /* Transition for smooth color change on hover */
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const imageURL = urlParams.get('imageURL');
+    if (imageURL) {
+        loadImage(imageURL);
+    } else {
+        console.error("No imageURL parameter provided.");
+    }
+});
+
+const canvas = new fabric.Canvas('canvas', { selection: false });
+
+function loadImage(imageURL) {
+    fabric.Image.fromURL(imageURL, function (img) {
+        if (!img) {
+            console.error("Failed to load image.");
+            return;
+        }
+        console.log("Image loaded:", img);
+        window.loadedImage = img;
+        updateImageOnCanvas(img);
+        img.selectable = false;
+        canvas.add(img);
+        img.sendToBack();
+        canvas.renderAll();
+    }, { crossOrigin: 'anonymous' });
+}
+
+function updateImageOnCanvas(img) {
+    const padding = 30; // Padding around the image
+    const scaleFactor = Math.min(
+        (canvas.width - 1.5 * padding) / img.width,
+        (canvas.height - 1.5 * padding) / img.height
+    );
+    img.set({
+        scaleX: scaleFactor,
+        scaleY: scaleFactor,
+        left: (canvas.width - img.width * scaleFactor) / 2,
+        top: (canvas.height - img.height * scaleFactor) / 2
+    });
+    canvas.renderAll();
+}
+
+window.onload = function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const imageURL = urlParams.get('imageURL') || 'your-default-image-url.jpg';
+    loadImage(imageURL);
+};
+
+window.addEventListener('resize', debounce(adjustCanvas, 100));
+
+function debounce(func, wait) {
+    let timeout;
+    return function () {
+        const context = this, args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+}
+
+function adjustCanvas() {
+    const horizontalPadding = 20; // 20px on each side
+    const verticalPadding = 20; // 50px on top and bottom for example
+    const canvasWidth = window.innerWidth - horizontalPadding;
+    const canvasHeight = window.innerHeight - verticalPadding - 50; // Deduct space for the button
+
+    const aspectRatio = 3 / 4;
+    const heightBasedOnWidth = canvasWidth / aspectRatio;
+    const finalCanvasHeight = Math.min(canvasHeight, heightBasedOnWidth);
+
+    canvas.setWidth(canvasWidth);
+    canvas.setHeight(finalCanvasHeight);
+
+    if (window.loadedImage) {
+        updateImageOnCanvas(window.loadedImage); // Update image position after canvas size change
+    }
+    canvas.renderAll();
+}
+</script>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+<div class="button-container">
+    <button id="calculateCentering">OVERLAY</button>
+</div>
+
+</body>
+</html>
