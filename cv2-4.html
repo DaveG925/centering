@@ -216,6 +216,11 @@ function loadImage(imageURL) {
         canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
             scaleX: minScale,
             scaleY: minScale,
+            // Center the background image within the canvas
+            left: canvas.width / 2,
+            top: canvas.height / 2,
+            originX: 'center',
+            originY: 'center',
         });
     });
 }
