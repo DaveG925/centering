@@ -39,10 +39,10 @@
     canvas.setWidth(window.innerWidth - 20);
     canvas.setHeight(window.innerHeight - 100);
 
-    function createControlPoint(x, y, color, offsetX, offsetY) {
+    function createControlPoint(x, y, color) {
         const circle = new fabric.Circle({
-            left: x + offsetX,
-            top: y + offsetY,
+            left: x,
+            top: y,
             radius: controlPointRadius,
             fill: color,
             originX: 'center',
@@ -62,12 +62,18 @@
 
     function initializeControlPoints() {
         const margin = 50;
-        controlPoints.push(
-            createControlPoint(margin, margin, 'red', offsetDistance, offsetDistance),
-            createControlPoint(canvas.width - margin, margin, 'red', -offsetDistance, offsetDistance),
-            createControlPoint(canvas.width - margin, canvas.height - margin, 'red', -offsetDistance, -offsetDistance),
-            createControlPoint(margin, canvas.height - margin, 'red', offsetDistance, -offsetDistance)
-        );
+        const corners = [
+            { x: margin, y: margin },
+            { x: canvas.width - margin, y: margin },
+            { x: canvas.width - margin, y: canvas.height - margin },
+            { x: margin, y: canvas.height - margin }
+        ];
+
+        corners.forEach((corner, index) => {
+            const offsetX = (index === 0 || index === 3) ? offsetDistance : -offsetDistance;
+            const offsetY = (index === 0 || index === 1) ? offsetDistance : -offsetDistance;
+            controlPoints.push(createControlPoint(corner.x + offsetX, corner.y + offsetY, 'red'));
+        });
 
         updateQuadrilateral();
     }
