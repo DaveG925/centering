@@ -53,24 +53,141 @@ document.addEventListener('DOMContentLoaded', function () {
     const cardID = urlParams.get('CardID');  // Retrieve CardID from URL
     const isFront = urlParams.get('isFront'); // Retrieve isFront from URL
 
+    // You can now use these values as needed within your application
     if (imageURL) {
         loadImage(imageURL);
     }
 
     console.log("Card ID:", cardID);
     console.log("Is Front:", isFront);
+
+    // Depending on the application, you may want to handle these variables differently
+    // For example, adjust functionality based on whether isFront is 'true'
+});
+</script>
+
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+<div class="button-container">
+    <button id="calculateCentering">OVERLAY</button>
+</div>
+<script>
+document.getElementById('calculateCentering').addEventListener('click', function() {
+    // Overlay the predefined image within the outer quadrilateral
+    addOverlayImage();
 });
 
 const canvas = new fabric.Canvas('canvas', { selection: false });
+const points = { outer: [] };
+const lines = { outer: [] };
+const controlPointOffset = 30; // Global offset for the control points
 
-function loadImage(imageURL) {
-    fabric.Image.fromURL(imageURL, function (img) {
-        window.loadedImage = img;
-        updateImageOnCanvas(img);
-        img.selectable = false;
-        canvas.add(img);
-        img.sendToBack();
-    }, { crossOrigin: 'anonymous' });
+function debounce(func, wait) {
+    let timeout;
+    return function () {
+        const context = this, args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+}
+
+function adjustCanvas() {
+    const horizontalPadding = 20; // 20px on each side
+    const verticalPadding = 20; // 50px on top and bottom for example
+    const canvasWidth = window.innerWidth - horizontalPadding;
+    const canvasHeight = window.innerHeight - verticalPadding - 50; // Deduct space for the button
+
+    // You may want to maintain a specific aspect ratio for the canvas.
+    // For example, if you want an aspect ratio of 4:3, you would calculate the height based on the width:
+    const aspectRatio = 3 / 4;
+    const heightBasedOnWidth = canvasWidth / aspectRatio;
+
+    // Then, choose the smaller of the two heights to ensure the canvas fits in the window.
+    const finalCanvasHeight = Math.min(canvasHeight, heightBasedOnWidth);
+
+    canvas.setWidth(canvasWidth);
+    canvas.setHeight(finalCanvasHeight);
+    initQuadrilaterals(); // Reinitialize to adjust corner positions
+    if (window.loadedImage) {
+        updateImageOnCanvas(window.loadedImage); // Update image position after canvas size change
+    }
+    canvas.renderAll();
+}
+
+function initQuadrilaterals() {
+    // Clear any existing objects from the canvas, except the loaded image
+    canvas.getObjects().forEach((obj) => {
+        if (obj !== window.loadedImage) {
+            canvas.remove(obj);
+        }
+    });
+
+    // Define your default corner positions for outer quadrilaterals
+    const defaultOuterCorners = [
+        { x: 50, y: 50 }, { x: canvas.width - 50, y: 50 },
+        { x: canvas.width - 50, y: canvas.height - 50 }, { x: 50, y: canvas.height - 50 }
+    ];
+
+    // Create or adjust the corner points
+    defaultOuterCorners.forEach((point, index) => {
+        points.outer[index] = createCorner(point, 'outer', index);
+    });
+
+    // Draw lines connecting the corners
+    drawLines();
+}
+
+function createCorner(point, borderType, index) {
+    // Determine the direction of the offset based on the corner
+    let offsetX = (index === 0 || index === 3) ? -controlPointOffset : controlPointOffset;
+    let offsetY = (index === 0 || index === 1) ? -controlPointOffset : controlPointOffset;
+
+    let circle = new fabric.Circle({
+        radius: 15, // Radius of control points for better touch response
+        fill: 'red',
+        left: point.x + offsetX,
+        top: point.y + offsetY,
+        originX: 'center',
+        originY: 'center',
+        hasBorders: false,
+        hasControls: false,
+        selectable: true,
+    });
+
+    // Store the true corner position inside the circle object for easy access
+    circle.trueX = point.x;
+    circle.trueY = point.y;
+
+    circle.on('moving', function () {
+        // Update the true corner position when the control point moves
+        this.trueX = this.left - offsetX;
+        this.trueY = this.top - offsetY;
+        drawLines();
+    });
+
+    canvas.add(circle);
+    return circle;
+}
+
+function drawLines() {
+    // Remove existing lines from the canvas
+    Object.values(lines).forEach(borderLines => {
+        borderLines.forEach(line => canvas.remove(line));
+    });
+
+    // Draw new lines for the outer quadrilateral
+    points.outer.forEach((point, index) => {
+        let startPoint = point;
+        let endPoint = points.outer[(index + 1) % points.outer.length];
+        lines.outer[index] = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
+            stroke: 'red',
+            strokeWidth: 2,
+            selectable: false,
+        });
+        canvas.add(lines.outer[index]);
+    });
 }
 
 function updateImageOnCanvas(img) {
@@ -82,10 +199,20 @@ function updateImageOnCanvas(img) {
     img.set({
         scaleX: scaleFactor,
         scaleY: scaleFactor,
-        left: (canvas.width - img.width * scaleFactor) / 2,
-        top: (canvas.height - img.height * scaleFactor) / 2
+        left: (canvas.width - img.width * scaleFactor) / 1.5,
+        top: (canvas.height - img.height * scaleFactor) / 1.5
     });
     canvas.renderAll();
+}
+
+function loadImage(imageURL) {
+    fabric.Image.fromURL(imageURL, function (img) {
+        window.loadedImage = img;
+        updateImageOnCanvas(img);
+        img.selectable = false;
+        canvas.add(img);
+        img.sendToBack();
+    });
 }
 
 function addOverlayImage() {
@@ -106,23 +233,16 @@ function addOverlayImage() {
     }, { crossOrigin: 'anonymous' });
 }
 
+window.addEventListener('resize', debounce(adjustCanvas, 100));
+
 window.onload = function () {
     const urlParams = new URLSearchParams(window.location.search);
     const imageURL = urlParams.get('imageURL') || 'your-default-image-url.jpg';
+    adjustCanvas();
     loadImage(imageURL);
+    initQuadrilaterals();
 };
 
-document.getElementById('calculateCentering').addEventListener('click', function() {
-    addOverlayImage();
-});
 </script>
-</head>
-<body>
-
-<canvas id="canvas"></canvas>
-<div class="button-container">
-    <button id="calculateCentering">ADD OVERLAY</button>
-</div>
-
 </body>
 </html>
