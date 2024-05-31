@@ -6,7 +6,7 @@
     <title>Movable Quadrilateral with Image</title>
     <style>
         body, html {
-            margin: 10;
+            margin: 0;
             padding: 0;
             display: flex;
             justify-content: center;
@@ -33,16 +33,16 @@
     const canvas = new fabric.Canvas('canvas');
     const controlPointRadius = 12;
     const controlPoints = [];
-    const offsetDistance = 20;
+    const offsetDistance = 50;
     let loadedImage = null;
 
     canvas.setWidth(window.innerWidth - 20);
     canvas.setHeight(window.innerHeight - 100);
 
-    function createControlPoint(x, y, color) {
+    function createControlPoint(x, y, color, offsetX, offsetY) {
         const circle = new fabric.Circle({
-            left: x,
-            top: y,
+            left: x + offsetX,
+            top: y + offsetY,
             radius: controlPointRadius,
             fill: color,
             originX: 'center',
@@ -63,10 +63,10 @@
     function initializeControlPoints() {
         const margin = 50;
         controlPoints.push(
-            createControlPoint(margin, margin, 'red'),
-            createControlPoint(canvas.width - margin, margin, 'red'),
-            createControlPoint(canvas.width - margin, canvas.height - margin, 'red'),
-            createControlPoint(margin, canvas.height - margin, 'red')
+            createControlPoint(margin, margin, 'red', -offsetDistance, -offsetDistance),
+            createControlPoint(canvas.width - margin, margin, 'red', offsetDistance, -offsetDistance),
+            createControlPoint(canvas.width - margin, canvas.height - margin, 'red', offsetDistance, offsetDistance),
+            createControlPoint(margin, canvas.height - margin, 'red', -offsetDistance, offsetDistance)
         );
 
         updateQuadrilateral();
