@@ -224,11 +224,16 @@
              outerCorners[2].x, outerCorners[2].y, outerCorners[3].x, outerCorners[3].y]
         );
 
-        overlayImg.set('transformMatrix', [
-            transform.coeffs[0], transform.coeffs[1], transform.coeffs[2],
-            transform.coeffs[3], transform.coeffs[4], transform.coeffs[5],
-            transform.coeffs[6], transform.coeffs[7], transform.coeffs[8]
-        ]);
+        const matrix = transform.coeffs;
+        overlayImg.set({
+            left: 0,
+            top: 0,
+            transformMatrix: [
+                matrix[0], matrix[3], 0, 
+                matrix[1], matrix[4], 0, 
+                matrix[2], matrix[5], 1
+            ]
+        });
         canvas.renderAll();
     }
 
