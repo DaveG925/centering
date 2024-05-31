@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Movable Quadrilateral</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #FFFFFF;
+        }
+
+        canvas {
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const controlPoints = [];
+    const pointRadius = 8;
+    let draggingPoint = null;
+
+    canvas.width = window.innerWidth - 20;
+    canvas.height = window.innerHeight - 20; // Adjusted for any potential space
+
+    function createControlPoint(x, y) {
+        return { x, y };
+    }
+
+    function drawControlPoints() {
+        ctx.fillStyle = 'red';
+        controlPoints.forEach(point => {
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, pointRadius, 0, 2 * Math.PI);
+            ctx.fill();
+        });
+    }
+
+    function drawQuadrilateral() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.beginPath();
+        ctx.moveTo(controlPoints[0].x, controlPoints[0].y);
+        ctx.lineTo(controlPoints[1].x, controlPoints[1].y);
+        ctx.lineTo(controlPoints[2].x, controlPoints[2].y);
+        ctx.lineTo(controlPoints[3].x, controlPoints[3].y);
+        ctx.closePath();
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        drawControlPoints();
+        drawConcentricQuadrilaterals(controlPoints);
+    }
+
+    function initializeControlPoints() {
+        const margin = 50;
+        controlPoints.push(
+            createControlPoint(margin, margin),
+            createControlPoint(canvas.width - margin, margin),
+            createControlPoint(canvas.width - margin, canvas.height - margin),
+            createControlPoint(margin, canvas.height - margin)
+        );
+
+        drawQuadrilateral();
+    }
+
+    function getMousePosition(event) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
+    }
+
+    function isPointClicked(point, mousePos) {
+        return Math.sqrt((point.x - mousePos.x) ** 2 + (point.y - mousePos.y) ** 2) < pointRadius;
+    }
+
+    function handleMouseDown(event) {
+        const mousePos = getMousePosition(event);
+        for (const point of controlPoints) {
+            if (isPointClicked(point, mousePos)) {
+                draggingPoint = point;
+                break;
+            }
+        }
+    }
+
+    function handleMouseMove(event) {
+        if (draggingPoint) {
+            const mousePos = getMousePosition(event);
+            draggingPoint.x = mousePos.x;
+            draggingPoint.y = mousePos.y;
+            drawQuadrilateral();
+        }
+    }
+
+    function handleMouseUp() {
+        draggingPoint = null;
+    }
+
+    function drawConcentricQuadrilaterals(corners) {
+        for (let i = 1; i <= 10; i++) {
+            const offset = i * 5;
+            const newCorners = offsetCorners(corners, offset);
+
+            drawQuadrilateralWithGap(newCorners, i);
+
+            // Draw number at the midpoint of each edge
+            drawLabelAtMidpoint(newCorners[0], newCorners[1], i, 'top');
+            drawLabelAtMidpoint(newCorners[1], newCorners[2], i, 'right');
+            drawLabelAtMidpoint(newCorners[2], newCorners[3], i, 'bottom');
+            drawLabelAtMidpoint(newCorners[3], newCorners[0], i, 'left');
+        }
+        ctx.setLineDash([]); // Reset to solid lines after drawing
+    }
+
+    function drawQuadrilateralWithGap(corners, index) {
+        const gapSize = 20;
+        const [p0, p1, p2, p3] = corners;
+
+        drawLineWithGap(p0, p1, gapSize, index);
+        drawLineWithGap(p1, p2, gapSize, index);
+        drawLineWithGap(p2, p3, gapSize, index);
+        drawLineWithGap(p3, p0, gapSize, index);
+    }
+
+    function drawLineWithGap(p1, p2, gapSize, index) {
+        const midX = (p1.x + p2.x) / 2;
+        const midY = (p1.y + p2.y) / 2;
+
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        const gapRatio = gapSize / len;
+
+        const gapStartX = midX - (dx * gapRatio) / 2;
+        const gapStartY = midY - (dy * gapRatio) / 2;
+        const gapEndX = midX + (dx * gapRatio) / 2;
+        const gapEndY = midY + (dy * gapRatio) / 2;
+
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(gapStartX, gapStartY);
+        ctx.moveTo(gapEndX, gapEndY);
+        ctx.lineTo(p2.x, p2.y);
+
+        if (index % 2 === 0) {
+            ctx.setLineDash([]);
+        } else {
+            ctx.setLineDash([5, 5]);
+        }
+
+        ctx.strokeStyle = 'gray';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
+
+    function drawLabelAtMidpoint(p1, p2, index, position) {
+        const midX = (p1.x + p2.x) / 2;
+        const midY = (p1.y + p2.y) / 2;
+
+        ctx.fillStyle = 'black';
+        ctx.font = '12px Arial';
+        ctx.textBaseline = 'middle';
+
+        if (position === 'top' || position === 'bottom') {
+            ctx.textAlign = index % 2 === 0 ? 'left' : 'right';
+            ctx.fillText(index, midX + (index % 2 === 0 ? 5 : -5), midY);
+        } else {
+            ctx.textAlign = 'center';
+            ctx.fillText(index, midX, midY + (index % 2 === 0 ? 5 : -5));
+        }
+    }
+
+    function offsetCorners(corners, offset) {
+        const [p0, p1, p2, p3] = corners;
+
+        const newP0 = offsetPoint(p0, p1, p3, offset);
+        const newP1 = offsetPoint(p1, p0, p2, offset);
+        const newP2 = offsetPoint(p2, p1, p3, offset);
+        const newP3 = offsetPoint(p3, p0, p2, offset);
+
+        return [newP0, newP1, newP2, newP3];
+    }
+
+    function offsetPoint(p, adj1, adj2, offset) {
+        const dx1 = adj1.x - p.x;
+        const dy1 = adj1.y - p.y;
+        const dx2 = adj2.x - p.x;
+        const dy2 = adj2.y - p.y;
+
+        const dist1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+        const dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+
+        const offsetX1 = (dx1 / dist1) * offset;
+        const offsetY1 = (dy1 / dist1) * offset;
+        const offsetX2 = (dx2 / dist2) * offset;
+        const offsetY2 = (dy2 / dist2) * offset;
+
+        return {
+            x: p.x + offsetX1 + offsetX2,
+            y: p.y + offsetY1 + offsetY2
+        };
+    }
+
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseup', handleMouseUp);
+
+    initializeControlPoints();
+</script>
+
+</body>
+</html>
