@@ -141,7 +141,7 @@
             const matrix = getTransformMatrix(src, dest);
 
             // Draw the image using the transform matrix
-            ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f);
+            ctx.setTransform(matrix[0], matrix[1], matrix[3], matrix[4], matrix[6], matrix[7]);
             ctx.drawImage(img, 0, 0);
 
             // Reset the transform to default
@@ -152,11 +152,8 @@
     }
 
     function getTransformMatrix(src, dest) {
-        const m = perspectiveTransform(src, dest);
-        return {
-            a: m[0], b: m[1], c: m[2],
-            d: m[3], e: m[4], f: m[5]
-        };
+        const transform = PerspT(src, dest);
+        return transform.coeffs;
     }
 
     canvas.addEventListener('mousedown', handleMouseDown);
