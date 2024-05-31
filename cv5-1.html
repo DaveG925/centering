@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Warping Tool</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #FFFFFF;
+        }
+        canvas {
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const controlPoints = [];
+    let img;
+
+    canvas.width = window.innerWidth - 20;
+    canvas.height = window.innerHeight - 20;
+
+    function loadImage(src, callback) {
+        img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = callback;
+        img.src = src;
+    }
+
+    function createControlPoint(x, y) {
+        return { x, y, dragging: false };
+    }
+
+    function drawControlPoints() {
+        ctx.fillStyle = 'red';
+        controlPoints.forEach(point => {
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
+            ctx.fill();
+        });
+    }
+
+    function drawImageWithControlPoints() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const [p0, p1, p2, p3] = controlPoints;
+
+        const width = img.width;
+        const height = img.height;
+
+        ctx.save();
+
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.lineTo(p3.x, p3.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.closePath();
+        ctx.clip();
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        ctx.restore();
+
+        drawControlPoints();
+    }
+
+    function initializeControlPoints() {
+        const startX = (canvas.width - img.width) / 2;
+        const startY = (canvas.height - img.height) / 2;
+
+        controlPoints.push(
+            createControlPoint(startX, startY),
+            createControlPoint(startX + img.width, startY),
+            createControlPoint(startX, startY + img.height),
+            createControlPoint(startX + img.width, startY + img.height)
+        );
+
+        drawImageWithControlPoints();
+    }
+
+    function getMousePosition(event) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
+    }
+
+    function isPointClicked(point, mousePos) {
+        return Math.sqrt((point.x - mousePos.x) ** 2 + (point.y - mousePos.y) ** 2) < 5;
+    }
+
+    function handleMouseDown(event) {
+        const mousePos = getMousePosition(event);
+        controlPoints.forEach(point => {
+            if (isPointClicked(point, mousePos)) {
+                point.dragging = true;
+            }
+        });
+    }
+
+    function handleMouseMove(event) {
+        const mousePos = getMousePosition(event);
+        controlPoints.forEach(point => {
+            if (point.dragging) {
+                point.x = mousePos.x;
+                point.y = mousePos.y;
+                drawImageWithControlPoints();
+            }
+        });
+    }
+
+    function handleMouseUp() {
+        controlPoints.forEach(point => {
+            point.dragging = false;
+        });
+    }
+
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseup', handleMouseUp);
+
+    loadImage('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', () => {
+        initializeControlPoints();
+    });
+</script>
+
+</body>
+</html>
