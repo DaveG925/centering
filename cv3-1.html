@@ -16,8 +16,11 @@
         }
         #canvas-container {
             position: relative;
-            width: 100%;
-            height: 100%;
+            width: 90%;
+            height: 90%;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #ffffff;
         }
         canvas {
             width: 100%;
@@ -45,8 +48,8 @@
 
             const canvas = new fabric.Canvas('mainCanvas', {
                 preserveObjectStacking: true,
-                width: window.innerWidth,
-                height: window.innerHeight
+                width: window.innerWidth * 0.9,
+                height: window.innerHeight * 0.9
             });
 
             fabric.Image.fromURL(imageUrl, (img) => {
@@ -92,8 +95,8 @@
             }, { crossOrigin: 'Anonymous' });
 
             window.addEventListener('resize', () => {
-                canvas.setWidth(window.innerWidth);
-                canvas.setHeight(window.innerHeight);
+                canvas.setWidth(window.innerWidth * 0.9);
+                canvas.setHeight(window.innerHeight * 0.9);
                 canvas.renderAll();
             });
 
@@ -131,10 +134,17 @@
                     'br': { x: br.left, y: br.top }
                 });
 
-                const transformMatrix = fabric.util.multiplyTransformMatrices(
-                    [1, 0, 0, 1, overlay.left, overlay.top],
-                    fabric.util.qrDecompose(overlay.calcTransformMatrix()).inverse().slice(0, 6)
-                );
+                const transformMatrix = fabric.util.composeMatrix({
+                    scaleX: 1, // Adjust this according to your need
+                    scaleY: 1, // Adjust this according to your need
+                    skewX: 0,
+                    skewY: 0,
+                    angle: 0,
+                    translateX: 0,
+                    translateY: 0,
+                    flipX: false,
+                    flipY: false
+                });
 
                 overlay.set('transformMatrix', transformMatrix);
 
