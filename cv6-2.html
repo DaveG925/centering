@@ -128,8 +128,9 @@
     }
 
     function drawConcentricQuadrilaterals(corners) {
-        for (let i = 0; i < 10; i++) {
-            const newCorners = offsetCorners(corners, i * 5);
+        for (let i = 1; i <= 10; i++) {
+            const offset = i * 5;
+            const newCorners = offsetCorners(corners, offset);
 
             ctx.beginPath();
             ctx.moveTo(newCorners[0].x, newCorners[0].y);
@@ -147,6 +148,14 @@
             ctx.strokeStyle = 'gray';
             ctx.lineWidth = 1;
             ctx.stroke();
+
+            // Draw number at the midpoint of the top edge
+            const midPointX = (newCorners[0].x + newCorners[1].x) / 2;
+            const midPointY = (newCorners[0].y + newCorners[1].y) / 2;
+            ctx.setLineDash([]);
+            ctx.fillStyle = 'black';
+            ctx.font = '12px Arial';
+            ctx.fillText(i, midPointX, midPointY);
         }
         ctx.setLineDash([]); // Reset to solid lines after drawing
     }
