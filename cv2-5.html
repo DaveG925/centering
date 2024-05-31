@@ -53,8 +53,8 @@
         if (window.loadedImage) {
             const img = window.loadedImage;
             img.set({
-                left: (canvasWidth - img.width) / 2,
-                top: (canvasHeight - img.height) / 2
+                left: (canvasWidth - img.width * img.scaleX) / 2,
+                top: (canvasHeight - img.height * img.scaleY) / 2
             });
             canvas.renderAll();
         }
@@ -79,8 +79,8 @@
 
             // Center the overlay image
             overlayImg.set({
-                left: (canvasWidth - overlayImg.width) / 2,
-                top: (canvasHeight - overlayImg.height) / 2,
+                left: (canvasWidth - overlayImg.width * overlayImg.scaleX) / 2,
+                top: (canvasHeight - overlayImg.height * overlayImg.scaleY) / 2,
                 hasControls: false, // Disable fabric.js controls for the overlay image
                 selectable: false // Make the overlay image non-selectable
             });
