@@ -20,7 +20,7 @@
         canvas {
             border: 1px solid #ccc;
             margin-top: 10px;
-            touch-action: none; /* Prevents default touch actions like scrolling */
+            touch-action: none;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
@@ -31,83 +31,20 @@
 
 <script>
     const canvas = new fabric.Canvas('canvas', { selection: false });
-    const points = { outer: [], inner: [] };
-    const lines = { outer: [], inner: [] };
-    const controlPointOffset = 30; // Global offset for the control points
+    const controlPoints = [];
+    const controlPointRadius = 12;
+    const offsetDistance = 30; // Offset distance
     let loadedImage = null;
 
-    function debounce(func, wait) {
-        let timeout;
-        return function () {
-            const context = this, args = arguments;
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(context, args), wait);
-        };
-    }
+    canvas.setWidth(window.innerWidth - 20);
+    canvas.setHeight(window.innerHeight - 100);
 
-    function adjustCanvas() {
-        const horizontalPadding = 20; // 20px on each side
-        const verticalPadding = 20; // 50px on top and bottom for example
-        const canvasWidth = window.innerWidth - horizontalPadding;
-        const canvasHeight = window.innerHeight - verticalPadding - 50; // Deduct space for the button
-
-        // You may want to maintain a specific aspect ratio for the canvas.
-        // For example, if you want an aspect ratio of 4:3, you would calculate the height based on the width:
-        const aspectRatio = 3 / 4;
-        const heightBasedOnWidth = canvasWidth / aspectRatio;
-
-        // Then, choose the smaller of the two heights to ensure the canvas fits in the window.
-        const finalCanvasHeight = Math.min(canvasHeight, heightBasedOnWidth);
-
-        canvas.setWidth(canvasWidth);
-        canvas.setHeight(finalCanvasHeight);
-        initQuadrilaterals(); // Reinitialize to adjust corner positions
-        if (loadedImage) {
-            updateImageOnCanvas(loadedImage); // Update image position after canvas size change
-        }
-        canvas.renderAll();
-    }
-
-    function initQuadrilaterals() {
-        // Clear any existing objects from the canvas, except the loaded image
-        canvas.getObjects().forEach((obj) => {
-            if (obj !== loadedImage) {
-                canvas.remove(obj);
-            }
-        });
-
-        // Define your default corner positions for outer and inner quadrilaterals
-        const defaultOuterCorners = [
-            { x: 50, y: 50 }, { x: canvas.width - 50, y: 50 },
-            { x: canvas.width - 50, y: canvas.height - 50 }, { x: 50, y: canvas.height - 50 }
-        ];
-        const defaultInnerCorners = [
-            { x: 150, y: 150 }, { x: canvas.width - 150, y: 150 },
-            { x: canvas.width - 150, y: canvas.height - 150 }, { x: 150, y: canvas.height - 150 }
-        ];
-
-        // Create or adjust the corner points
-        defaultOuterCorners.forEach((point, index) => {
-            points.outer[index] = createCorner(point, 'outer', index);
-        });
-        defaultInnerCorners.forEach((point, index) => {
-            points.inner[index] = createCorner(point, 'inner', index);
-        });
-
-        // Draw lines connecting the corners
-        drawLines();
-    }
-
-    function createCorner(point, borderType, index) {
-        // Determine the direction of the offset based on the corner
-        let offsetX = (index === 0 || index === 3) ? -controlPointOffset : controlPointOffset;
-        let offsetY = (index === 0 || index === 1) ? -controlPointOffset : controlPointOffset;
-
-        let circle = new fabric.Circle({
-            radius: 15, // Radius of control points for better touch response
-            fill: borderType === 'outer' ? 'red' : 'blue',
-            left: point.x + offsetX,
-            top: point.y + offsetY,
+    function createControlPoint(x, y, color) {
+        const circle = new fabric.Circle({
+            left: x,
+            top: y,
+            radius: controlPointRadius,
+            fill: color,
             originX: 'center',
             originY: 'center',
             hasBorders: false,
@@ -115,86 +52,237 @@
             selectable: true,
         });
 
-        // Store the true corner position inside the circle object for easy access
-        circle.trueX = point.x;
-        circle.trueY = point.y;
-
         circle.on('moving', function () {
-            // Update the true corner position when the control point moves
-            this.trueX = this.left - offsetX;
-            this.trueY = this.top - offsetY;
-            drawLines();
+            updateQuadrilateral();
         });
 
         canvas.add(circle);
         return circle;
     }
 
-    function drawLines() {
-        // Remove existing lines from the canvas
-        Object.values(lines).forEach(borderLines => {
-            borderLines.forEach(line => canvas.remove(line));
+    function initializeControlPoints() {
+        const margin = 50;
+        const outerCorners = [
+            { x: margin, y: margin },
+            { x: canvas.width - margin, y: margin },
+            { x: canvas.width - margin, y: canvas.height - margin },
+            { x: margin, y: canvas.height - margin }
+        ];
+
+        const innermostCorners = offsetCorners(outerCorners, 50); // Calculate innermost corners with a fixed offset
+
+        innermostCorners.forEach((corner, index) => {
+            controlPoints.push(createControlPoint(corner.x, corner.y, 'red'));
         });
 
-        // Draw new lines for the outer quadrilateral
-        points.outer.forEach((point, index) => {
-            let startPoint = point;
-            let endPoint = points.outer[(index + 1) % points.outer.length];
-            lines.outer[index] = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
-                stroke: 'red',
-                strokeWidth: 2,
-                selectable: false,
-            });
-            canvas.add(lines.outer[index]);
-        });
-
-        // Draw new lines for the inner quadrilateral
-        points.inner.forEach((point, index) => {
-            let startPoint = point;
-            let endPoint = points.inner[(index + 1) % points.inner.length];
-            lines.inner[index] = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
-                stroke: 'blue',
-                strokeWidth: 2,
-                selectable: false,
-            });
-            canvas.add(lines.inner[index]);
-        });
+        updateQuadrilateral();
     }
 
-    function updateImageOnCanvas(img) {
-        const padding = 30; // Padding around the image
-        const scaleFactor = Math.min(
-            (canvas.width - 1.5 * padding) / img.width,
-            (canvas.height - 1.5 * padding) / img.height
-        );
-        img.set({
-            scaleX: scaleFactor,
-            scaleY: scaleFactor,
-            left: (canvas.width - img.width * scaleFactor) / 1.5,
-            top: (canvas.height - img.height * scaleFactor) / 1.5
+    function updateQuadrilateral() {
+        canvas.getObjects('line').forEach(line => canvas.remove(line));
+        canvas.getObjects('text').forEach(text => canvas.remove(text));
+        canvas.getObjects('circle').forEach(circle => {
+            if (!controlPoints.includes(circle)) {
+                canvas.remove(circle);
+            }
         });
-        canvas.renderAll();
+
+        const points = controlPoints.map(point => ({
+            x: point.left,
+            y: point.top
+        }));
+
+        drawOuterQuadrilateral(points);
+        drawConcentricQuadrilaterals(points);
+
+        // Re-draw control points after drawing the quadrilateral
+        controlPoints.forEach(point => canvas.add(point));
+    }
+
+    function drawOuterQuadrilateral(corners) {
+        const [p0, p1, p2, p3] = corners;
+
+        const line1 = new fabric.Line([p0.x, p0.y, p1.x, p1.y], {
+            stroke: 'blue',
+            strokeWidth: 2,
+            selectable: false,
+        });
+
+        const line2 = new fabric.Line([p1.x, p1.y, p2.x, p2.y], {
+            stroke: 'blue',
+            strokeWidth: 2,
+            selectable: false,
+        });
+
+        const line3 = new fabric.Line([p2.x, p2.y, p3.x, p3.y], {
+            stroke: 'blue',
+            strokeWidth: 2,
+            selectable: false,
+        });
+
+        const line4 = new fabric.Line([p3.x, p3.y, p0.x, p0.y], {
+            stroke: 'blue',
+            strokeWidth: 2,
+            selectable: false,
+        });
+
+        canvas.add(line1, line2, line3, line4);
+    }
+
+    function drawConcentricQuadrilaterals(corners) {
+        for (let i = 1; i <= 10; i++) {
+            const offset = i * 5;
+            const newCorners = offsetCorners(corners, offset);
+
+            drawQuadrilateralWithGap(newCorners, i);
+            drawLabels(newCorners, i);
+        }
+    }
+
+    function drawQuadrilateralWithGap(corners, index) {
+        const gapSize = 30;
+        const [p0, p1, p2, p3] = corners;
+
+        drawLineWithGap(p0, p1, gapSize, index);
+        drawLineWithGap(p1, p2, gapSize, index);
+        drawLineWithGap(p2, p3, gapSize, index);
+        drawLineWithGap(p3, p0, gapSize, index);
+    }
+
+    function drawLineWithGap(p1, p2, gapSize, index) {
+        const midX = (p1.x + p2.x) / 2;
+        const midY = (p1.y + p2.y) / 2;
+
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        const gapRatio = gapSize / len;
+
+        const gapStartX = midX - (dx * gapRatio) / 2;
+        const gapStartY = midY - (dy * gapRatio) / 2;
+        const gapEndX = midX + (dx * gapRatio) / 2;
+        const gapEndY = midY + (dy * gapRatio) / 2;
+
+        const line1 = new fabric.Line([p1.x, p1.y, gapStartX, gapStartY], {
+            stroke: 'gray',
+            strokeWidth: 1,
+            selectable: false,
+        });
+
+        const line2 = new fabric.Line([gapEndX, gapEndY, p2.x, p2.y], {
+            stroke: 'gray',
+            strokeWidth: 1,
+            selectable: false,
+        });
+
+        if (index % 2 === 0) {
+            line1.set({ strokeDashArray: [] });
+            line2.set({ strokeDashArray: [] });
+        } else {
+            line1.set({ strokeDashArray: [5, 5] });
+            line2.set({ strokeDashArray: [5, 5] });
+        }
+
+        canvas.add(line1, line2);
+    }
+
+    function drawLabels(corners, index) {
+        drawLabelAtMidpoint(corners[0], corners[1], index, 'top');
+        drawLabelAtMidpoint(corners[1], corners[2], index, 'right');
+        drawLabelAtMidpoint(corners[2], corners[3], index, 'bottom');
+        drawLabelAtMidpoint(corners[3], corners[0], index, 'left');
+    }
+
+    function drawLabelAtMidpoint(p1, p2, index, position) {
+        const midX = (p1.x + p2.x) / 2;
+        const midY = (p1.y + p2.y) / 2;
+
+        const label = new fabric.Text(index.toString(), {
+            left: midX,
+            top: midY,
+            fontSize: 12,
+            originX: 'center',
+            originY: 'center',
+            selectable: false,
+        });
+
+        if (position === 'top' || position === 'bottom') {
+            label.set({
+                left: midX + (index % 2 === 0 ? 5 : -5),
+                textAlign: index % 2 === 0 ? 'left' : 'right'
+            });
+        } else {
+            label.set({
+                top: midY + (index % 2 === 0 ? 5 : -5),
+                textAlign: 'center'
+            });
+        }
+
+        canvas.add(label);
+    }
+
+    function offsetCorners(corners, offset) {
+        const [p0, p1, p2, p3] = corners;
+
+        const newP0 = offsetPoint(p0, p1, p3, offset);
+        const newP1 = offsetPoint(p1, p0, p2, offset);
+        const newP2 = offsetPoint(p2, p1, p3, offset);
+        const newP3 = offsetPoint(p3, p0, p2, offset);
+
+        return [newP0, newP1, newP2, newP3];
+    }
+
+    function offsetPoint(p, adj1, adj2, offset) {
+        const dx1 = adj1.x - p.x;
+        const dy1 = adj1.y - p.y;
+        const dx2 = adj2.x - p.x;
+        const dy2 = adj2.y - p.y;
+
+        const dist1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+        const dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+
+        const offsetX1 = (dx1 / dist1) * offset;
+        const offsetY1 = (dy1 / dist1) * offset;
+        const offsetX2 = (dx2 / dist2) * offset;
+        const offsetY2 = (dy2 / dist2) * offset;
+
+        return {
+            x: p.x + offsetX1 + offsetX2,
+            y: p.y + offsetY1 + offsetY2
+        };
     }
 
     function loadImage(imageURL) {
         fabric.Image.fromURL(imageURL, function (img) {
             loadedImage = img;
-            updateImageOnCanvas(img);
-            img.selectable = false;
+            const aspectRatio = img.width / img.height;
+            if (canvas.width / canvas.height > aspectRatio) {
+                img.scaleToHeight(canvas.height);
+            } else {
+                img.scaleToWidth(canvas.width);
+            }
+            img.set({
+                left: (canvas.width - img.getScaledWidth()) / 2,
+                top: (canvas.height - img.getScaledHeight()) / 2,
+                selectable: false
+            });
             canvas.add(img);
             img.sendToBack();
         });
     }
 
-    window.onload = function () {
+    window.onload = function() {
         const urlParams = new URLSearchParams(window.location.search);
         const imageURL = urlParams.get('imageURL') || 'your-default-image-url.jpg';
-        adjustCanvas();
+        initializeControlPoints();
         loadImage(imageURL);
-        initQuadrilaterals();
     };
 
-    window.addEventListener('resize', debounce(adjustCanvas, 100));
+    window.addEventListener('resize', function() {
+        canvas.setWidth(window.innerWidth - 20);
+        canvas.setHeight(window.innerHeight - 100);
+        updateQuadrilateral();
+    });
 </script>
 
 </body>
