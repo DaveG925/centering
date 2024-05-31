@@ -156,13 +156,18 @@
                      destCorners[3].x, destCorners[3].y]
                 );
 
+                const coeffs = transform.coeffs;
+
                 const canvasEl = document.getElementById('mainCanvas');
                 const ctx = canvasEl.getContext('2d');
                 const image = overlay._element;
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.save();
-                ctx.setTransform(...transform.coeffs);
+                ctx.transform(
+                    coeffs[0], coeffs[3], coeffs[1], coeffs[4],
+                    coeffs[2], coeffs[5]
+                );
                 ctx.drawImage(image, 0, 0, overlay.width, overlay.height);
                 ctx.restore();
             }
