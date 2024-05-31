@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Movable Quadrilateral with Image</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #FFFFFF;
+            overflow: hidden;
+        }
+
+        canvas {
+            border: 1px solid #ccc;
+            margin-top: 10px;
+            touch-action: none;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<script>
+    const canvas = new fabric.Canvas('canvas');
+    const controlPointRadius = 12;
+    const controlPoints = [];
+    const offsetDistance = 30 / Math.sqrt(2); // Calculate offset for 45 degrees
+    let loadedImage = null;
+
+    canvas.setWidth(window.innerWidth - 20);
+    canvas.setHeight(window.innerHeight - 100);
+
+    function createControlPoint(x, y, color) {
+        const circle = new fabric.Circle({
+            left: x,
+            top: y,
+            radius: controlPointRadius,
+            fill: color,
+            originX: 'center',
+            originY: 'center',
+            hasBorders: false,
+            hasControls: false,
+            selectable: true,
+        });
+
+        circle.on('moving', function () {
+            updateQuadrilateral();
+        });
+
+        canvas.add(circle);
+        return circle;
+    }
+
+    function initializeControlPoints() {
+        const margin = 50;
+        const outerCorners = [
+            { x: margin, y: margin },
+            { x: canvas.width - margin, y: margin },
+            { x: canvas.width - margin, y: canvas.height - margin },
+            { x: margin, y: canvas.height - margin }
+        ];
+
+        // Place control points halfway between each pair of outer corners
+        for (let i = 0; i < outerCorners.length; i++) {
+            const nextIndex = (i + 1) % outerCorners.length;
+            const x = (outerCorners[i].x + outerCorners[nextIndex].x) / 2;
+            const y = (outerCorners[i].y + outerCorners[nextIndex].y) / 2;
+            controlPoints.push(createControlPoint(x, y, 'red'));
+        }
+
+        updateQuadrilateral();
+    }
+
+    function updateQuadrilateral() {
+        canvas.getObjects('line').forEach(line => canvas.remove(line));
+        canvas.getObjects('text').forEach(text => canvas.remove(text));
+
+        const points = controlPoints.map(point => ({
+            x: point.left,
+            y: point.top
+        }));
+
+        drawOuterQuadrilateral(points);
+        drawConcentricQuadrilaterals(points);
+    }
+
+    function drawOuterQuadrilateral(corners) {
+        const [p0, p1, p2, p3] = corners;
+
+        const line1 = new fabric.Line([p0.x, p0.y, p1.x, p1.y], {
+            stroke: 'blue',
+            strokeWidth: 2,
+            selectable: false,
+        });
+
+        const line2 = new fabric.Line([p1.x, p1.y, p2.x, p2.y], {
+            stroke: 'blue',
+            strokeWidth: 2,
+            selectable: false,
+        });
+
+        const line3 = new fabric.Line([p2.x, p2.y, p3.x, p3.y], {
+            stroke: 'blue',
+            strokeWidth: 2,
+            selectable: false,
+        });
+
+        const line4 = new fabric.Line([p3.x, p3.y, p0.x, p0.y], {
+            stroke: 'blue',
+            strokeWidth: 2,
+            selectable: false,
+        });
+
+        canvas.add(line1, line2, line3, line4);
+    }
+
+    function drawConcentricQuadrilaterals(corners) {
+        for (let i = 1; i <= 10; i++) {
+            const offset = i * 5;
+            const newCorners = offsetCorners(corners, offset);
+
+            drawQuadrilateralWithGap(newCorners, i);
+            drawLabels(newCorners, i);
+        }
+    }
+
+    function drawQuadrilateralWithGap(corners, index) {
+        const gapSize = 30;
+        const [p0, p1, p2, p3] = corners;
+
+        drawLineWithGap(p0, p1, gapSize, index);
+        drawLineWithGap(p1, p2, gapSize, index);
+        drawLineWithGap(p2, p3, gapSize, index);
+        drawLineWithGap(p3, p0, gapSize, index);
+    }
+
+    function drawLineWithGap(p1, p2, gapSize, index) {
+        const midX = (p1.x + p2.x) / 2;
+        const midY = (p1.y + p2.y) / 2;
+
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        const gapRatio = gapSize / len;
+
+        const gapStartX = midX - (dx * gapRatio) / 2;
+        const gapStartY = midY - (dy * gapRatio) / 2;
+        const gapEndX = midX + (dx * gapRatio) / 2;
+        const gapEndY = midY + (dy * gapRatio) / 2;
+
+        const line1 = new fabric.Line([p1.x, p1.y, gapStartX, gapStartY], {
+            stroke: 'gray',
+            strokeWidth: 1,
+            selectable: false,
+        });
+
+        const line2 = new fabric.Line([gapEndX, gapEndY, p2.x, p2.y], {
+            stroke: 'gray',
+            strokeWidth: 1,
+            selectable: false,
+        });
+
+        if (index % 2 === 0) {
+            line1.set({ strokeDashArray: [] });
+            line2.set({ strokeDashArray: [] });
+        } else {
+            line1.set({ strokeDashArray: [5, 5] });
+            line2.set({ strokeDashArray: [5, 5] });
+        }
+
+        canvas.add(line1, line2);
+    }
+
+    function drawLabels(corners, index) {
+        drawLabelAtMidpoint(corners[0], corners[1], index, 'top');
+        drawLabelAtMidpoint(corners[1], corners[2], index, 'right');
+        drawLabelAtMidpoint(corners[2], corners[3], index, 'bottom');
+        drawLabelAtMidpoint(corners[3], corners[0], index, 'left');
+    }
+
+    function drawLabelAtMidpoint(p1, p2, index, position) {
+        const midX = (p1.x + p2.x) / 2;
+        const midY = (p1.y + p2.y) / 2;
+
+        const label = new fabric.Text(index.toString(), {
+            left: midX,
+            top: midY,
+            fontSize: 12,
+            originX: 'center',
+            originY: 'center',
+            selectable: false,
+        });
+
+        if (position === 'top' || position === 'bottom') {
+            label.set({
+                left: midX + (index % 2 === 0 ? 5 : -5),
+                textAlign: index % 2 === 0 ? 'left' : 'right'
+            });
+        } else {
+            label.set({
+                top: midY + (index % 2 === 0 ? 5 : -5),
+                textAlign: 'center'
+            });
+        }
+
+        canvas.add(label);
+    }
+
+    function offsetCorners(corners, offset) {
+        const [p0, p1, p2, p3] = corners;
+
+        const newP0 = offsetPoint(p0, p1, p3, offset);
+        const newP1 = offsetPoint(p1, p0, p2, offset);
+        const newP2 = offsetPoint(p2, p1, p3, offset);
+        const newP3 = offsetPoint(p3, p0, p2, offset);
+
+        return [newP0, newP1, newP2, newP3];
+    }
+
+    function offsetPoint(p, adj1, adj2, offset) {
+        const dx1 = adj1.x - p.x;
+        const dy1 = adj1.y - p.y;
+        const dx2 = adj2.x - p.x;
+        const dy2 = adj2.y - p.y;
+
+        const dist1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+        const dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+
+        const offsetX1 = (dx1 / dist1) * offset;
+        const offsetY1 = (dy1 / dist1) * offset;
+        const offsetX2 = (dx2 / dist2) * offset;
+        const offsetY2 = (dy2 / dist2) * offset;
+
+        return {
+            x: p.x + offsetX1 + offsetX2,
+            y: p.y + offsetY1 + offsetY2
+        };
+    }
+
+    function loadImage(imageURL) {
+        fabric.Image.fromURL(imageURL, function (img) {
+            loadedImage = img;
+            const aspectRatio = img.width / img.height;
+            if (canvas.width / canvas.height > aspectRatio) {
+                img.scaleToHeight(canvas.height);
+            } else {
+                img.scaleToWidth(canvas.width);
+            }
+            img.set({
+                left: (canvas.width - img.getScaledWidth()) / 2,
+                top: (canvas.height - img.getScaledHeight()) / 2,
+                selectable: false
+            });
+            canvas.add(img);
+            img.sendToBack();
+        });
+    }
+
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const imageURL = urlParams.get('imageURL') || 'your-default-image-url.jpg';
+        initializeControlPoints();
+        loadImage(imageURL);
+    };
+
+    window.addEventListener('resize', function() {
+        canvas.setWidth(window.innerWidth - 20);
+        canvas.setHeight(window.innerHeight - 100);
+        updateQuadrilateral();
+    });
+</script>
+
+</body>
+</html>
