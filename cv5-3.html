@@ -132,55 +132,39 @@
         img.src = 'https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png';
         img.onload = function() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Define source and destination points
-            const src = [0, 0, img.width, 0, img.width, img.height, 0, img.height];
-            const dest = corners.flatMap(p => [p.x, p.y]);
 
-            // Get the perspective transform matrix
-            const matrix = getTransformMatrix(src, dest);
+            // Draw the image using the corners
+            ctx.save();
+            const [p0, p1, p2, p3] = corners;
 
-            // Apply the transform matrix to the canvas context
-            ctx.setTransform(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
-            ctx.drawImage(img, 0, 0);
+            // Compute the transform matrix for the image
+            const width = img.width;
+            const height = img.height;
 
-            // Reset the transform to default
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            const deltaX1 = p1.x - p2.x;
+            const deltaY1 = p1.y - p2.y;
+            const deltaX2 = p3.x - p2.x;
+            const deltaY2 = p3.y - p2.y;
+
+            const divisor = deltaX1 * deltaY2 - deltaX2 * deltaY1;
+            if (divisor === 0) {
+                console.error('Invalid transformation.');
+                return;
+            }
+
+            const a = ((p0.x - p1.x + p2.x - p3.x) * deltaY2 - (p0.y - p1.y + p2.y - p3.y) * deltaX2) / divisor;
+            const b = ((p0.y - p1.y + p2.y - p3.y) * deltaX1 - (p0.x - p1.x + p2.x - p3.x) * deltaY1) / divisor;
+
+            ctx.setTransform(
+                p1.x - p0.x + a * p1.x, p1.y - p0.y + a * p1.y,
+                p3.x - p0.x + b * p3.x, p3.y - p0.y + b * p3.y,
+                p0.x, p0.y
+            );
+            ctx.drawImage(img, 0, 0, width, height);
+            ctx.restore();
 
             drawQuadrilateral();  // Draw the control points and quadrilateral again
         };
-    }
-
-    function getTransformMatrix(src, dest) {
-        // Compute the transformation matrix
-        const a = [
-            [src[0], src[1], 1, 0, 0, 0, -src[0] * dest[0], -src[1] * dest[0]],
-            [0, 0, 0, src[0], src[1], 1, -src[0] * dest[1], -src[1] * dest[1]],
-            [src[2], src[3], 1, 0, 0, 0, -src[2] * dest[2], -src[3] * dest[2]],
-            [0, 0, 0, src[2], src[3], 1, -src[2] * dest[3], -src[3] * dest[3]],
-            [src[4], src[5], 1, 0, 0, 0, -src[4] * dest[4], -src[5] * dest[4]],
-            [0, 0, 0, src[4], src[5], 1, -src[4] * dest[5], -src[5] * dest[5]],
-            [src[6], src[7], 1, 0, 0, 0, -src[6] * dest[6], -src[7] * dest[6]],
-            [0, 0, 0, src[6], src[7], 1, -src[6] * dest[7], -src[7] * dest[7]]
-        ];
-
-        const b = [
-            dest[0],
-            dest[1],
-            dest[2],
-            dest[3],
-            dest[4],
-            dest[5],
-            dest[6],
-            dest[7]
-        ];
-
-        const h = numeric.solve(a, b);
-        return [
-            h[0], h[3], 0,
-            h[1], h[4], 0,
-            h[2], h[5], 1
-        ];
     }
 
     canvas.addEventListener('mousedown', handleMouseDown);
@@ -192,6 +176,5 @@
     initializeControlPoints();
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
 </body>
 </html>
