@@ -134,14 +134,11 @@
 
             drawQuadrilateralWithGap(newCorners, i);
 
-            // Draw number at the midpoint of the top edge
-            const midPointX = (newCorners[0].x + newCorners[1].x) / 2;
-            const midPointY = (newCorners[0].y + newCorners[1].y) / 2;
-            ctx.fillStyle = 'black';
-            ctx.font = '12px Arial';
-            ctx.textBaseline = 'middle';
-            ctx.textAlign = 'center';
-            ctx.fillText(i, midPointX, midPointY);
+            // Draw number at the midpoint of each edge
+            drawLabelAtMidpoint(newCorners[0], newCorners[1], i);
+            drawLabelAtMidpoint(newCorners[1], newCorners[2], i);
+            drawLabelAtMidpoint(newCorners[2], newCorners[3], i);
+            drawLabelAtMidpoint(newCorners[3], newCorners[0], i);
         }
         ctx.setLineDash([]); // Reset to solid lines after drawing
     }
@@ -185,6 +182,22 @@
         ctx.strokeStyle = 'gray';
         ctx.lineWidth = 1;
         ctx.stroke();
+    }
+
+    function drawLabelAtMidpoint(p1, p2, index) {
+        const midX = (p1.x + p2.x) / 2;
+        const midY = (p1.y + p2.y) / 2;
+
+        ctx.fillStyle = 'black';
+        ctx.font = '12px Arial';
+        ctx.textBaseline = 'middle';
+        if (index % 2 === 0) {
+            ctx.textAlign = 'left';
+            ctx.fillText(index, midX + 5, midY);
+        } else {
+            ctx.textAlign = 'right';
+            ctx.fillText(index, midX - 5, midY);
+        }
     }
 
     function offsetCorners(corners, offset) {
