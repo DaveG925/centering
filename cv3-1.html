@@ -41,6 +41,8 @@
                 return;
             }
 
+            console.log('Loading image from URL:', imageUrl);
+
             const canvas = new fabric.Canvas('mainCanvas', {
                 preserveObjectStacking: true,
                 width: window.innerWidth,
@@ -59,6 +61,7 @@
                     selectable: false
                 });
                 canvas.add(img);
+                console.log('Background image added.');
 
                 fabric.Image.fromURL(overlayUrl, (overlay) => {
                     overlay.set({
@@ -79,8 +82,9 @@
                     });
                     canvas.add(overlay);
                     canvas.setActiveObject(overlay);
-                });
-            });
+                    console.log('Overlay image added.');
+                }, { crossOrigin: 'Anonymous' });
+            }, { crossOrigin: 'Anonymous' });
 
             window.addEventListener('resize', () => {
                 canvas.setWidth(window.innerWidth);
