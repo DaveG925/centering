@@ -25,26 +25,28 @@ canvas {
 document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const imageURL = urlParams.get('imageURL');
-    const cardID = urlParams.get('CardID');  // Retrieve CardID from URL
-    const isFront = urlParams.get('isFront'); // Retrieve isFront from URL
-
     if (imageURL) {
         loadImage(imageURL);
+    } else {
+        console.error("No imageURL parameter provided.");
     }
-
-    console.log("Card ID:", cardID);
-    console.log("Is Front:", isFront);
 });
 
 const canvas = new fabric.Canvas('canvas', { selection: false });
 
 function loadImage(imageURL) {
     fabric.Image.fromURL(imageURL, function (img) {
+        if (!img) {
+            console.error("Failed to load image.");
+            return;
+        }
+        console.log("Image loaded:", img);
         window.loadedImage = img;
         updateImageOnCanvas(img);
         img.selectable = false;
         canvas.add(img);
         img.sendToBack();
+        canvas.renderAll();
     }, { crossOrigin: 'anonymous' });
 }
 
@@ -63,33 +65,13 @@ function updateImageOnCanvas(img) {
     canvas.renderAll();
 }
 
-function addOverlayImage() {
-    fabric.Image.fromURL('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', function (img) {
-        img.set({
-            left: canvas.width / 2,
-            top: canvas.height / 2,
-            originX: 'center',
-            originY: 'center',
-            selectable: true,
-            hasBorders: true,
-            hasControls: true
-        });
-        canvas.add(img);
-        img.bringToFront();
-        canvas.setActiveObject(img);
-        canvas.renderAll();
-    }, { crossOrigin: 'anonymous' });
-}
-
-window.addEventListener('resize', debounce(adjustCanvas, 100));
-
 window.onload = function () {
     const urlParams = new URLSearchParams(window.location.search);
     const imageURL = urlParams.get('imageURL') || 'your-default-image-url.jpg';
-    adjustCanvas();
     loadImage(imageURL);
-    addOverlayImage(); // Automatically add overlay image on load
 };
+
+window.addEventListener('resize', debounce(adjustCanvas, 100));
 
 function debounce(func, wait) {
     let timeout;
@@ -106,12 +88,8 @@ function adjustCanvas() {
     const canvasWidth = window.innerWidth - horizontalPadding;
     const canvasHeight = window.innerHeight - verticalPadding;
 
-    // You may want to maintain a specific aspect ratio for the canvas.
-    // For example, if you want an aspect ratio of 4:3, you would calculate the height based on the width:
     const aspectRatio = 3 / 4;
     const heightBasedOnWidth = canvasWidth / aspectRatio;
-
-    // Then, choose the smaller of the two heights to ensure the canvas fits in the window.
     const finalCanvasHeight = Math.min(canvasHeight, heightBasedOnWidth);
 
     canvas.setWidth(canvasWidth);
@@ -122,7 +100,6 @@ function adjustCanvas() {
     }
     canvas.renderAll();
 }
-
 </script>
 </head>
 <body>
