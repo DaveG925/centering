@@ -215,6 +215,28 @@ function loadImage(imageURL) {
     });
 }
 
+function computeTransformMatrix(srcPoints, dstPoints) {
+    const a = [], b = [];
+    for (let i = 0; i < 4; i++) {
+        a.push([srcPoints[i].x, srcPoints[i].y, 1, 0, 0, 0, -dstPoints[i].x * srcPoints[i].x, -dstPoints[i].x * srcPoints[i].y]);
+        a.push([0, 0, 0, srcPoints[i].x, srcPoints[i].y, 1, -dstPoints[i].y * srcPoints[i].x, -dstPoints[i].y * srcPoints[i].y]);
+        b.push(dstPoints[i].x);
+        b.push(dstPoints[i].y);
+    }
+
+    const h = numeric.solve(a, b);
+    const matrix = [
+        [h[0], h[1], h[2]],
+        [h[3], h[4], h[5]],
+        [h[6], h[7], 1]
+    ];
+    return matrix;
+}
+
+function applyTransform(ctx, matrix) {
+    ctx.setTransform(matrix[0][0], matrix[1][0], matrix[0][1], matrix[1][1], matrix[0][2], matrix[1][2]);
+}
+
 function overlayImageInQuadrilateral() {
     const outerCorners = points.outer.map(p => ({ x: p.trueX, y: p.trueY }));
 
@@ -232,25 +254,16 @@ function overlayImageInQuadrilateral() {
         ];
 
         // Define the destination points (corners of the quadrilateral)
-        const destPoints = outerCorners.map(point => {
-            return new fabric.Point(point.x, point.y);
-        });
+        const destPoints = outerCorners.map(point => new fabric.Point(point.x, point.y));
 
-        // Calculate the perspective transform matrix
-        const transformMatrix = fabric.util.makeTransformMatrix({
-            topLeft: srcPoints[0],
-            topRight: srcPoints[1],
-            bottomRight: srcPoints[2],
-            bottomLeft: srcPoints[3],
-            destTopLeft: destPoints[0],
-            destTopRight: destPoints[1],
-            destBottomRight: destPoints[2],
-            destBottomLeft: destPoints[3]
-        });
+        // Compute the perspective transform matrix
+        const transformMatrix = computeTransformMatrix(srcPoints, destPoints);
 
-        // Apply the transformation matrix to the image
+        // Apply the perspective transformation
+        const canvasContext = canvas.getContext('2d');
+        applyTransform(canvasContext, transformMatrix);
+
         img.set({
-            transformMatrix: transformMatrix,
             left: 0,
             top: 0,
             originX: 'left',
@@ -273,5 +286,6 @@ window.onload = function () {
     initQuadrilaterals();
 };
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
 </body>
 </html>
