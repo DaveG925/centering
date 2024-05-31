@@ -61,7 +61,7 @@
         positions.forEach(pos => {
             const circle = new fabric.Circle({
                 radius: 5,
-                fill: 'red',
+                fill: 'blue',
                 left: pos.left,
                 top: pos.top,
                 originX: 'center',
@@ -87,18 +87,19 @@
 
         const destCorners = controlPoints.map(p => ({ x: p.left, y: p.top }));
 
-        const transform = PerspT(srcCorners, destCorners);
+        const matrix = perspective(
+            srcCorners.map(p => [p.x, p.y]),
+            destCorners.map(p => [p.x, p.y])
+        );
 
-        const matrix = [
-            transform[0][0], transform[0][1], transform[0][2],
-            transform[1][0], transform[1][1], transform[1][2],
-            transform[2][0], transform[2][1], transform[2][2]
+        const flatMatrix = [
+            matrix[0][0], matrix[0][1], matrix[0][2],
+            matrix[1][0], matrix[1][1], matrix[1][2],
+            matrix[2][0], matrix[2][1], matrix[2][2]
         ];
 
         overlayImg.set({
-            left: 0,
-            top: 0,
-            transformMatrix: matrix
+            transformMatrix: flatMatrix
         });
 
         canvas.renderAll();
