@@ -223,18 +223,23 @@ function overlayImageInQuadrilateral() {
     fabric.Image.fromURL('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', function (img) {
         console.log('Image loaded:', img);
 
-        // Calculate the overlay width and height
-        const overlayWidth = Math.abs(outerCorners[1].x - outerCorners[0].x);
-        const overlayHeight = Math.abs(outerCorners[3].y - outerCorners[0].y);
+        const srcPoints = [
+            { x: 0, y: 0 },
+            { x: img.width, y: 0 },
+            { x: img.width, y: img.height },
+            { x: 0, y: img.height }
+        ];
 
-        // Set the image position and scale
+        const destPoints = outerCorners.map(point => [point.x, point.y]);
+
+        const matrix = fabric.util.makeTransformMatrix(srcPoints, destPoints);
+        
         img.set({
-            left: outerCorners[0].x,
-            top: outerCorners[0].y,
-            scaleX: overlayWidth / img.width,
-            scaleY: overlayHeight / img.height,
+            left: 0,
+            top: 0,
             originX: 'left',
             originY: 'top',
+            transformMatrix: matrix
         });
 
         canvas.add(img);
