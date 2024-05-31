@@ -140,8 +140,8 @@
             // Get the perspective transform matrix
             const matrix = getTransformMatrix(src, dest);
 
-            // Draw the image using the transform matrix
-            ctx.setTransform(matrix[0], matrix[1], matrix[3], matrix[4], matrix[6], matrix[7]);
+            // Apply the transform matrix to the canvas context
+            ctx.setTransform(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
             ctx.drawImage(img, 0, 0);
 
             // Reset the transform to default
@@ -152,8 +152,35 @@
     }
 
     function getTransformMatrix(src, dest) {
-        const transform = PerspT(src, dest);
-        return transform.coeffs;
+        // Compute the transformation matrix
+        const a = [
+            [src[0], src[1], 1, 0, 0, 0, -src[0] * dest[0], -src[1] * dest[0]],
+            [0, 0, 0, src[0], src[1], 1, -src[0] * dest[1], -src[1] * dest[1]],
+            [src[2], src[3], 1, 0, 0, 0, -src[2] * dest[2], -src[3] * dest[2]],
+            [0, 0, 0, src[2], src[3], 1, -src[2] * dest[3], -src[3] * dest[3]],
+            [src[4], src[5], 1, 0, 0, 0, -src[4] * dest[4], -src[5] * dest[4]],
+            [0, 0, 0, src[4], src[5], 1, -src[4] * dest[5], -src[5] * dest[5]],
+            [src[6], src[7], 1, 0, 0, 0, -src[6] * dest[6], -src[7] * dest[6]],
+            [0, 0, 0, src[6], src[7], 1, -src[6] * dest[7], -src[7] * dest[7]]
+        ];
+
+        const b = [
+            dest[0],
+            dest[1],
+            dest[2],
+            dest[3],
+            dest[4],
+            dest[5],
+            dest[6],
+            dest[7]
+        ];
+
+        const h = numeric.solve(a, b);
+        return [
+            h[0], h[3], 0,
+            h[1], h[4], 0,
+            h[2], h[5], 1
+        ];
     }
 
     canvas.addEventListener('mousedown', handleMouseDown);
@@ -165,6 +192,6 @@
     initializeControlPoints();
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/perspective-transform@1.0.6/dist/perspective-transform.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
 </body>
 </html>
