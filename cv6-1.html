@@ -31,7 +31,7 @@
 <body>
 
 <canvas id="canvas"></canvas>
-<button id="saveButton">Save Corners and Draw Grid</button>
+<button id="saveButton">Save Corners and Draw Concentric Quadrilaterals</button>
 
 <script>
     const canvas = document.getElementById('canvas');
@@ -122,54 +122,32 @@
     function handleSaveCorners() {
         const corners = controlPoints.map(point => ({ x: point.x, y: point.y }));
         console.log('Saved Corners:', corners);
-        alert('Corners saved! Drawing the grid now.');
+        alert('Corners saved! Drawing concentric quadrilaterals now.');
 
-        drawGridWithinQuadrilateral(corners);
+        drawConcentricQuadrilaterals(corners);
     }
 
-    function drawGridWithinQuadrilateral(corners) {
+    function drawConcentricQuadrilaterals(corners) {
         const [p0, p1, p2, p3] = corners;
 
-        // Number of divisions for the grid
-        const divisions = 10;
+        for (let i = 0; i < 10; i++) {
+            const offset = i * 5;
 
-        // Calculate step increments for edges
-        const topEdge = interpolate(p0, p1, divisions);
-        const rightEdge = interpolate(p1, p3, divisions);
-        const bottomEdge = interpolate(p2, p3, divisions);
-        const leftEdge = interpolate(p0, p2, divisions);
+            const newP0 = { x: p0.x + offset, y: p0.y + offset };
+            const newP1 = { x: p1.x - offset, y: p1.y + offset };
+            const newP2 = { x: p2.x + offset, y: p2.y - offset };
+            const newP3 = { x: p3.x - offset, y: p3.y - offset };
 
-        // Draw vertical lines
-        for (let i = 0; i <= divisions; i++) {
             ctx.beginPath();
-            ctx.moveTo(topEdge[i].x, topEdge[i].y);
-            ctx.lineTo(bottomEdge[i].x, bottomEdge[i].y);
+            ctx.moveTo(newP0.x, newP0.y);
+            ctx.lineTo(newP1.x, newP1.y);
+            ctx.lineTo(newP3.x, newP3.y);
+            ctx.lineTo(newP2.x, newP2.y);
+            ctx.closePath();
             ctx.strokeStyle = 'gray';
             ctx.lineWidth = 1;
             ctx.stroke();
         }
-
-        // Draw horizontal lines
-        for (let i = 0; i <= divisions; i++) {
-            ctx.beginPath();
-            ctx.moveTo(leftEdge[i].x, leftEdge[i].y);
-            ctx.lineTo(rightEdge[i].x, rightEdge[i].y);
-            ctx.strokeStyle = 'gray';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-        }
-    }
-
-    function interpolate(pointA, pointB, divisions) {
-        const points = [];
-        for (let i = 0; i <= divisions; i++) {
-            const t = i / divisions;
-            points.push({
-                x: pointA.x + t * (pointB.x - pointA.x),
-                y: pointA.y + t * (pointB.y - pointA.y)
-            });
-        }
-        return points;
     }
 
     canvas.addEventListener('mousedown', handleMouseDown);
