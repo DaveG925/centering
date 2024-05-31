@@ -33,7 +33,6 @@
     const canvas = new fabric.Canvas('canvas');
     const controlPointRadius = 12;
     const controlPoints = [];
-    const offsetDistance = -60 / Math.sqrt(3); // Calculate offset for 45 degrees
     let loadedImage = null;
 
     canvas.setWidth(window.innerWidth - 20);
@@ -61,18 +60,17 @@
     }
 
     function initializeControlPoints() {
-        const margin = 50;
-        const outerCorners = [
-            { x: margin, y: margin },
-            { x: canvas.width - margin, y: margin },
-            { x: canvas.width - margin, y: canvas.height - margin },
-            { x: margin, y: canvas.height - margin }
+        // Define custom positions for control points
+        const customPositions = [
+            { x: 100, y: 100 }, // Example custom position for control point 1
+            { x: 300, y: 200 }, // Example custom position for control point 2
+            { x: 400, y: 300 }, // Example custom position for control point 3
+            { x: 200, y: 400 }  // Example custom position for control point 4
         ];
 
-        const innermostCorners = offsetCorners(outerCorners, -50); // Calculate innermost corners with a fixed offset
-
-        innermostCorners.forEach((corner, index) => {
-            controlPoints.push(createControlPoint(corner.x, corner.y, 'red'));
+        // Create control points at custom positions
+        customPositions.forEach(position => {
+            controlPoints.push(createControlPoint(position.x, position.y, 'red'));
         });
 
         updateQuadrilateral();
@@ -162,7 +160,7 @@
         });
 
         const line2 = new fabric.Line([gapEndX, gapEndY, p2.x, p2.y], {
-            stroke: 'green',
+            stroke: 'gray',
             strokeWidth: 1,
             selectable: false,
         });
