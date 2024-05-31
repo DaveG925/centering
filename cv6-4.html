@@ -19,7 +19,7 @@
 
         canvas {
             border: 1px solid #ccc;
-            margin-top: 50px; /* Add top margin for padding */
+            margin-top: 10px; /* Add top margin for padding */
             touch-action: none; /* Prevents default touch actions like scrolling */
         }
     </style>
@@ -34,7 +34,7 @@
     const controlPoints = [];
     const pointRadius = 12; // Change this value to set the size of the control circles
     let draggingPoint = null;
-    const offsetDistance = 30; // Variable for offset distance
+    const offsetDistance = -50; // Variable for offset distance
     let loadedImage = null;
     let imageX, imageY, imageWidth, imageHeight;
 
@@ -131,7 +131,7 @@
     }
 
     function drawConcentricQuadrilaterals(corners) {
-        for (let i = 1; i <= 10; i++) {
+        for (let i = 1; i <= 15; i++) {
             const offset = i * 5;
             const newCorners = offsetCorners(corners, offset);
 
@@ -147,7 +147,7 @@
     }
 
     function drawQuadrilateralWithGap(corners, index) {
-        const gapSize = 20;
+        const gapSize = 30;
         const [p0, p1, p2, p3] = corners;
 
         drawLineWithGap(p0, p1, gapSize, index);
