@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Perspective Transformation</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+        #canvas-container {
+            position: relative;
+            width: 90%;
+            height: 90%;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #ffffff;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <canvas id="mainCanvas"></canvas>
+    </div>
+    <button id="applyTransformButton">Apply Perspective Warp</button>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const imageUrl = urlParams.get('imageURL');
+            const overlayUrl = 'https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png';
+
+            if (!imageUrl) {
+                alert('No image URL provided');
+                return;
+            }
+
+            const canvas = new fabric.Canvas('mainCanvas', {
+                preserveObjectStacking: true,
+                width: window.innerWidth * 0.9,
+                height: window.innerHeight * 0.9
+            });
+
+            fabric.Image.fromURL(imageUrl, (img) => {
+                const scaleFactor = Math.min(canvas.getWidth() / img.width, canvas.getHeight() / img.height);
+                img.set({
+                    originX: 'center',
+                    originY: 'center',
+                    left: canvas.getWidth() / 2,
+                    top: canvas.getHeight() / 2,
+                    scaleX: scaleFactor,
+                    scaleY: scaleFactor,
+                    selectable: false
+                });
+                canvas.add(img);
+                console.log('Background image added.');
+
+                fabric.Image.fromURL(overlayUrl, (overlay) => {
+                    overlay.set({
+                        originX: 'center',
+                        originY: 'center',
+                        left: canvas.getWidth() / 2,
+                        top: canvas.getHeight() / 2,
+                        opacity: 0.5,
+                        lockScalingFlip: true,
+                        hasRotatingPoint: false,
+                        cornerStyle: 'circle',
+                        transparentCorners: false,
+                        selectable: false
+                    });
+
+                    canvas.add(overlay);
+                    console.log('Overlay image added.');
+
+                    addCornerControls(canvas, overlay);
+                }, { crossOrigin: 'Anonymous' });
+            }, { crossOrigin: 'Anonymous' });
+
+            window.addEventListener('resize', () => {
+                canvas.setWidth(window.innerWidth * 0.9);
+                canvas.setHeight(window.innerHeight * 0.9);
+                canvas.renderAll();
+            });
+
+            function addCornerControls(canvas, overlay) {
+                const points = [
+                    { left: overlay.left - overlay.width / 2, top: overlay.top - overlay.height / 2 }, // TL
+                    { left: overlay.left + overlay.width / 2, top: overlay.top - overlay.height / 2 }, // TR
+                    { left: overlay.left - overlay.width / 2, top: overlay.top + overlay.height / 2 }, // BL
+                    { left: overlay.left + overlay.width / 2, top: overlay.top + overlay.height / 2 }  // BR
+                ];
+
+                const cornerPoints = points.map(point => {
+                    return new fabric.Circle({
+                        radius: 5,
+                        fill: 'red',
+                        left: point.left,
+                        top: point.top,
+                        originX: 'center',
+                        originY: 'center',
+                        hasControls: false,
+                        hasBorders: false
+                    });
+                });
+
+                cornerPoints.forEach((point, index) => {
+                    canvas.add(point);
+                    point.on('moving', function () {
+                        updateOverlayTransform(overlay, cornerPoints);
+                    });
+                });
+
+                updateOverlayTransform(overlay, cornerPoints);
+
+                // Add a button to send the data to the server
+                const button = document.getElementById('applyTransformButton');
+                button.onclick = () => {
+                    const corners = cornerPoints.map(p => ({ x: p.left, y: p.top }));
+                    sendCornersToServer(corners, imageUrl);
+                };
+            }
+
+            function updateOverlayTransform(overlay, points) {
+                const tl = points[0];
+                const tr = points[1];
+                const bl = points[2];
+                const br = points[3];
+
+                const width = overlay.width;
+                const height = overlay.height;
+
+                const srcCorners = [
+                    { x: 0, y: 0 },
+                    { x: width, y: 0 },
+                    { x: 0, y: height },
+                    { x: width, y: height }
+                ];
+
+                const destCorners = [
+                    { x: tl.left, y: tl.top },
+                    { x: tr.left, y: tr.top },
+                    { x: bl.left, y: bl.top },
+                    { x: br.left, y: br.top }
+                ];
+
+                // Perform perspective transformation
+                const transform = PerspT(
+                    [srcCorners[0].x, srcCorners[0].y,
+                     srcCorners[1].x, srcCorners[1].y,
+                     srcCorners[2].x, srcCorners[2].y,
+                     srcCorners[3].x, srcCorners[3].y],
+                    [destCorners[0].x, destCorners[0].y,
+                     destCorners[1].x, destCorners[1].y,
+                     destCorners[2].x, destCorners[2].y,
+                     destCorners[3].x, destCorners[3].y]
+                );
+
+                const coeffs = transform.coeffs;
+
+                const canvasEl = document.getElementById('mainCanvas');
+                const ctx = canvasEl.getContext('2d');
+                const image = overlay._element;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.save();
+                ctx.transform(
+                    coeffs[0], coeffs[3], coeffs[1], coeffs[4],
+                    coeffs[2], coeffs[5]
+                );
+                ctx.drawImage(image, 0, 0, overlay.width, overlay.height);
+                ctx.restore();
+            }
+
+            function sendCornersToServer(corners, imageUrl) {
+                fetch('http://YOUR_VM_EXTERNAL_IP/transform', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ corners, imageUrl })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Transformation applied successfully');
+                        const transformedImage = new Image();
+                        transformedImage.src = 'http://34.42.241.211' + data.transformedImageUrl;
+                        transformedImage.onload = () => {
+                            const img = new fabric.Image(transformedImage, {
+                                left: canvas.getWidth() / 2,
+                                top: canvas.getHeight() / 2,
+                                originX: 'center',
+                                originY: 'center'
+                            });
+                            canvas.add(img);
+                        };
+                    } else {
+                        console.error('Transformation failed');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        });
+    </script>
+</body>
+</html>
