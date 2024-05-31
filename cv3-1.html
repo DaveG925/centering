@@ -33,7 +33,7 @@
         <canvas id="mainCanvas"></canvas>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
-    <script src="https://raw.githubusercontent.com/jlouthan/perspective-transform/master/perspective.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/jlouthan/perspective-transform@master/perspective.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -131,14 +131,11 @@
                 const bl = points[2];
                 const br = points[3];
 
-                const width = overlay.width;
-                const height = overlay.height;
-
                 const srcCorners = [
                     { x: 0, y: 0 },
-                    { x: width, y: 0 },
-                    { x: 0, y: height },
-                    { x: width, y: height }
+                    { x: overlay.width, y: 0 },
+                    { x: 0, y: overlay.height },
+                    { x: overlay.width, y: overlay.height }
                 ];
 
                 const destCorners = [
@@ -166,7 +163,7 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.save();
                 ctx.setTransform(...transform.coeffs);
-                ctx.drawImage(image, 0, 0, width, height);
+                ctx.drawImage(image, 0, 0, overlay.width, overlay.height);
                 ctx.restore();
             }
         });
