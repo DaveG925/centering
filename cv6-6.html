@@ -33,7 +33,7 @@
     const canvas = new fabric.Canvas('canvas');
     const controlPointRadius = 12;
     const controlPoints = [];
-    const offsetDistance = 50;
+    const offsetDistance = 10;
     let loadedImage = null;
 
     canvas.setWidth(window.innerWidth - 20);
@@ -150,7 +150,7 @@
         const gapEndY = midY + (dy * gapRatio) / 2;
 
         const line1 = new fabric.Line([p1.x, p1.y, gapStartX, gapStartY], {
-            stroke: 'gray',
+            stroke: 'black',
             strokeWidth: 1,
             selectable: false,
         });
