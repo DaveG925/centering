@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Warping Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@finos/perspective@1.1.3/dist/umd/perspective.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/perspective-transform@1.0.6/dist/perspective-transform.min.js"></script>
     <style>
         body, html {
             margin: 0;
@@ -61,7 +61,7 @@
         positions.forEach(pos => {
             const circle = new fabric.Circle({
                 radius: 5,
-                fill: 'blue',
+                fill: 'green',
                 left: pos.left,
                 top: pos.top,
                 originX: 'center',
@@ -79,25 +79,24 @@
 
     function updateOverlayImagePosition() {
         const srcCorners = [
-            [0, 0],
-            [overlayImg.width, 0],
-            [0, overlayImg.height],
-            [overlayImg.width, overlayImg.height]
+            { x: 0, y: 0 },
+            { x: overlayImg.width, y: 0 },
+            { x: 0, y: overlayImg.height },
+            { x: overlayImg.width, y: overlayImg.height }
         ];
 
-        const destCorners = controlPoints.map(p => [p.left, p.top]);
+        const destCorners = controlPoints.map(p => ({ x: p.left, y: p.top }));
 
-        const perspT = perspective.transform(destCorners, srcCorners);
+        const pt = PerspT(srcCorners[0].x, srcCorners[0].y, srcCorners[1].x, srcCorners[1].y, srcCorners[2].x, srcCorners[2].y, srcCorners[3].x, srcCorners[3].y);
+        pt.bound(destCorners[0].x, destCorners[0].y, destCorners[1].x, destCorners[1].y, destCorners[2].x, destCorners[2].y, destCorners[3].x, destCorners[3].y);
 
         const matrix = [
-            perspT[0][0], perspT[0][1], perspT[0][2],
-            perspT[1][0], perspT[1][1], perspT[1][2],
-            perspT[2][0], perspT[2][1], perspT[2][2]
+            pt.coeff[0], pt.coeff[1], 0,
+            pt.coeff[3], pt.coeff[4], 0,
+            pt.coeff[6], pt.coeff[7], 1
         ];
 
         overlayImg.set({
-            left: 0,
-            top: 0,
             transformMatrix: matrix
         });
 
