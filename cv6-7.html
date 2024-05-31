@@ -56,7 +56,6 @@
             updateQuadrilateral();
         });
 
-        canvas.add(circle);
         return circle;
     }
 
@@ -81,6 +80,7 @@
     function updateQuadrilateral() {
         canvas.getObjects('line').forEach(line => canvas.remove(line));
         canvas.getObjects('text').forEach(text => canvas.remove(text));
+        canvas.getObjects('circle').forEach(circle => canvas.remove(circle)); // Remove control points before redrawing
 
         const points = controlPoints.map(point => ({
             x: point.left,
@@ -89,6 +89,7 @@
 
         drawOuterQuadrilateral(points);
         drawConcentricQuadrilaterals(points);
+        drawControlPoints(points); // Draw control points last
     }
 
     function drawOuterQuadrilateral(corners) {
@@ -242,6 +243,14 @@
             x: p.x + offsetX1 + offsetX2,
             y: p.y + offsetY1 + offsetY2
         };
+    }
+
+    function drawControlPoints(corners) {
+        corners.forEach((corner) => {
+            const controlPoint = createControlPoint(corner.x, corner.y, 'red');
+            canvas.add(controlPoint);
+            controlPoints.push(controlPoint);
+        });
     }
 
     function loadImage(imageURL) {
