@@ -251,13 +251,12 @@ function overlayImageInQuadrilateral() {
 
         // Create control points for the overlay image
         const overlayPoints = [];
-        const overlayLines = [];
         outerCorners.forEach((corner, index) => {
             const offsetX = (index === 0 || index === 3) ? -controlPointOffset : controlPointOffset;
             const offsetY = (index === 0 || index === 1) ? -controlPointOffset : controlPointOffset;
             const circle = new fabric.Circle({
                 radius: 15,
-                fill: 'blue',
+                fill: 'red',
                 left: corner.x + offsetX,
                 top: corner.y + offsetY,
                 originX: 'center',
@@ -266,16 +265,17 @@ function overlayImageInQuadrilateral() {
                 hasControls: false,
                 selectable: true,
             });
+            circle.trueX = corner.x;
+            circle.trueY = corner.y;
             circle.on('moving', function () {
                 // Update the corner position when the control point moves
-                const index = overlayPoints.indexOf(this);
-                overlayPoints[index].trueX = this.left - offsetX;
-                overlayPoints[index].trueY = this.top - offsetY;
-                drawOverlayLines();
+                this.trueX = this.left - offsetX;
+                this.trueY = this.top - offsetY;
                 updateOverlayImagePosition();
+                drawOverlayLines();
             });
             canvas.add(circle);
-            overlayPoints.push({ trueX: corner.x, trueY: corner.y });
+            overlayPoints.push(circle);
         });
 
         function drawOverlayLines() {
@@ -316,6 +316,7 @@ function overlayImageInQuadrilateral() {
         drawOverlayLines();
     });
 }
+
 
 
 window.addEventListener('resize', debounce(adjustCanvas, 100));
