@@ -2,220 +2,111 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Perspective Transformation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Warping Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/wanadev/perspective.js/dist/perspective.min.js"></script>
     <style>
         body, html {
             margin: 0;
             padding: 0;
-            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #f0f0f0;
+            height: 100vh;
+            background-color: #FFFFFF;
         }
-        #canvas-container {
-            position: relative;
-            width: 90%;
-            height: 90%;
-            padding: 20px;
-            box-sizing: border-box;
-            background-color: #ffffff;
-        }
+
         canvas {
-            width: 100%;
-            height: 100%;
-        }
-        button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
+            border: 1px solid #ccc;
         }
     </style>
 </head>
 <body>
-    <div id="canvas-container">
-        <canvas id="mainCanvas"></canvas>
-    </div>
-    <button id="applyTransformButton">Apply Perspective Warp</button>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const imageUrl = urlParams.get('imageURL');
-            const overlayUrl = 'https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png';
 
-            if (!imageUrl) {
-                alert('No image URL provided');
-                return;
-            }
+<canvas id="canvas"></canvas>
 
-            const canvas = new fabric.Canvas('mainCanvas', {
-                preserveObjectStacking: true,
-                width: window.innerWidth * 0.9,
-                height: window.innerHeight * 0.9
+<script>
+    const canvas = new fabric.Canvas('canvas', { selection: false });
+    let overlayImg, controlPoints = [];
+
+    function initializeCanvas() {
+        canvas.setWidth(window.innerWidth - 20);
+        canvas.setHeight(window.innerHeight - 20);
+
+        // Load and add the overlay image
+        fabric.Image.fromURL('https://raw.githubusercontent.com/DaveG925/centering/main/centering2.png', function (img) {
+            overlayImg = img;
+            overlayImg.set({
+                left: canvas.getWidth() / 4,
+                top: canvas.getHeight() / 4,
+                scaleX: 0.5,
+                scaleY: 0.5,
+                hasControls: false,
+                selectable: false
             });
-
-            fabric.Image.fromURL(imageUrl, (img) => {
-                const scaleFactor = Math.min(canvas.getWidth() / img.width, canvas.getHeight() / img.height);
-                img.set({
-                    originX: 'center',
-                    originY: 'center',
-                    left: canvas.getWidth() / 2,
-                    top: canvas.getHeight() / 2,
-                    scaleX: scaleFactor,
-                    scaleY: scaleFactor,
-                    selectable: false
-                });
-                canvas.add(img);
-                console.log('Background image added.');
-
-                fabric.Image.fromURL(overlayUrl, (overlay) => {
-                    overlay.set({
-                        originX: 'center',
-                        originY: 'center',
-                        left: canvas.getWidth() / 2,
-                        top: canvas.getHeight() / 2,
-                        opacity: 0.5,
-                        lockScalingFlip: true,
-                        hasRotatingPoint: false,
-                        cornerStyle: 'circle',
-                        transparentCorners: false,
-                        selectable: false
-                    });
-
-                    canvas.add(overlay);
-                    console.log('Overlay image added.');
-
-                    addCornerControls(canvas, overlay);
-                }, { crossOrigin: 'Anonymous' });
-            }, { crossOrigin: 'Anonymous' });
-
-            window.addEventListener('resize', () => {
-                canvas.setWidth(window.innerWidth * 0.9);
-                canvas.setHeight(window.innerHeight * 0.9);
-                canvas.renderAll();
-            });
-
-            function addCornerControls(canvas, overlay) {
-                const points = [
-                    { left: overlay.left - overlay.width / 2, top: overlay.top - overlay.height / 2 }, // TL
-                    { left: overlay.left + overlay.width / 2, top: overlay.top - overlay.height / 2 }, // TR
-                    { left: overlay.left - overlay.width / 2, top: overlay.top + overlay.height / 2 }, // BL
-                    { left: overlay.left + overlay.width / 2, top: overlay.top + overlay.height / 2 }  // BR
-                ];
-
-                const cornerPoints = points.map(point => {
-                    return new fabric.Circle({
-                        radius: 5,
-                        fill: 'red',
-                        left: point.left,
-                        top: point.top,
-                        originX: 'center',
-                        originY: 'center',
-                        hasControls: false,
-                        hasBorders: false
-                    });
-                });
-
-                cornerPoints.forEach((point, index) => {
-                    canvas.add(point);
-                    point.on('moving', function () {
-                        updateOverlayTransform(overlay, cornerPoints);
-                    });
-                });
-
-                updateOverlayTransform(overlay, cornerPoints);
-
-                // Add a button to send the data to the server
-                const button = document.getElementById('applyTransformButton');
-                button.onclick = () => {
-                    const corners = cornerPoints.map(p => ({ x: p.left, y: p.top }));
-                    sendCornersToServer(corners, imageUrl);
-                };
-            }
-
-            function updateOverlayTransform(overlay, points) {
-                const tl = points[0];
-                const tr = points[1];
-                const bl = points[2];
-                const br = points[3];
-
-                const width = overlay.width;
-                const height = overlay.height;
-
-                const srcCorners = [
-                    { x: 0, y: 0 },
-                    { x: width, y: 0 },
-                    { x: 0, y: height },
-                    { x: width, y: height }
-                ];
-
-                const destCorners = [
-                    { x: tl.left, y: tl.top },
-                    { x: tr.left, y: tr.top },
-                    { x: bl.left, y: bl.top },
-                    { x: br.left, y: br.top }
-                ];
-
-                // Perform perspective transformation
-                const transform = PerspT(
-                    [srcCorners[0].x, srcCorners[0].y,
-                     srcCorners[1].x, srcCorners[1].y,
-                     srcCorners[2].x, srcCorners[2].y,
-                     srcCorners[3].x, srcCorners[3].y],
-                    [destCorners[0].x, destCorners[0].y,
-                     destCorners[1].x, destCorners[1].y,
-                     destCorners[2].x, destCorners[2].y,
-                     destCorners[3].x, destCorners[3].y]
-                );
-
-                const coeffs = transform.coeffs;
-
-                const canvasEl = document.getElementById('mainCanvas');
-                const ctx = canvasEl.getContext('2d');
-                const image = overlay._element;
-
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.save();
-                ctx.transform(
-                    coeffs[0], coeffs[3], coeffs[1], coeffs[4],
-                    coeffs[2], coeffs[5]
-                );
-                ctx.drawImage(image, 0, 0, overlay.width, overlay.height);
-                ctx.restore();
-            }
-
-            function sendCornersToServer(corners, imageUrl) {
-                fetch('http://YOUR_VM_EXTERNAL_IP/transform', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ corners, imageUrl })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        console.log('Transformation applied successfully');
-                        const transformedImage = new Image();
-                        transformedImage.src = 'http://34.42.241.211' + data.transformedImageUrl;
-                        transformedImage.onload = () => {
-                            const img = new fabric.Image(transformedImage, {
-                                left: canvas.getWidth() / 2,
-                                top: canvas.getHeight() / 2,
-                                originX: 'center',
-                                originY: 'center'
-                            });
-                            canvas.add(img);
-                        };
-                    } else {
-                        console.error('Transformation failed');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-            }
+            canvas.add(overlayImg);
+            initializeControlPoints();
         });
-    </script>
+    }
+
+    function initializeControlPoints() {
+        const positions = [
+            { left: overlayImg.left, top: overlayImg.top },
+            { left: overlayImg.left + overlayImg.getScaledWidth(), top: overlayImg.top },
+            { left: overlayImg.left, top: overlayImg.top + overlayImg.getScaledHeight() },
+            { left: overlayImg.left + overlayImg.getScaledWidth(), top: overlayImg.top + overlayImg.getScaledHeight() }
+        ];
+
+        positions.forEach(pos => {
+            const circle = new fabric.Circle({
+                radius: 5,
+                fill: 'red',
+                left: pos.left,
+                top: pos.top,
+                originX: 'center',
+                originY: 'center',
+                hasControls: false,
+                hasBorders: false,
+                selectable: true,
+            });
+
+            circle.on('moving', updateOverlayImagePosition);
+            controlPoints.push(circle);
+            canvas.add(circle);
+        });
+    }
+
+    function updateOverlayImagePosition() {
+        const srcCorners = [
+            { x: 0, y: 0 },
+            { x: overlayImg.width, y: 0 },
+            { x: 0, y: overlayImg.height },
+            { x: overlayImg.width, y: overlayImg.height }
+        ];
+
+        const destCorners = controlPoints.map(p => ({ x: p.left, y: p.top }));
+
+        const transform = PerspT(
+            srcCorners.flatMap(c => [c.x, c.y]),
+            destCorners.flatMap(c => [c.x, c.y])
+        );
+
+        const matrix = transform.coeffs;
+        overlayImg.set({
+            left: 0,
+            top: 0,
+            transformMatrix: [
+                matrix[0], matrix[3], 0,
+                matrix[1], matrix[4], 0,
+                matrix[2], matrix[5], 1
+            ]
+        });
+        canvas.renderAll();
+    }
+
+    window.onload = initializeCanvas;
+    window.onresize = initializeCanvas;
+</script>
 </body>
 </html>
