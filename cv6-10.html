@@ -208,8 +208,8 @@
             line1.set({ strokeDashArray: [] });
             line2.set({ strokeDashArray: [] });
         } else {
-            line1.set({ strokeDashArray: [5, 5] });
-            line2.set({ strokeDashArray: [5, 5] });
+            line1.set({ strokeDashArray: [10, 10] });
+            line2.set({ strokeDashArray: [10, 10] });
         }
 
         lines.concentric.push(line1, line2);
@@ -230,7 +230,7 @@
         const label = new fabric.Text(index.toString(), {
             left: midX,
             top: midY,
-            fontSize: 12,
+            fontSize: 10,
             originX: 'center',
             originY: 'center',
             selectable: false,
