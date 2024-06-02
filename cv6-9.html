@@ -54,7 +54,6 @@
 
         canvas.setWidth(canvasWidth);
         canvas.setHeight(finalCanvasHeight);
-
         addOverlay();
         if (window.loadedImage) {
             updateImageOnCanvas(window.loadedImage);
@@ -104,7 +103,7 @@
 
         let circle = new fabric.Circle({
             radius: 15,
-            fill: 'red',
+            fill: 'green',
             left: point.x + offsetX,
             top: point.y + offsetY,
             originX: 'center',
