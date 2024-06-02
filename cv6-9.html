@@ -21,32 +21,16 @@
             border: 1px solid #ccc;
         }
     </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const imageURL = urlParams.get('imageURL');
-            const cardID = urlParams.get('CardID');
-            const isFront = urlParams.get('isFront');
-
-            if (imageURL) {
-                loadImage(imageURL);
-            }
-
-            console.log("Card ID:", cardID);
-            console.log("Is Front:", isFront);
-        });
-
-    </script>
 </head>
 <body>
 <canvas id="canvas"></canvas>
 <script>
     const canvas = new fabric.Canvas('canvas', { selection: false });
-    const points = { outer: [] };
-    const lines = { outer: [], concentric: [] };
-    const labels = [];
-    let controlPointOffset = 30; // Change this value to adjust the offset
+    let points = { outer: [] };
+    let lines = { outer: [], concentric: [] };
+    let labels = [];
     let controlPoints = [];
+    let controlPointOffset = 30;
     let overlay;
 
     function debounce(func, wait) {
@@ -70,28 +54,32 @@
 
         canvas.setWidth(canvasWidth);
         canvas.setHeight(finalCanvasHeight);
+
+        addOverlay();
         if (window.loadedImage) {
             updateImageOnCanvas(window.loadedImage);
         }
-        addOverlay();
         initQuadrilaterals();
         canvas.renderAll();
     }
 
     function addOverlay() {
-        if (!overlay) {
-            overlay = new fabric.Rect({
-                left: 0,
-                top: 0,
-                width: canvas.width,
-                height: canvas.height,
-                fill: 'rgba(255, 255, 255, 0.5)',
-                selectable: false,
-                evented: false,
-            });
-            canvas.add(overlay);
-            overlay.sendToBack();
+        if (overlay) {
+            canvas.remove(overlay);
         }
+
+        overlay = new fabric.Rect({
+            left: 0,
+            top: 0,
+            width: canvas.width,
+            height: canvas.height,
+            fill: 'rgba(255, 255, 255, 0.5)',
+            selectable: false,
+            evented: false,
+        });
+
+        canvas.add(overlay);
+        overlay.sendToBack();
     }
 
     function initQuadrilaterals() {
@@ -306,17 +294,17 @@
             left: (canvas.width - img.width * scaleFactor) / 1.5,
             top: (canvas.height - img.height * scaleFactor) / 1.5
         });
-        img.sendToBack();
-        overlay.sendToBack();
         canvas.renderAll();
     }
 
     function loadImage(imageURL) {
         fabric.Image.fromURL(imageURL, function (img) {
             window.loadedImage = img;
-            updateImageOnCanvas(img);
             img.selectable = false;
             canvas.add(img);
+            updateImageOnCanvas(img);
+            addOverlay(); // Add overlay after image is loaded
+            initQuadrilaterals(); // Initialize quadrilaterals after image is loaded
             img.sendToBack();
             overlay.sendToBack();
         });
@@ -327,9 +315,8 @@
     window.onload = function () {
         const urlParams = new URLSearchParams(window.location.search);
         const imageURL = urlParams.get('imageURL') || 'your-default-image-url.jpg';
-        adjustCanvas();
         loadImage(imageURL);
-        initQuadrilaterals();
+        adjustCanvas();
     };
 </script>
 </body>
