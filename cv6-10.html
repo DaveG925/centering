@@ -104,7 +104,7 @@
 
         let circle = new fabric.Circle({
             radius: 15,
-            fill: 'red',
+            fill: 'blue',
             left: point.x + offsetX,
             top: point.y + offsetY,
             originX: 'center',
@@ -149,8 +149,8 @@
             let startPoint = point;
             let endPoint = points.outer[(index + 1) % points.outer.length];
             const line = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
-                stroke: 'red',
-                strokeWidth: 2,
+                stroke: 'blue',
+                strokeWidth: 3,
                 selectable: false,
             });
             lines.outer.push(line);
@@ -159,7 +159,7 @@
     }
 
     function drawConcentricQuadrilaterals(corners) {
-        for (let i = 1; i <= 10; i++) {
+        for (let i = 1; i <= 12; i++) {
             const offset = i * 5;
             const newCorners = offsetCorners(corners, offset);
 
@@ -193,13 +193,13 @@
         const gapEndY = midY + (dy * gapRatio) / 2;
 
         const line1 = new fabric.Line([p1.x, p1.y, gapStartX, gapStartY], {
-            stroke: 'gray',
+            stroke: 'black',
             strokeWidth: 1,
             selectable: false,
         });
 
         const line2 = new fabric.Line([gapEndX, gapEndY, p2.x, p2.y], {
-            stroke: 'gray',
+            stroke: 'black',
             strokeWidth: 1,
             selectable: false,
         });
