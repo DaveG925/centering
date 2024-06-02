@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Card Centering Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+<style>
+   body, html {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #FFFFFF;
+}
+
+canvas {
+    border: 1px solid #ccc;
+}
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const imageURL = urlParams.get('imageURL');
+        const cardID = urlParams.get('CardID');
+        const isFront = urlParams.get('isFront');
+
+        if (imageURL) {
+            loadImage(imageURL);
+        }
+
+        console.log("Card ID:", cardID);
+        console.log("Is Front:", isFront);
+    });
+
+</script>
+
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+<script>
+    const canvas = new fabric.Canvas('canvas', { selection: false });
+    const points = { outer: [] };
+    const lines = { outer: [], concentric: [] };
+    const labels = [];
+    let controlPointOffset = 30; // Change this value to adjust the offset
+
+    function debounce(func, wait) {
+        let timeout;
+        return function () {
+            const context = this, args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), wait);
+        };
+    }
+
+    function adjustCanvas() {
+        const horizontalPadding = 20;
+        const verticalPadding = 20;
+        const canvasWidth = window.innerWidth - horizontalPadding;
+        const canvasHeight = window.innerHeight - verticalPadding;
+
+        const aspectRatio = 3 / 4;
+        const heightBasedOnWidth = canvasWidth / aspectRatio;
+        const finalCanvasHeight = Math.min(canvasHeight, heightBasedOnWidth);
+
+        canvas.setWidth(canvasWidth);
+        canvas.setHeight(finalCanvasHeight);
+        if (window.loadedImage) {
+            updateImageOnCanvas(window.loadedImage);
+        }
+        addOverlay();
+        initQuadrilaterals();
+        canvas.renderAll();
+    }
+
+    function addOverlay() {
+        const overlay = new fabric.Rect({
+            left: 0,
+            top: 0,
+            width: canvas.width,
+            height: canvas.height,
+            fill: 'rgba(255, 255, 255, 0.5)',
+            selectable: false,
+            evented: false,
+        });
+        canvas.add(overlay);
+    }
+
+    function initQuadrilaterals() {
+        const defaultOuterCorners = [
+            { x: 50, y: 50 }, { x: canvas.width - 50, y: 50 },
+            { x: canvas.width - 50, y: canvas.height - 50 }, { x: 50, y: canvas.height - 50 }
+        ];
+
+        defaultOuterCorners.forEach((point, index) => {
+            points.outer[index] = createCorner(point, 'outer', index);
+        });
+
+        drawLines();
+        drawConcentricQuadrilaterals(defaultOuterCorners);
+    }
+
+    function createCorner(point, borderType, index) {
+        let offsetX = (index === 0 || index === 3) ? -controlPointOffset : controlPointOffset;
+        let offsetY = (index === 0 || index === 1) ? -controlPointOffset : controlPointOffset;
+
+        let circle = new fabric.Circle({
+            radius: 15,
+            fill: 'red',
+            left: point.x + offsetX,
+            top: point.y + offsetY,
+            originX: 'center',
+            originY: 'center',
+            hasBorders: false,
+            hasControls: false,
+            selectable: true,
+        });
+
+        circle.trueX = point.x;
+        circle.trueY = point.y;
+
+        circle.on('moving', function () {
+            this.trueX = this.left - offsetX;
+            this.trueY = this.top - offsetY;
+            drawLines();
+            drawConcentricQuadrilaterals(points.outer.map(p => ({ x: p.trueX, y: p.trueY })));
+        });
+
+        canvas.add(circle);
+        return circle;
+    }
+
+    function drawLines() {
+        Object.values(lines).forEach(borderLines => {
+            borderLines.forEach(line => canvas.remove(line));
+        });
+        lines.outer = [];
+        lines.concentric.forEach(line => canvas.remove(line));
+        lines.concentric = [];
+        labels.forEach(label => canvas.remove(label));
+        labels.length = 0;
+
+        points.outer.forEach((point, index) => {
+            let startPoint = point;
+            let endPoint = points.outer[(index + 1) % points.outer.length];
+            const line = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
+                stroke: 'red',
+                strokeWidth: 2,
+                selectable: false,
+            });
+            lines.outer.push(line);
+            canvas.add(line);
+        });
+    }
+
+    function drawConcentricQuadrilaterals(corners) {
+        for (let i = 1; i <= 10; i++) {
+            const offset = i * 5;
+            const newCorners = offsetCorners(corners, offset);
+
+            drawQuadrilateralWithGap(newCorners, i);
+            drawLabels(newCorners, i);
+        }
+    }
+
+    function drawQuadrilateralWithGap(corners, index) {
+        const gapSize = 30;
+        const [p0, p1, p2, p3] = corners;
+
+        drawLineWithGap(p0, p1, gapSize, index);
+        drawLineWithGap(p1, p2, gapSize, index);
+        drawLineWithGap(p2, p3, gapSize, index);
+        drawLineWithGap(p3, p0, gapSize, index);
+    }
+
+    function drawLineWithGap(p1, p2, gapSize, index) {
+        const midX = (p1.x + p2.x) / 2;
+        const midY = (p1.y + p2.y) / 2;
+
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        const gapRatio = gapSize / len;
+
+        const gapStartX = midX - (dx * gapRatio) / 2;
+        const gapStartY = midY - (dy * gapRatio) / 2;
+        const gapEndX = midX + (dx * gapRatio) / 2;
+        const gapEndY = midY + (dy * gapRatio) / 2;
+
+        const line1 = new fabric.Line([p1.x, p1.y, gapStartX, gapStartY], {
+            stroke: 'gray',
+            strokeWidth: 1,
+            selectable: false,
+        });
+
+        const line2 = new fabric.Line([gapEndX, gapEndY, p2.x, p2.y], {
+            stroke: 'gray',
+            strokeWidth: 1,
+            selectable: false,
+        });
+
+        if (index % 2 === 0) {
+            line1.set({ strokeDashArray: [] });
+            line2.set({ strokeDashArray: [] });
+        } else {
+            line1.set({ strokeDashArray: [5, 5] });
+            line2.set({ strokeDashArray: [5, 5] });
+        }
+
+        lines.concentric.push(line1, line2);
+        canvas.add(line1, line2);
+    }
+
+    function drawLabels(corners, index) {
+        drawLabelAtMidpoint(corners[0], corners[1], index, 'top');
+        drawLabelAtMidpoint(corners[1], corners[2], index, 'right');
+        drawLabelAtMidpoint(corners[2], corners[3], index, 'bottom');
+        drawLabelAtMidpoint(corners[3], corners[0], index, 'left');
+    }
+
+    function drawLabelAtMidpoint(p1, p2, index, position) {
+        const midX = (p1.x + p2.x) / 2;
+        const midY = (p1.y + p2.y) / 2;
+
+        const label = new fabric.Text(index.toString(), {
+            left: midX,
+            top: midY,
+            fontSize: 12,
+            originX: 'center',
+            originY: 'center',
+            selectable: false,
+        });
+
+        if (position === 'top' || position === 'bottom') {
+            label.set({
+                left: midX + (index % 2 === 0 ? 5 : -5),
+                textAlign: index % 2 === 0 ? 'left' : 'right'
+            });
+        } else {
+            label.set({
+                top: midY + (index % 2 === 0 ? 5 : -5),
+                textAlign: 'center'
+            });
+        }
+
+        labels.push(label);
+        canvas.add(label);
+    }
+
+    function offsetCorners(corners, offset) {
+        const [p0, p1, p2, p3] = corners;
+
+        const newP0 = offsetPoint(p0, p1, p3, offset);
+        const newP1 = offsetPoint(p1, p0, p2, offset);
+        const newP2 = offsetPoint(p2, p1, p3, offset);
+        const newP3 = offsetPoint(p3, p0, p2, offset);
+
+        return [newP0, newP1, newP2, newP3];
+    }
+
+    function offsetPoint(p, adj1, adj2, offset) {
+        const dx1 = adj1.x - p.x;
+        const dy1 = adj1.y - p.y;
+        const dx2 = adj2.x - p.x;
+        const dy2 = adj2.y - p.y;
+
+        const dist1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+        const dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+
+        const offsetX1 = (dx1 / dist1) * offset;
+        const offsetY1 = (dy1 / dist1) * offset;
+        const offsetX2 = (dx2 / dist2) * offset;
+        const offsetY2 = (dy2 / dist2) * offset;
+
+        return {
+            x: p.x + offsetX1 + offsetX2,
+            y: p.y + offsetY1 + offsetY2
+        };
+    }
+
+    function updateImageOnCanvas(img) {
+        const padding = 30;
+        const scaleFactor = Math.min(
+            (canvas.width - 1.5 * padding) / img.width,
+            (canvas.height - 1.5 * padding) / img.height
+        );
+        img.set({
+            scaleX: scaleFactor,
+            scaleY: scaleFactor,
+            left: (canvas.width - img.width * scaleFactor) / 1.5,
+            top: (canvas.height - img.height * scaleFactor) / 1.5
+        });
+        canvas.renderAll();
+    }
+
+    function loadImage(imageURL) {
+        fabric.Image.fromURL(imageURL, function (img) {
+            window.loadedImage = img;
+            updateImageOnCanvas(img);
+            img.selectable = false;
+            canvas.add(img);
+            img.sendToBack();
+        });
+    }
+
+    window.addEventListener('resize', debounce(adjustCanvas, 100));
+
+    window.onload = function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const imageURL = urlParams.get('imageURL') || 'your-default-image-url.jpg';
+        adjustCanvas();
+        loadImage(imageURL);
+        initQuadrilaterals();
+    };
+</script>
+</body>
+</html>
