@@ -319,8 +319,8 @@
             }
         });
 
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
+        const centerX = (points.outer.reduce((sum, point) => sum + point.trueX, 0)) / points.outer.length;
+        const centerY = (points.outer.reduce((sum, point) => sum + point.trueY, 0)) / points.outer.length;
         const crosshairLength = 50;
 
         const horizontalLine = new fabric.Line(
