@@ -47,7 +47,7 @@ canvas {
     const points = { outer: [] };
     const lines = { outer: [], concentric: [] };
     const labels = [];
-    const controlPointOffset = -30;
+    const controlPointOffset = 30;
 
     function debounce(func, wait) {
         let timeout;
@@ -102,8 +102,8 @@ canvas {
         let offsetY = (index === 0 || index === 1) ? -controlPointOffset : controlPointOffset;
 
         let circle = new fabric.Circle({
-            radius: 20,
-            fill: 'green',
+            radius: 15,
+            fill: 'red',
             left: point.x + offsetX,
             top: point.y + offsetY,
             originX: 'center',
