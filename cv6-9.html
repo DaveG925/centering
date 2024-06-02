@@ -54,7 +54,7 @@
 
         canvas.setWidth(canvasWidth);
         canvas.setHeight(finalCanvasHeight);
-        
+
         if (window.loadedImage) {
             updateImageOnCanvas(window.loadedImage);
         }
@@ -95,6 +95,7 @@
 
         drawLines();
         drawConcentricQuadrilaterals(defaultOuterCorners);
+        addCrosshairs();
     }
 
     function createCorner(point, borderType, index) {
@@ -121,6 +122,7 @@
             this.trueY = this.top - offsetY;
             drawLines();
             drawConcentricQuadrilaterals(points.outer.map(p => ({ x: p.trueX, y: p.trueY })));
+            addCrosshairs();
         });
 
         controlPoints.push(circle);
@@ -191,13 +193,13 @@
         const gapEndY = midY + (dy * gapRatio) / 2;
 
         const line1 = new fabric.Line([p1.x, p1.y, gapStartX, gapStartY], {
-            stroke: 'black',
+            stroke: 'gray',
             strokeWidth: 1,
             selectable: false,
         });
 
         const line2 = new fabric.Line([gapEndX, gapEndY, p2.x, p2.y], {
-            stroke: 'blue',
+            stroke: 'gray',
             strokeWidth: 1,
             selectable: false,
         });
@@ -228,7 +230,7 @@
         const label = new fabric.Text(index.toString(), {
             left: midX,
             top: midY,
-            fontSize: 10,
+            fontSize: 12,
             originX: 'center',
             originY: 'center',
             selectable: false,
@@ -307,6 +309,37 @@
             overlay.moveTo(1); // Move overlay above the image
             img.moveTo(0); // Ensure image is at the very back
         });
+    }
+
+    function addCrosshairs() {
+        // Clear previous crosshairs
+        canvas.getObjects('line').forEach(line => {
+            if (line.name === 'crosshair') {
+                canvas.remove(line);
+            }
+        });
+
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const crosshairLength = 50;
+
+        const horizontalLine = new fabric.Line(
+            [centerX - crosshairLength, centerY, centerX + crosshairLength, centerY], {
+            stroke: 'black',
+            strokeWidth: 1,
+            selectable: false,
+            name: 'crosshair'
+        });
+
+        const verticalLine = new fabric.Line(
+            [centerX, centerY - crosshairLength, centerX, centerY + crosshairLength], {
+            stroke: 'black',
+            strokeWidth: 1,
+            selectable: false,
+            name: 'crosshair'
+        });
+
+        canvas.add(horizontalLine, verticalLine);
     }
 
     window.addEventListener('resize', debounce(adjustCanvas, 100));
