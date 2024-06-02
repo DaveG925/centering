@@ -68,7 +68,7 @@
             { x: margin, y: canvas.height - margin }
         ];
 
-        const offset = 30; // Adjust this value to move the points inward
+        const offset = -90; // Adjust this value to move the points inward
         const innerCorners = outerCorners.map(corner => ({
             x: corner.x + (corner.x < canvas.width / 2 ? offset : -offset),
             y: corner.y + (corner.y < canvas.height / 2 ? offset : -offset)
