@@ -54,11 +54,10 @@
 
         canvas.setWidth(canvasWidth);
         canvas.setHeight(finalCanvasHeight);
-
+        
         if (window.loadedImage) {
             updateImageOnCanvas(window.loadedImage);
         }
-        addOverlay();
         initQuadrilaterals();
         canvas.renderAll();
     }
@@ -79,7 +78,7 @@
         });
 
         canvas.add(overlay);
-        overlay.sendToBack();
+        overlay.moveTo(1); // Move overlay to be above the image
     }
 
     function initQuadrilaterals() {
@@ -303,9 +302,10 @@
             img.selectable = false;
             canvas.add(img);
             updateImageOnCanvas(img);
-            img.sendToBack();  // Send the image to the back first
-            addOverlay();  // Then add the overlay and send it to the back
+            addOverlay();  // Add overlay after image is loaded
             initQuadrilaterals();  // Initialize quadrilaterals after image is loaded
+            overlay.moveTo(1); // Move overlay above the image
+            img.moveTo(0); // Ensure image is at the very back
         });
     }
 
