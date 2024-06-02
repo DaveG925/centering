@@ -33,7 +33,6 @@
     const canvas = new fabric.Canvas('canvas');
     const controlPointRadius = 12;
     const controlPoints = [];
-    const offsetDistance = 30 / Math.sqrt(2); // Calculate offset for 45 degrees
     let loadedImage = null;
 
     canvas.setWidth(window.innerWidth - 20);
@@ -62,15 +61,20 @@
 
     function initializeControlPoints() {
         const margin = 50;
-        const offset = 100; // Adjust this value to move the points inward
         const outerCorners = [
-            { x: margin + offset, y: margin + offset },
-            { x: canvas.width - margin - offset, y: margin + offset },
-            { x: canvas.width - margin - offset, y: canvas.height - margin - offset },
-            { x: margin + offset, y: canvas.height - margin - offset }
+            { x: margin, y: margin },
+            { x: canvas.width - margin, y: margin },
+            { x: canvas.width - margin, y: canvas.height - margin },
+            { x: margin, y: canvas.height - margin }
         ];
 
-        outerCorners.forEach((corner, index) => {
+        const offset = 30; // Adjust this value to move the points inward
+        const innerCorners = outerCorners.map(corner => ({
+            x: corner.x + (corner.x < canvas.width / 2 ? offset : -offset),
+            y: corner.y + (corner.y < canvas.height / 2 ? offset : -offset)
+        }));
+
+        innerCorners.forEach((corner, index) => {
             controlPoints.push(createControlPoint(corner.x, corner.y, 'red')); // Adjusted positions
         });
 
