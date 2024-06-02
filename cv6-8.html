@@ -20,39 +20,14 @@
 canvas {
     border: 1px solid #ccc;
 }
-
-.button-container {
-        margin-top: 20px; /* Space between canvas and button */
-        text-align: center; /* Ensure the button text is centered */
-    }
-
-    button {
-        display: block;
-        margin-bottom: 5px;
-    }
-    #calculateCentering {
-        background-color: #446d8b; /* The button's background color */
-        border: 1px solid #446d8b; /* The button's border */
-        color: white; /* The text color of the button */
-        padding: 8px 24px; /* Top and bottom padding of 12px, left and right padding of 24px */
-        text-align: center; /* Center the text inside the button */
-        text-decoration: none; /* Remove underline from text */
-        display: inline-block; /* Allow the button to be inline but also set dimensions */
-        font-size: 14px; /* The font size of the text */
-        cursor: pointer; /* Change mouse pointer on hover */
-        border-radius: 4px; /* Rounded corners of the button */
-        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.4); /* Shadow to give depth */
-        transition: all 0.3s; /* Transition for smooth color change on hover */
-    }
 </style>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const urlParams = new URLSearchParams(window.location.search);
         const imageURL = urlParams.get('imageURL');
-        const cardID = urlParams.get('CardID');  // Retrieve CardID from URL
-        const isFront = urlParams.get('isFront'); // Retrieve isFront from URL
+        const cardID = urlParams.get('CardID');
+        const isFront = urlParams.get('isFront');
 
-        // You can now use these values as needed within your application
         if (imageURL) {
             loadImage(imageURL);
         }
@@ -67,26 +42,12 @@ canvas {
 <body>
 
 <canvas id="canvas"></canvas>
-<div class="button-container">
-    <button id="calculateCentering">CALCULATE</button>
-</div>
 <script>
-    document.getElementById('calculateCentering').addEventListener('click', function() {
-        // Gather the true corners for outer and inner quadrilaterals
-        const outerCorners = points.outer.map(p => ({ x: p.trueX, y: p.trueY }));
-        const innerCorners = points.inner.map(p => ({ x: p.trueX, y: p.trueY }));
-
-        // Calculate the centering ratios using the true corners
-        const ratios = calculateCenteringRatios(outerCorners, innerCorners);
-
-        // Display the ratios in an alert
-        alert(`Horizontal Centering: ${ratios.horizontal}%, Vertical Centering: ${ratios.vertical}%`);
-    });
-
     const canvas = new fabric.Canvas('canvas', { selection: false });
     const points = { outer: [], inner: [] };
-    const lines = { outer: [], inner: [] };
-    const controlPointOffset = 30; // Global offset for the control points
+    const lines = { outer: [], inner: [], concentric: [] };
+    const labels = [];
+    const controlPointOffset = 30;
 
     function debounce(func, wait) {
         let timeout;
@@ -98,10 +59,10 @@ canvas {
     }
 
     function adjustCanvas() {
-        const horizontalPadding = 20; // 20px on each side
-        const verticalPadding = 20; // 50px on top and bottom for example
+        const horizontalPadding = 20;
+        const verticalPadding = 20;
         const canvasWidth = window.innerWidth - horizontalPadding;
-        const canvasHeight = window.innerHeight - verticalPadding - 50; // Deduct space for the button
+        const canvasHeight = window.innerHeight - verticalPadding;
 
         const aspectRatio = 3 / 4;
         const heightBasedOnWidth = canvasWidth / aspectRatio;
@@ -109,9 +70,9 @@ canvas {
 
         canvas.setWidth(canvasWidth);
         canvas.setHeight(finalCanvasHeight);
-        initQuadrilaterals(); // Reinitialize to adjust corner positions
+        initQuadrilaterals();
         if (window.loadedImage) {
-            updateImageOnCanvas(window.loadedImage); // Update image position after canvas size change
+            updateImageOnCanvas(window.loadedImage);
         }
         canvas.renderAll();
     }
@@ -178,27 +139,35 @@ canvas {
         Object.values(lines).forEach(borderLines => {
             borderLines.forEach(line => canvas.remove(line));
         });
+        lines.outer = [];
+        lines.inner = [];
+        lines.concentric.forEach(line => canvas.remove(line));
+        lines.concentric = [];
+        labels.forEach(label => canvas.remove(label));
+        labels.length = 0;
 
         points.outer.forEach((point, index) => {
             let startPoint = point;
             let endPoint = points.outer[(index + 1) % points.outer.length];
-            lines.outer[index] = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
+            const line = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
                 stroke: 'red',
                 strokeWidth: 2,
                 selectable: false,
             });
-            canvas.add(lines.outer[index]);
+            lines.outer.push(line);
+            canvas.add(line);
         });
 
         points.inner.forEach((point, index) => {
             let startPoint = point;
             let endPoint = points.inner[(index + 1) % points.inner.length];
-            lines.inner[index] = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
+            const line = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
                 stroke: 'blue',
                 strokeWidth: 2,
                 selectable: false,
             });
-            canvas.add(lines.inner[index]);
+            lines.inner.push(line);
+            canvas.add(line);
         });
     }
 
@@ -256,6 +225,7 @@ canvas {
             line2.set({ strokeDashArray: [5, 5] });
         }
 
+        lines.concentric.push(line1, line2);
         canvas.add(line1, line2);
     }
 
@@ -291,6 +261,7 @@ canvas {
             });
         }
 
+        labels.push(label);
         canvas.add(label);
     }
 
@@ -326,7 +297,7 @@ canvas {
     }
 
     function updateImageOnCanvas(img) {
-        const padding = 30; // Padding around the image
+        const padding = 30;
         const scaleFactor = Math.min(
             (canvas.width - 1.5 * padding) / img.width,
             (canvas.height - 1.5 * padding) / img.height
@@ -348,34 +319,6 @@ canvas {
             canvas.add(img);
             img.sendToBack();
         });
-    }
-
-    function calculateCenteringRatios(outerCorners, innerCorners) {
-        const totalOuterWidth = Math.abs(outerCorners[1].x - outerCorners[0].x);
-        const totalOuterHeight = Math.abs(outerCorners[3].y - outerCorners[0].y);
-        
-        const leftSpace = Math.abs(innerCorners[0].x - outerCorners[0].x);
-        const rightSpace = Math.abs(outerCorners[1].x - innerCorners[1].x);
-        const topSpace = Math.abs(innerCorners[0].y - outerCorners[0].y);
-        const bottomSpace = Math.abs(outerCorners[3].y - innerCorners[3].y);
-        
-        const horizontalRatioLeft = (leftSpace / totalOuterWidth) * 100;
-        const horizontalRatioRight = (rightSpace / totalOuterWidth) * 100;
-        const verticalRatioTop = (topSpace / totalOuterHeight) * 100;
-        const verticalRatioBottom = (bottomSpace / totalOuterHeight) * 100;
-
-        const horizontalTotal = horizontalRatioLeft + horizontalRatioRight;
-        const verticalTotal = verticalRatioTop + verticalRatioBottom;
-
-        const adjustedHorizontalLeft = (horizontalRatioLeft / horizontalTotal) * 100;
-        const adjustedHorizontalRight = 100 - adjustedHorizontalLeft;
-        const adjustedVerticalTop = (verticalRatioTop / verticalTotal) * 100;
-        const adjustedVerticalBottom = 100 - adjustedVerticalTop;
-
-        return {
-            horizontal: `${adjustedHorizontalLeft.toFixed(1)}/${adjustedHorizontalRight.toFixed(1)}`,
-            vertical: `${adjustedVerticalTop.toFixed(1)}/${adjustedVerticalBottom.toFixed(1)}`
-        };
     }
 
     window.addEventListener('resize', debounce(adjustCanvas, 100));
