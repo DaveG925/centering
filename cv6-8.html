@@ -44,8 +44,8 @@ canvas {
 <canvas id="canvas"></canvas>
 <script>
     const canvas = new fabric.Canvas('canvas', { selection: false });
-    const points = { outer: [], inner: [] };
-    const lines = { outer: [], inner: [], concentric: [] };
+    const points = { outer: [] };
+    const lines = { outer: [], concentric: [] };
     const labels = [];
     const controlPointOffset = 30;
 
@@ -89,16 +89,8 @@ canvas {
             { x: canvas.width - 50, y: canvas.height - 50 }, { x: 50, y: canvas.height - 50 }
         ];
 
-        const defaultInnerCorners = [
-            { x: 150, y: 150 }, { x: canvas.width - 150, y: 150 },
-            { x: canvas.width - 150, y: canvas.height - 150 }, { x: 150, y: canvas.height - 150 }
-        ];
-
         defaultOuterCorners.forEach((point, index) => {
             points.outer[index] = createCorner(point, 'outer', index);
-        });
-        defaultInnerCorners.forEach((point, index) => {
-            points.inner[index] = createCorner(point, 'inner', index);
         });
 
         drawLines();
@@ -111,7 +103,7 @@ canvas {
 
         let circle = new fabric.Circle({
             radius: 15,
-            fill: borderType === 'outer' ? 'red' : 'blue',
+            fill: 'red',
             left: point.x + offsetX,
             top: point.y + offsetY,
             originX: 'center',
@@ -140,7 +132,6 @@ canvas {
             borderLines.forEach(line => canvas.remove(line));
         });
         lines.outer = [];
-        lines.inner = [];
         lines.concentric.forEach(line => canvas.remove(line));
         lines.concentric = [];
         labels.forEach(label => canvas.remove(label));
@@ -155,18 +146,6 @@ canvas {
                 selectable: false,
             });
             lines.outer.push(line);
-            canvas.add(line);
-        });
-
-        points.inner.forEach((point, index) => {
-            let startPoint = point;
-            let endPoint = points.inner[(index + 1) % points.inner.length];
-            const line = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
-                stroke: 'blue',
-                strokeWidth: 2,
-                selectable: false,
-            });
-            lines.inner.push(line);
             canvas.add(line);
         });
     }
