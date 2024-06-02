@@ -48,6 +48,7 @@ canvas {
     const lines = { outer: [], concentric: [] };
     const labels = [];
     let controlPointOffset = 30; // Change this value to adjust the offset
+    let controlPoints = [];
 
     function debounce(func, wait) {
         let timeout;
@@ -131,8 +132,14 @@ canvas {
             drawConcentricQuadrilaterals(points.outer.map(p => ({ x: p.trueX, y: p.trueY })));
         });
 
+        controlPoints.push(circle);
         canvas.add(circle);
         return circle;
+    }
+
+    function clearControlPoints() {
+        controlPoints.forEach(point => canvas.remove(point));
+        controlPoints = [];
     }
 
     function drawLines() {
