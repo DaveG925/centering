@@ -54,10 +54,11 @@
 
         canvas.setWidth(canvasWidth);
         canvas.setHeight(finalCanvasHeight);
-        addOverlay();
+
         if (window.loadedImage) {
             updateImageOnCanvas(window.loadedImage);
         }
+        addOverlay();
         initQuadrilaterals();
         canvas.renderAll();
     }
@@ -103,7 +104,7 @@
 
         let circle = new fabric.Circle({
             radius: 15,
-            fill: 'green',
+            fill: 'red',
             left: point.x + offsetX,
             top: point.y + offsetY,
             originX: 'center',
@@ -302,10 +303,9 @@
             img.selectable = false;
             canvas.add(img);
             updateImageOnCanvas(img);
-            addOverlay(); // Add overlay after image is loaded
-            initQuadrilaterals(); // Initialize quadrilaterals after image is loaded
-            img.sendToBack();
-            overlay.sendToBack();
+            img.sendToBack();  // Send the image to the back first
+            addOverlay();  // Then add the overlay and send it to the back
+            initQuadrilaterals();  // Initialize quadrilaterals after image is loaded
         });
     }
 
