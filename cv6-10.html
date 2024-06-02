@@ -160,7 +160,7 @@
 
     function drawConcentricQuadrilaterals(corners) {
         for (let i = 1; i <= 12; i++) {
-            const offset = i * 5;
+            const offset = i * 3;
             const newCorners = offsetCorners(corners, offset);
 
             drawQuadrilateralWithGap(newCorners, i);
