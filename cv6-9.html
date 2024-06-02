@@ -5,42 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Card Centering Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
-<style>
-   body, html {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #FFFFFF;
-}
-
-canvas {
-    border: 1px solid #ccc;
-}
-</style>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const imageURL = urlParams.get('imageURL');
-        const cardID = urlParams.get('CardID');
-        const isFront = urlParams.get('isFront');
-
-        if (imageURL) {
-            loadImage(imageURL);
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #FFFFFF;
         }
 
-        console.log("Card ID:", cardID);
-        console.log("Is Front:", isFront);
-    });
+        canvas {
+            border: 1px solid #ccc;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const imageURL = urlParams.get('imageURL');
+            const cardID = urlParams.get('CardID');
+            const isFront = urlParams.get('isFront');
 
-</script>
+            if (imageURL) {
+                loadImage(imageURL);
+            }
 
+            console.log("Card ID:", cardID);
+            console.log("Is Front:", isFront);
+        });
+
+    </script>
 </head>
 <body>
-
 <canvas id="canvas"></canvas>
 <script>
     const canvas = new fabric.Canvas('canvas', { selection: false });
@@ -49,6 +47,7 @@ canvas {
     const labels = [];
     let controlPointOffset = 30; // Change this value to adjust the offset
     let controlPoints = [];
+    let overlay;
 
     function debounce(func, wait) {
         let timeout;
@@ -80,17 +79,19 @@ canvas {
     }
 
     function addOverlay() {
-        const overlay = new fabric.Rect({
-            left: 0,
-            top: 0,
-            width: canvas.width,
-            height: canvas.height,
-            fill: 'rgba(255, 255, 255, 0.5)',
-            selectable: false,
-            evented: false,
-        });
-        canvas.add(overlay);
-        overlay.sendToBack();
+        if (!overlay) {
+            overlay = new fabric.Rect({
+                left: 0,
+                top: 0,
+                width: canvas.width,
+                height: canvas.height,
+                fill: 'rgba(255, 255, 255, 0.5)',
+                selectable: false,
+                evented: false,
+            });
+            canvas.add(overlay);
+            overlay.sendToBack();
+        }
     }
 
     function initQuadrilaterals() {
@@ -305,6 +306,8 @@ canvas {
             left: (canvas.width - img.width * scaleFactor) / 1.5,
             top: (canvas.height - img.height * scaleFactor) / 1.5
         });
+        img.sendToBack();
+        overlay.sendToBack();
         canvas.renderAll();
     }
 
@@ -315,6 +318,7 @@ canvas {
             img.selectable = false;
             canvas.add(img);
             img.sendToBack();
+            overlay.sendToBack();
         });
     }
 
