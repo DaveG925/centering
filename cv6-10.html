@@ -13,8 +13,12 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 200px;
+            height: 100vh; /* Adjusted to 100vh for full viewport height */
             background-color: #9FA5AE;
+        }
+
+        .canvas-container {
+            padding-bottom: 50px; /* Adjust this value to push the canvas up */
         }
 
         canvas {
@@ -23,7 +27,9 @@
     </style>
 </head>
 <body>
-<canvas id="canvas"></canvas>
+<div class="canvas-container">
+    <canvas id="canvas"></canvas>
+</div>
 <script>
     const canvas = new fabric.Canvas('canvas', { selection: false });
     let points = { outer: [] };
@@ -46,7 +52,7 @@
         const horizontalPadding = 0;
         const verticalPadding = 0;
         const canvasWidth = window.innerWidth - horizontalPadding;
-        const canvasHeight = window.innerHeight - verticalPadding;
+        const canvasHeight = window.innerHeight - verticalPadding - 50; // Adjust for the padding
 
         const aspectRatio = 2 / 5;
         const heightBasedOnWidth = canvasWidth / aspectRatio;
