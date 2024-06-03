@@ -23,8 +23,8 @@
 
         canvas {
             border: 1px solid #ccc;
-            width: 350px; /* Set fixed width */
-            height: 500px; /* Set fixed height */
+            width: 800px; /* Set fixed width */
+            height: 600px; /* Set fixed height */
         }
     </style>
 </head>
@@ -288,8 +288,8 @@
         img.set({
             scaleX: scaleFactor,
             scaleY: scaleFactor,
-            left: (canvas.width - img.width * scaleFactor) / 1.5,
-            top: (canvas.height - img.height * scaleFactor) / 1.5
+            left: (canvas.width - img.width * scaleFactor) / 2,
+            top: (canvas.height - img.height * scaleFactor) / 2
         });
         canvas.renderAll();
     }
