@@ -30,7 +30,7 @@
     let lines = { outer: [], concentric: [] };
     let labels = [];
     let controlPoints = [];
-    let controlPointOffset = 25;
+    let controlPointOffset = 35;
     let overlay;
 
     function debounce(func, wait) {
@@ -48,7 +48,7 @@
         const canvasWidth = window.innerWidth - horizontalPadding;
         const canvasHeight = window.innerHeight - verticalPadding;
 
-        const aspectRatio = 3 / 5;
+        const aspectRatio = 7 / 10;
         const heightBasedOnWidth = canvasWidth / aspectRatio;
         const finalCanvasHeight = Math.min(canvasHeight, heightBasedOnWidth);
 
@@ -72,7 +72,7 @@
             top: 0,
             width: canvas.width,
             height: canvas.height,
-            fill: 'rgba(255, 255, 255, 0.5)',
+            fill: 'rgba(255, 255, 255, 0.3)',
             selectable: false,
             evented: false,
         });
