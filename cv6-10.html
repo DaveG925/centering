@@ -30,7 +30,7 @@
     let lines = { outer: [], concentric: [] };
     let labels = [];
     let controlPoints = [];
-    let controlPointOffset = -60;
+    let controlPointOffset = 25;
     let overlay;
 
     function debounce(func, wait) {
@@ -43,8 +43,8 @@
     }
 
     function adjustCanvas() {
-        const horizontalPadding = 20;
-        const verticalPadding = 20;
+        const horizontalPadding = 30;
+        const verticalPadding = 30;
         const canvasWidth = window.innerWidth - horizontalPadding;
         const canvasHeight = window.innerHeight - verticalPadding;
 
