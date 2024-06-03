@@ -290,9 +290,9 @@
     }
 
     function updateImageOnCanvas(img) {
-        const padding = 70;
+        const padding = 30;
         const scaleFactor = Math.min(
-            (canvas.width - 1.5 * padding) / img.width,
+            (canvas.width - 1.0 * padding) / img.width,
             (canvas.height - 1.5 * padding) / img.height
         );
         img.set({
