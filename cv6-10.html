@@ -48,7 +48,7 @@
         const canvasWidth = window.innerWidth - horizontalPadding;
         const canvasHeight = window.innerHeight - verticalPadding;
 
-        const aspectRatio = 7 / 10;
+        const aspectRatio = 3 / 4;
         const heightBasedOnWidth = canvasWidth / aspectRatio;
         const finalCanvasHeight = Math.min(canvasHeight, heightBasedOnWidth);
 
@@ -290,7 +290,7 @@
     }
 
     function updateImageOnCanvas(img) {
-        const padding = 30;
+        const padding = 50;
         const scaleFactor = Math.min(
             (canvas.width - 1.5 * padding) / img.width,
             (canvas.height - 1.5 * padding) / img.height
