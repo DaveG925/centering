@@ -50,12 +50,12 @@
     }
 
     function adjustCanvas() {
-        const horizontalPadding = 50;
+        const horizontalPadding = 60;
         const verticalPadding = 0;
         const canvasWidth = window.innerWidth - horizontalPadding;
         const canvasHeight = window.innerHeight - verticalPadding -0 ; // Adjust for the padding
 
-        const aspectRatio = 3 / 5;
+        const aspectRatio = 4 / 9;
         const heightBasedOnWidth = canvasWidth / aspectRatio;
         const finalCanvasHeight = Math.min(canvasHeight, heightBasedOnWidth);
 
