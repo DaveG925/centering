@@ -15,6 +15,7 @@
             align-items: center;
             height: 100vh; /* Adjusted to 100vh for full viewport height */
             background-color: #FFFFFF;
+            overflow: hidden; /* Prevent scrolling */
         }
 
         .canvas-container {
@@ -28,7 +29,7 @@
 </head>
 <body>
 <div class="canvas-container">
-    <canvas id="canvas" width="800" height="600"></canvas> <!-- Set fixed width and height -->
+    <canvas id="canvas"></canvas>
 </div>
 <script>
     const canvas = new fabric.Canvas('canvas', { selection: false });
@@ -46,6 +47,26 @@
             clearTimeout(timeout);
             timeout = setTimeout(() => func.apply(context, args), wait);
         };
+    }
+
+    function adjustCanvas() {
+        const horizontalPadding = 0;
+        const verticalPadding = 0;
+        const canvasWidth = window.innerWidth - horizontalPadding;
+        const canvasHeight = window.innerHeight - verticalPadding -0 ; // Adjust for the padding
+
+        const aspectRatio = 1 / 2;
+        const heightBasedOnWidth = canvasWidth / aspectRatio;
+        const finalCanvasHeight = Math.min(canvasHeight, heightBasedOnWidth);
+
+        canvas.setWidth(canvasWidth);
+        canvas.setHeight(finalCanvasHeight);
+
+        if (window.loadedImage) {
+            updateImageOnCanvas(window.loadedImage);
+        }
+        initQuadrilaterals();
+        canvas.renderAll();
     }
 
     function addOverlay() {
@@ -284,8 +305,8 @@
         img.set({
             scaleX: scaleFactor,
             scaleY: scaleFactor,
-            left: (canvas.width - img.width * scaleFactor) / 2,
-            top: (canvas.height - img.height * scaleFactor) / 2
+            left: (canvas.width - img.width * scaleFactor) / 1.5,
+            top: (canvas.height - img.height * scaleFactor) / 1.5
         });
         canvas.renderAll();
     }
