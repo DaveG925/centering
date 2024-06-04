@@ -13,8 +13,8 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #9FA5AE;
+            height: 100vh; /* Adjusted to 100vh for full viewport height */
+            background-color: #FFFFFF;
         }
 
         .canvas-container {
@@ -22,15 +22,13 @@
         }
 
         canvas {
-            border: 1px solid #ccc;
-            width: 800px; /* Set fixed width */
-            height: 600px; /* Set fixed height */
+            border: 0px solid #ccc;
         }
     </style>
 </head>
 <body>
 <div class="canvas-container">
-    <canvas id="canvas" width="800" height="600"></canvas> <!-- Fixed width and height -->
+    <canvas id="canvas" width="800" height="600"></canvas> <!-- Set fixed width and height -->
 </div>
 <script>
     const canvas = new fabric.Canvas('canvas', { selection: false });
@@ -38,7 +36,7 @@
     let lines = { outer: [], concentric: [] };
     let labels = [];
     let controlPoints = [];
-    let controlPointOffset = 30;
+    let controlPointOffset = 50;
     let overlay;
 
     function debounce(func, wait) {
@@ -73,10 +71,8 @@
         clearControlPoints();
 
         const defaultOuterCorners = [
-            { x: 50, y: 100 }, // Adjusted y-coordinate
-            { x: canvas.width - 50, y: 100 }, // Adjusted y-coordinate
-            { x: canvas.width - 50, y: canvas.height - 100 }, // Adjusted y-coordinate
-            { x: 50, y: canvas.height - 100 } // Adjusted y-coordinate
+            { x: 50, y: 100 }, { x: canvas.width - 50, y: 100 },
+            { x: canvas.width - 50, y: canvas.height - 70 }, { x: 50, y: canvas.height - 70 }
         ];
 
         defaultOuterCorners.forEach((point, index) => {
