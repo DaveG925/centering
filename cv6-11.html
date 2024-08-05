@@ -162,7 +162,7 @@
             let startPoint = point;
             let endPoint = points.outer[(index + 1) % points.outer.length];
             const line = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
-                stroke: 'blue',
+                stroke: 'black',
                 strokeWidth: 1,
                 selectable: false,
             });
@@ -212,7 +212,7 @@
         });
 
         const line2 = new fabric.Line([gapEndX, gapEndY, p2.x, p2.y], {
-            stroke: 'blue',
+            stroke: 'black',
             strokeWidth: 1,
             selectable: false,
         });
