@@ -206,7 +206,7 @@
         const gapEndY = midY + (dy * gapRatio) / 2;
 
         const line1 = new fabric.Line([p1.x, p1.y, gapStartX, gapStartY], {
-            stroke: 'blue',
+            stroke: 'black',
             strokeWidth: 1,
             selectable: false,
         });
@@ -243,7 +243,7 @@
         const label = new fabric.Text(index.toString(), {
             left: midX,
             top: midY,
-            fontSize: 12,
+            fontSize: 14,
             originX: 'center',
             originY: 'center',
             selectable: false,
