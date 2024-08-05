@@ -162,8 +162,8 @@
             let startPoint = point;
             let endPoint = points.outer[(index + 1) % points.outer.length];
             const line = new fabric.Line([startPoint.trueX, startPoint.trueY, endPoint.trueX, endPoint.trueY], {
-                stroke: 'black',
-                strokeWidth: 1,
+                stroke: 'blue',
+                strokeWidth: 2,
                 selectable: false,
             });
             lines.outer.push(line);
