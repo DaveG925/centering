@@ -172,8 +172,8 @@
     }
 
     function drawConcentricQuadrilaterals(corners) {
-        for (let i = 1; i <= 13; i++) {
-            const offset = i * 4;
+        for (let i = 1; i <= 10; i++) {
+            const offset = i * 5;
             const newCorners = offsetCorners(corners, offset);
 
             drawQuadrilateralWithGap(newCorners, i);
@@ -212,7 +212,7 @@
         });
 
         const line2 = new fabric.Line([gapEndX, gapEndY, p2.x, p2.y], {
-            stroke: 'black',
+            stroke: 'blue',
             strokeWidth: 1,
             selectable: false,
         });
@@ -243,7 +243,7 @@
         const label = new fabric.Text(index.toString(), {
             left: midX,
             top: midY,
-            fontSize: 10,
+            fontSize: 12,
             originX: 'center',
             originY: 'center',
             selectable: false,
